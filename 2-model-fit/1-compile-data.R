@@ -114,7 +114,7 @@ rm(list = setdiff(ls(), c("jags_dat", "data_dir")))
 for (i in 1:length(jags_dat)) assign(x = names(jags_dat)[i], value = jags_dat[[i]])
 rm(i)
 
-cat("\n\n Data Files Prepared Successfully.\n All needed information is in the list 'jags_dat' and as local objects. \n See ls(). \n\n")
+# cat("\n\n Data Files Prepared Successfully.\n All needed information is in the list 'jags_dat' and as local objects. \n See ls(). \n\n")
 
 ## prepare csv for matt
 # states_dat = cbind(
