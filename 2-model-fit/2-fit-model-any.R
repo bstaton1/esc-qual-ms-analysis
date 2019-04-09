@@ -1,5 +1,7 @@
 # CRAN Packages: install these using the typical install.packages("pkgname")
 suppressMessages(suppressWarnings(library(jagsUI)))
+
+# Staton Packages: install these using devtools::install_github("bstaton1/pkgname")
 suppressMessages(suppressWarnings(library(StatonMisc)))
 suppressMessages(suppressWarnings(library(codaTools)))
 
@@ -40,12 +42,12 @@ if (!dir.exists("model-files")) dir.create("model-files")
 model_file = file.path("model-files", paste("model-", model, ".txt", sep = ""))
 out_dir = "../../model-output/"
 if (!dir.exists(out_dir)) dir.create(out_dir)
-post_name = paste("testpost-", model, ".rds", sep = "")
-meta_name = paste("testmeta-", model, ".rds", sep = "")
-msy_name = paste("testmsy-", model, ".rds", sep = "")
+post_name = paste("post-", model, ".rds", sep = "")
+meta_name = paste("meta-", model, ".rds", sep = "")
+msy_name = paste("msy-", model, ".rds", sep = "")
 
 # set mcmc per chain dimensions
-if (mcmc_short)  {npost = 100; nburn = 50; nthin = 1; nadapt = 50}
+if (mcmc_short)  {npost = 1000; nburn = 500; nthin = 1; nadapt = 1000}
 if (mcmc_medium) {npost = 50000; nburn = 20000; nthin = 10 * nchain; nadapt = 10000}
 if (mcmc_long)   {npost = 500000; nburn = 50000; nthin = 100 * nchain/2; nadapt = 10000}
 
