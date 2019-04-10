@@ -1,16 +1,11 @@
 #!/bin/bash
 
-maxsleep=5
+maxsleep=60
 
 echo "---------------------------------------"
 echo "Please enter the models you wish to run (separated by spaces):"
 read models
 echo "---------------------------------------"
-
-# when ran on the HPC, include this to make R findable
-# echo "Loading R"
-# source /opt/asn/etc/asn-bash-profiles-special/modules.sh
-# module load R/3.3.3
 
 # loop through models: create and execute model-specific programs
 for model in ${models[@]}
