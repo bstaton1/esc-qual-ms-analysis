@@ -19,10 +19,10 @@ d=$(date)
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo "Running Model $model"
-echo "  Started running at: $d"
+echo "Started running at: $d"
 Rscript 2-fit-model-any.R $model 
 
 # print the end date and time of this script
 d=$(date)
-echo "  Ended running at:   $d"
+echo "Ended running at:   $d"
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++"

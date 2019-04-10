@@ -14,7 +14,7 @@ get_EG = function(post.samp, spawn_units, vuln, Rmax_p = 0.9, Rmax_prob = 0.9,
   Hout = matrix(NA, n_samp, length(S_breaks) - 1); colnames(Hout) = 1:(length(S_breaks) - 1)
   
   for (i in 1:n_samp) {
-    if (!silent) cat("\r", round(i/n_samp, 2) * 100, "%", sep = "")
+    if (!silent) cat("\r","      ", round(i/n_samp, 2) * 100, "%", sep = "")
     
     # calculate equilibrium H, S, and R at each F for this MCMC sample
     tmp = matrix(NA, nF, 3)
