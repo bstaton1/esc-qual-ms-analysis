@@ -20,18 +20,16 @@ args = commandArgs(trailingOnly = T)
 model = as.numeric(args[1])
 # model = 1
 
-beep = T
-nchain = 2
-parallel = T
-verbose = F
-seed = 1
-silent = T
-mcmc_short = T
-mcmc_medium = F
-mcmc_long = F
-
-calc_msy = T
-calc_EG = T
+nchain =      2  # number of chains
+parallel =    T  # run chains in parallel?
+verbose =     F  # print JAGS messages to console?
+silent =      T  # print post processing progress?
+seed =        1  # seed for initial value and mcmc sampling
+mcmc_short =  T  # run with short mcmc settings?
+mcmc_medium = F  # run with medium mcmc settings?
+mcmc_long =   F  # run with long mcmc settings?
+calc_msy =    T  # calculate msy-based quantities?
+calc_EG =     T  # calculate escapement goal endpoints based on probability profiles?
 
 # model assumptions
 mod_key = read.csv("model-key.csv")
@@ -54,7 +52,7 @@ EG_name = paste("goals-", model, ".rds", sep = "")
 # set mcmc per chain dimensions
 if (mcmc_short)  {npost = 100; nburn = 500; nthin = 1; nadapt = 50}
 if (mcmc_medium) {npost = 50000; nburn = 20000; nthin = 10 * nchain; nadapt = 10000}
-if (mcmc_long)   {npost = 500000; nburn = 50000; nthin = 100 * nchain/2; nadapt = 10000}
+if (mcmc_long)   {npost = 250000; nburn = 20000; nthin = 100 * nchain/4; nadapt = 10000}
 
 # set nodes to monitor
 jags_params = c(
@@ -198,12 +196,14 @@ if (calc_EG) {
   EG_late = abind(EG_unr_late$goals, EG_res_late$goals, along = 3)
   EG_all = abind(EG_unr_all$goals, EG_res_all$goals, along = 3)
   EG = abind(EG_early, EG_all, EG_late, along = 4)
+  dimnames(EG)[[3]] = c("unr", "res")
   dimnames(EG)[[4]] = c("early", "all", "late")
   
   probs_early = abind(EG_unr_early$probs, EG_res_early$probs, along = 3)
   probs_late = abind(EG_unr_late$probs, EG_res_late$probs, along = 3)
   probs_all = abind(EG_unr_all$probs, EG_res_all$probs, along = 3)
   probs = abind(probs_early, probs_all, probs_late, along = 4)
+  dimnames(probs)[[3]] = c("unr", "res")
   dimnames(probs)[[4]] = c("early", "all", "late")
   
   EGinfo = list(EG = EG, probs = probs)
@@ -232,5 +232,3 @@ saveRDS(
     )), file.path(out_dir, meta_name))
 
 cat("\n  Model", model, "Done.\n")
-
-if (beep) beepr::beep()
