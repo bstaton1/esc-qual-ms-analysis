@@ -34,7 +34,7 @@ xlate = xall + 0.15
 ppi = 600
 png(paste(vuln, ".png", sep = ""), h = 5 * ppi, w = 5 * ppi, res = ppi)
 par(mar = c(6,3.5,2,2), tcl = -0.25, mgp = c(2,0.5,0))
-plot(all["50%",] ~ xall, yaxt = "n", xlim = range(xall) + c(-0.15,0.15), xaxt = "n", ylim = range(msys[c(q_lwr, q_upr),value,vuln,,]), pch = 0,
+plot(all["50%",] ~ xall, yaxt = "n", xlim = range(xall) + c(-0.15,0.15), xaxt = "n", ylim = range(msys[c(q_lwr, q_upr),value,,,]), pch = 0,
      xlab = "", ylab = "", main = ifelse(vuln == "unr", "Unrestricted", "Restricted"), cex = 1.2)
 points(early["50%",] ~ xearly, pch = 0, col = "grey", cex = 1.2)
 points(late["50%",] ~ xlate, pch = 15, cex = 1.2)
