@@ -1,13 +1,17 @@
 
 ##### DATA COMPILATION FILE FOR ESCAPEMENT QUALITY MODEL #####
 
-# location of data
+# location of data: for fitting models
 data_dir = "inputs"
+
+# location of data: when kniting Rmarkdowns: NEED TO FIX THIS
+# data_dir = "../2-model-fit/inputs"
 
 ### dimensional variables
 ft = 1976
 lt = 2017
-nt = length(ft:lt)
+years = ft:lt
+nt = length(years)
 
 # age dimensions
 a_min = 4                   # first age at maturity
@@ -108,22 +112,10 @@ jags_dat = list(
 )
 
 # clean up workspace
-rm(list = setdiff(ls(), c("jags_dat", "data_dir")))
+rm(list = setdiff(ls(), c("jags_dat", "data_dir", "years")))
 
 # get all elements in as objects in workspace
 for (i in 1:length(jags_dat)) assign(x = names(jags_dat)[i], value = jags_dat[[i]])
 rm(i)
 
 # cat("\n\n Data Files Prepared Successfully.\n All needed information is in the list 'jags_dat' and as local objects. \n See ls(). \n\n")
-
-## prepare csv for matt
-# states_dat = cbind(
-#   S_obs, S_obs_sig, Hcom_obs, Hcom_obs_sig, com_mesh, Hsub_obs, Hsub_obs_sig, sub_mesh)
-# 
-# colnames(x_esc) = paste("esc", colnames(x_esc), sep = "_")
-# colnames(x_com) = paste("com", colnames(x_com), sep = "_")
-# colnames(x_sub) = paste("sub", colnames(x_sub), sep = "_")
-# 
-# full_df = cbind(year = 1976:2017, states_dat, x_esc, x_com, x_sub)
-# 
-# write.csv(full_df, "esc-qual-dataframe.csv", row.names = F)
