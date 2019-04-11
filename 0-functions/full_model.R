@@ -1,8 +1,8 @@
 jags_model_code = function() {
   
   # Priors for SR portion
-  log_alpha ~ dnorm(0,1.0E-2) %_% I(,6)
-  beta ~ dunif(0,10)
+  log_alpha ~ dnorm(0,0.01) %_% I(,4)
+  beta ~ dunif(0,0.5)
   phi ~ dunif(-1, 0.99)
   tau_R_white ~ dgamma(0.01, 0.01)
   tau_R_red <- tau_R_white * (1 - phi * phi)
@@ -14,7 +14,7 @@ jags_model_code = function() {
   ### PART 1: BIOLOGICAL PROCESS SUBMODEL: BROOD YEAR RECRUITMENT PROCESS #####
   
   #1a) Brood year returns without SR link; drawn from a common lognormal dist
-  log_mean_R0 ~ dnorm(0,1.0E-4)#%_%I(0,)        
+  log_mean_R0 ~ dnorm(0,0.0001)#%_%I(0,)        
   tau_R0 ~ dgamma(0.1,0.1)      
   sigma_R0 <- 1 / sqrt(tau_R0)
   for(y in 1:a_max){ 
@@ -63,8 +63,8 @@ jags_model_code = function() {
     
     # estimate coefficients for the rest of the ages
     for (a in 1:(na-1)) {
-      b0_mat[s,a] ~ dnorm(0,0.0001)
-      b1_mat[s,a] ~ dnorm(0,0.0001)
+      b0_mat[s,a] ~ dnorm(0,1e-6)
+      b1_mat[s,a] ~ dnorm(0,1e-6)
     }
     
     # draw dirichlet random variables around the expectation
