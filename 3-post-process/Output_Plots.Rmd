@@ -21,41 +21,50 @@ library(kableExtra)
 source("../2-model-fit/1-compile-data.R")
 
 # load in additional functions
-# source("../new-func-source.R")
+source("../new-func-source.R")
+model = 7
 
 # read in the saved posterior samples
-post = readRDS("../../model-output/post-3.rds")
+post = readRDS(paste("../../model-output/post-", model, ".rds", sep = ""))
 # post = codaTools::thin_post(post, 0.8)
-meta = readRDS("../../model-output/meta-3.rds")
+meta = readRDS(paste("../../model-output/meta-", model, ".rds", sep = ""))
+EGinfo = readRDS(paste("../../model-output/goals-", model, ".rds", sep = ""))
+msy = paste("../../model-output/msy-", model, ".rds", sep = "")
 
 years = 1976:2017
 ```
 
-```{r description}
-desc = c(
-  "*  **Index of reproductive potential**: spawners, no attention paid to sex or age",
-  "*  **Index of reproductive potential**: spawners, no attention paid to sex or age",
-  "*  **Vulnerability**: Pearson net selectivity model, estimates four parameters with diffuse priors",
-  "*  **Maturity**: independent time trend across brood years for each age and sex-specific exectation, random deviates drawn from these time varying expectations"
-)
-
-# *  **Sex Composition**: time trend across brood years for proportion of recruits that mature as females, random deviates drawn from this time varying expectation
-# *  **Fishing mortality**: time varying for both commercial and subsistence harvest, subsistence mortality happens first
-# *  **Fits to**: age/sex composition of commerical, subsistence, and escapement. Total harvest from commerical and subsistence, total escapement
-```
-
 ```{r options}
-mod_desc = F
 mcmc_dim = T
 mcmc_diag = T
 
-model_code = F
-model_data = F
+model_code = T
+model_data = T
 ```
 
-`r if (mod_desc) "# Model Description"`
+# Model Description
 
-`r if (mod_desc) paste(desc, collapse = "\n")`
+```{r}
+
+tab = data.frame(
+  q = c(
+    "Model Number",
+    "Reproductive Units",
+    "Fecundity",
+    "Sex-based Maturation",
+    "Age-based Maturation",
+    "Vulnerability"
+  ),
+  v = c(meta$model, ifelse(meta$eggs, "Eggs", "Fish"),
+        ifelse(c(meta$eggs_trend, meta$sex_trend, meta$mat_trend, meta$vuln_trend), "Yes", "No"))
+)
+
+colnames(tab) = c("Option", "Setting")
+
+kable(tab, caption = "Assumptions regarding trends and reproductive units in this model.") %>%
+  kable_styling(full_width = T) %>%
+  group_rows("Trends", 3, 6, italic = T, bold = F)
+```
 
 `r if (mcmc_dim | mcmc_diag) "# MCMC"` 
 
@@ -107,64 +116,17 @@ kable(round(tab), caption = "Model fit statistics.", row.names = F) %>%
 `r if (mcmc_diag) "## Convergence"`
 ```{r convergence, eval = mcmc_diag}
 
-main_p = c("alpha", "beta", "sigma_R_white", "sigma_R0", "phi", "D_sum", "^p[", "^R[", "Fcom", "Fsub", "^Vlam$", "^Vtau$", "^Vtha$", "^Vsig$", "mu_pi_mat", "mu_pi_f")
-           # "p[", "Fcom", "Fsub", "^Vtau$", , ) #"D_sum"
-# main_p = c("alpha", "beta", "U_msy", "S_msy")
+bgr = meta$R.hat
+ess = meta$n.eff
+params = rownames(bgr)
+params = paste("`", params, "`", sep = "")
+rownames(bgr) = rownames(ess) = NULL
 
-tmp_summ = function(z, na.rm = F) {
-  c(Mean = mean(z, na.rm = na.rm),
-    Median = median(z, na.rm = na.rm),
-    Min = min(z, na.rm = na.rm),
-    Max = max(z, na.rm = na.rm)
-    )
-}
-
-diags = summ_post(post, main_p, bgr = T, ess = T)[c("bgr", "ess"),]
-all_p = colnames(diags)
-diags = sapply(main_p, function(x) {
-  list(diags[,stringr::str_detect(all_p, ins_regex_bracket(x))])
-})
-
-bgr = t(as.data.frame(lapply(diags, function(x) {
-  if (is.matrix(x)) {
-    tmp_summ(x["bgr",], na.rm = T)
-  } else {
-    tmp_summ(x["bgr"], na.rm = T)
-  }
-})))
-ess = t(as.data.frame(lapply(diags, function(x) {
-  if (is.matrix(x)) {
-    tmp_summ(x["ess",], na.rm = T)
-  } else {
-    tmp_summ(x["ess"], na.rm = T)
-  }
-})))
 bgr = apply(bgr, 2, function(x) round(x, 2))
 ess = apply(ess, 2, function(x) prettify(round(x)))
 
-ps = stringr::str_replace(rownames(bgr), "X\\.", "")
-ps = stringr::str_replace(ps, "\\.", "")
-
-ps = ifelse(ps == "Fcom", "$F_{\\text{com},t}$", ps)
-ps = ifelse(ps == "Fsub", "$F_{\\text{sub},t}$", ps)
-ps = ifelse(ps == "phi", "$\\phi$", ps)
-ps = ifelse(ps == "D_sum", "$D_s$", ps)
-ps = ifelse(ps %in% c("alpha", "beta"), paste("$\\", ps, "$", sep = ""), ps)
-ps = ifelse(ps == "sigma_R_white", "$\\sigma_R$", ps)
-ps = ifelse(ps == "sigma_R0", "$\\sigma_{R_0}$", ps)
-ps = ifelse(ps == "R", "$R_{y}$", ps)
-ps = ifelse(ps == "Vlam", "$\\lambda_{\\text{vuln}}$", ps)
-ps = ifelse(ps == "Vtau", "$\\tau_{\\text{vuln}}$", ps)
-ps = ifelse(ps == "Vtha", "$\\theta_{\\text{vuln}}$", ps)
-ps = ifelse(ps == "Vsig", "$\\sigma_{\\text{vuln}}$", ps)
-ps = ifelse(ps == "p", "$p_{y,a,s}$", ps)
-ps = ifelse(ps == "mu_pi_mat", "$\\pi_{y,a,s}$", ps)
-ps = ifelse(ps == "mu_pi_f", "$\\pi_{y,\\text{female}}$", ps)
-
-bgr = data.frame(Parameter = ps, bgr); rownames(bgr) = NULL
-bgr = bgr[order(bgr$Mean, decreasing = T),]
-ess = data.frame(Parameter = ps, ess); rownames(ess) = NULL
-ess = ess[order(as.numeric(gsub(pattern = ",", replacement = "", as.character(ess$Mean)))),]
+bgr = cbind(Parameter = params, bgr)
+ess = cbind(Parameter = params, ess)
 
 kable(
   bgr, 
@@ -178,10 +140,15 @@ kable(
 
 ```
 
-`r if (mcmc_diag) "## Convergence of $D$"`
+`r if (mcmc_diag) "## Diagnostic Plots"`
 
-```{r D convergence, eval = mcmc_diag}
+```{r plot-convergence, eval = mcmc_diag}
 diag_plots(post, "D_sum")
+diag_plots(post, "alpha")
+diag_plots(post, "beta")
+diag_plots(post, c("^Vtau$", "^Vsig$", "^Vtha$", "^Vlam$"))
+diag_plots(post, c("Fcom[1]", "Fcom[11]", "Fcom[22]", "Fcom[33]"))
+diag_plots(post, c("Fsub[1]", "Fsub[11]", "Fsub[22]", "Fsub[33]"))
 ```
 
 # Fit to Age/Sex Comp
@@ -386,7 +353,7 @@ mtext(side = 2, outer = T, "Proportion Females")
 ```{r, fig.height = 8, fig.width = 6}
 Hsub_fit = summ_post(post, "Hsub")/1000
 Hcom_fit = summ_post(post, "Hcom")/1000
-S_fit = summ_post(post, "S_t[")/1000
+S_fit = summ_post(post, "^S_t[")/1000
 
 
 par(mfrow = c(3,1), mar = c(2,4,2,2), cex.axis = 1.2, oma = c(3,3,0,0), cex.main = 1.5)
@@ -617,8 +584,11 @@ mtext(side = 2, outer = T, "Exploitation Rate", line = 1, cex = 1.2)
 
 # Spawner-Recruit Relationship
 
-```{r}
-S = summ_post(post, "S_t[")
+`r eggs = ifelse(meta$eggs, T, F)`
+`r fish = ifelse(meta$eggs, F, T)`
+
+```{r fish-sra, eval = fish}
+S = summ_post(post, "^S_t[")
 R = summ_post(post, "R[")
 SRA_post = filter_post(post, c("alpha", "beta"), "matrix")
 
@@ -658,8 +628,115 @@ points(R[3,R_ind] ~ S[3,S_ind], pch = 16)
 abline(0,1, lty = 2)
 ```
 
+```{r eggs-sra, eval = eggs}
+S = summ_post(post, "^eggs_t[")
+R = summ_post(post, "R[")
+SRA_post = filter_post(post, c("alpha", "beta"), "matrix")
 
-```{r}
+ricker = function(S, params) {
+  params[1] * S * exp(-params[2] * S)
+}
+
+S_ind = 1:(nt - a_min)
+R_ind = (a_max + 1):ny
+by = 1976 + S_ind - 1
+S_pred = seq(0, max(S[5,S_ind]), length = 100)
+
+R_pred = t(apply(SRA_post, 1, function(x) ricker(S_pred, x)))
+R_pred = apply(R_pred, 2, summ)
+
+S = S/1e6
+R = R/1000
+S_pred = S_pred/1e6
+R_pred = R_pred/1000
+
+par(xaxs = "i", yaxs = "i", mar = c(5,5,1,1), cex.axis = 1.4, cex.lab = 1.4)
+plot(R[3,R_ind] ~ S[3,S_ind], type = "n", las = 1,
+     xlim = c(0, max(S[5,S_ind])) * 1.05,
+     ylim = c(0, max(R[5,R_ind])) * 1.05,
+     xlab = "Eggs (Millions)", ylab = "Recruits (1000s)")
+polygon(x = c(S_pred, rev(S_pred)), y = c(R_pred[4,], rev(R_pred[5,])), 
+        col = "grey90", border = NA)
+lines(R_pred[4,] ~ S_pred, col = "grey")
+lines(R_pred[5,] ~ S_pred, col = "grey")
+lines(R_pred[3,] ~ S_pred)
+# text(R[3,R_ind] ~ S[3,S_ind], 
+#      labels = paste("'", substr(by, 3, 4), sep = ""), 
+#      col = ifelse(by %in% 2011:2013, "red", "black"), font = 2)
+segments(S[4,S_ind], R[3,R_ind], S[5,S_ind], R[3,R_ind], col = "grey")
+segments(S[3,S_ind], R[4,R_ind], S[3,S_ind], R[5,R_ind], col = "grey")
+points(R[3,R_ind] ~ S[3,S_ind], pch = 16)
+abline(0,1, lty = 2)
+```
+
+```{r, eval = eggs}
+S = summ_post(post, "^S_t[")
+eggs = summ_post(post, "^eggs_t[")
+
+S_scale = S[3,]/max(S[3,])
+eggs_scale = eggs[3,]/max(eggs[3,])
+
+R = summ_post(post, "R[")
+SRA_post = filter_post(post, c("alpha", "beta"), "matrix")
+
+ricker = function(S, params) {
+  params[1] * S * exp(-params[2] * S)
+}
+
+S_ind = 1:(nt - a_min)
+R_ind = (a_max + 1):ny
+by = 1976 + S_ind - 1
+S_pred = seq(0, max(eggs[5,S_ind]), length = 100)
+
+R_pred = t(apply(SRA_post, 1, function(x) ricker(S_pred, x)))
+R_pred = apply(R_pred, 2, summ)
+
+S_pred = S_pred/max(eggs[3,])
+S = S[3,]/max(S[3,])
+eggs = eggs[3,]/max(eggs[3,])
+R = R[3,]/1000
+R_pred = R_pred/1000
+
+par(xaxs = "i", yaxs = "i", mar = c(5,5,1,1), cex.axis = 1.4, cex.lab = 1.4)
+plot(R[R_ind] ~ S[S_ind], type = "n", las = 1,
+     xlim = c(0, max(S_pred)) * 1.05,
+     ylim = c(0, max(R[R_ind])) * 1.05,
+     xlab = "Eggs or Spawners as a Fraction of Max", ylab = "Recruits (1000s)")
+polygon(x = c(S_pred, rev(S_pred)), y = c(R_pred[4,], rev(R_pred[5,])), 
+        col = "grey90", border = NA)
+lines(R_pred[4,] ~ S_pred, col = "grey")
+lines(R_pred[5,] ~ S_pred, col = "grey")
+lines(R_pred[3,] ~ S_pred)
+text(R[R_ind] ~ S[S_ind],
+     labels = paste("", substr(by, 3, 4), sep = ""), cex = 0.8,
+     col = "black", font = 1)
+# segments(S[4,S_ind], R[3,R_ind], S[5,S_ind], R[3,R_ind], col = "grey")
+# segments(S[3,S_ind], R[4,R_ind], S[3,S_ind], R[5,R_ind], col = "grey")
+# points(R[R_ind] ~ S[S_ind], pch = 1)
+points(R[R_ind] ~ eggs[S_ind], pch = 16)
+arrows(S[S_ind], R[R_ind], 
+       ifelse(eggs[S_ind] < S[S_ind], eggs[S_ind] + 0.02, eggs[S_ind] - 0.02), R[R_ind], length = 0.05)
+# abline(0,1, lty = 2)
+legend("topright", legend = c("Eggs", "Spawners"), pch = c(16, 89), bty = "n")
+
+
+```
+
+```{r, eval = meta$eggs, fig.height = 5, fig.width = 4}
+d = eggs - S
+par(mar = c(5,5,1,1), cex.axis = 1.2, cex.lab = 1.2)
+plot(1,1,type = "n", ylim = rev(range(years)), xlim = max(abs(d)) * c(-1,1), las = 1, xlab = "Scaled Eggs - Scaled Spawners", ylab = "")
+lines(years ~ d, col = "grey")
+points(years ~ d, pch = 16, cex = 1.2)
+abline(v = 0, lty = 2)
+axis(side = 2, at = years, labels = rep("", nt), tcl = -0.2)
+axis(side = 2, at = 1985 + seq(0, 30, 10), labels = rep("", 4), tcl = -0.35)
+```
+
+`r if(meta$eggs) "_'Scaled' means each years' quantity divided by the max observed across years_"`
+
+
+```{r, eval= F}
 tab = t(summ_post(post, c("alpha", "beta", "sigma_R_white", "phi")))
 tab["beta",] = tab["beta",] * 1e5
 rownames(tab) = c("$\\alpha$", "$\\beta \\times 10^5$", "$\\sigma_R$", "$\\phi$")
@@ -669,190 +746,14 @@ kable(tab, digits = 2, escape = F) %>%
 
 `r if (model_code) "# JAGS Model Code"`
 
-```{r, echo = model_code}
-mod = function() {
-  
-  # Priors for SR portion
-  log_alpha ~ dnorm(0,1.0E-2) %_% I(,6)
-  beta ~ dunif(0,10)
-  phi ~ dunif(-1, 0.99)                                      
-  tau_R_white ~ dgamma(0.01, 0.01)        
-  tau_R_red <- tau_R_white * (1 - phi * phi)
-  log_resid_0 ~ dnorm(0, tau_R_red)#%_%T(-3,3)
-  sigma_R_white <- 1 / sqrt(tau_R_white)
-  sigma_R_red <- 1 / sqrt(tau_R_red)
-  alpha <- exp(log_alpha)
-  
-  ### PART 1: BIOLOGICAL PROCESS SUBMODEL: BROOD YEAR RECRUITMENT PROCESS #####
-  
-  #1a) Brood year returns without SR link; drawn from a common lognormal dist
-  log_mean_R0 ~ dnorm(0,1.0E-4)#%_%I(0,)        
-  tau_R0 ~ dgamma(0.1,0.1)      
-  sigma_R0 <- 1 / sqrt(tau_R0)
-  for(y in 1:a_max){ 
-    log_R[y] ~ dnorm(log_mean_R0, tau_R0)   
-    R[y] <- exp(log_R[y])
-    log_resid[y] <- log_R[y] - log_mean_R0
-  }
-  
-  #1b) Stock-Recruitment with Autocorrelated lag-1 residuals: for years with spawner/recruit link
-  for (y in (na+a_min):ny) {
-    log_R[y] ~ dnorm(log_Rmean2[y],tau_R_white)
-    R[y] <- exp(log_R[y])
-    log_Rmean1[y] <- log_alpha + log(S_t[y-a_max]) - beta * S_t[y-a_max]
-    log_resid[y] <- log_R[y] - log_Rmean1[y]
-  }
-  log_Rmean2[na+a_min] <- log_Rmean1[na+a_min] + phi * log_resid_0
-  for (y in (na+a_min+1):ny) {
-    log_Rmean2[y] <- log_Rmean1[y] + phi * log_resid[y-1]
-  }
-  
-  ### PART 2: MATURITY PROCESS SUBMODEL ###
-  # 2a) brood-year specific sex ratio
-  sex_scale ~ dunif(0.01,1)
-  sex_sum <- 1/sex_scale^2
-  b0_sex ~ dnorm(0,1e-6)
-  b1_sex ~ dnorm(0,1e-6)
-  for (y in 1:ny) {
-    logit(mu_pi_f[y]) <- b0_sex + b1_sex * y
-    B1[y] <- mu_pi_f[y] * sex_sum
-    B2[y] <- (1 - mu_pi_f[y]) * sex_sum
-    p_f[y] ~ dbeta(B1[y], B2[y])
-    R_sex[y,1] <- R[y] * p_f[y]
-    R_sex[y,2] <- R[y] * (1 - p_f[y])
-  }
-  
-  # 2b) brood year-specific maturity schedules by sex, with separate estimated time trends for each sex
-  for (s in 1:2) {
-    D_scale[s] ~ dunif(0.01,1)
-    D_sum[s] <- 1/D_scale[s]^2
-    
-    # set coefs for last age
-    b0_mat[s,na] <- 1
-    b1_mat[s,na] <- 0
-    
-    # estimate coefficients for the rest of the ages
-    for (a in 1:(na-1)) {
-      b0_mat[s,a] ~ dnorm(0,0.0001)
-      b1_mat[s,a] ~ dnorm(0,0.0001)
-    }
-    
-    # draw dirichlet random variables around the expectation
-    for (y in 1:ny) {
-      for (a in 1:na) {
-        eta_mat[y,a,s] <- exp(b0_mat[s,a] + b1_mat[s,a] * y)
-        mu_pi_mat[y,a,s] <- eta_mat[y,a,s] / sum(eta_mat[y,1:na,s])
-        gamma[y,a,s] <- D_sum[s] * mu_pi_mat[y,a,s]
-        g[y,a,s] ~ dgamma(gamma[y,a,s],0.1)
-        p[y,a,s] <- g[y,a,s]/sum(g[y,1:na,s])
-      }
-    }
-  }
-  
-  ##### PART 3: HARVEST PROCESS MODEL #####
-  # 3a) Apportion sex-specific recruits to each age and calendar year
-  for (t in 1:nt) {
-    for (a in 1:na) {
-      for (s in 1:2) {
-        N_tas[t,a,s] <- R_sex[t+na-a,s] * p[t+na-a,a,s]
-      }
-      N_ta[t,a] <- sum(N_tas[t,a,1:2])
-    }
-    N_t[t] <- sum(N_ta[t,1:na])
-  }
-  
-  # 3b) Create age/sex/year/mesh-specific vulnerability/selectivity schedule
-
-  Vtau ~ dnorm(1.920, 1/(0.012 * 10)^2)
-  Vsig ~ dnorm(0.204, 1/(0.021 * 10)^2) %_% I(0,)
-  Vtha ~ dnorm(0.622, 1/(0.033 * 10)^2) %_% I(0,)
-  Vlam ~ dnorm(-0.547, 1/(0.075 * 10)^2)
-  Vtau_prior ~ dnorm(1.920, 1/(0.012 * 10)^2)
-  Vsig_prior ~ dnorm(0.204, 1/(0.021 * 10)^2) %_% I(0,)
-  Vtha_prior ~ dnorm(0.622, 1/(0.033 * 10)^2) %_% I(0,)
-  Vlam_prior ~ dnorm(-0.547, 1/(0.075 * 10)^2)
-  
-  for (t in 1:nt) {
-    for (s in 1:2) {
-      for (m in 1:2) {
-        for (a in 1:na) {
-          # the pearson model
-          v_term_1[t,a,s,m] <- (1 + Vlam^2/(4 * Vtha^2))^Vtha
-          v_term_2[t,a,s,m] <- rlm[t,a,s,m] - (Vsig * Vlam)/(2 * Vtha) - Vtau
-          v_term_3[t,a,s,m] <- (1 + v_term_2[t,a,s,m]^2/Vsig^2)^-Vtha
-          v_term_4[t,a,s,m] <- exp(-Vlam * (atan(v_term_2[t,a,s,m]/Vsig) + atan(Vlam/(2 * Vtha))))
-          v_raw[t,a,s,m] <- v_term_1[t,a,s,m] * v_term_3[t,a,s,m] * v_term_4[t,a,s,m]
-          
-          # standardize within year and mesh so one age/sex combo is fully vuln
-          v[t,a,s,m] <- v_raw[t,a,s,m]/max(v_raw[t,1:na,1:2,m])
-        }
-      }
-    }
-  }
-  
-  # 3c: calculate harvest by age, sex, year, and fishery
-  for (t in 1:nt) {
-    Fsub[t] ~ dunif(0,10)
-    Fcom[t] ~ dunif(0,10)
-    for (a in 1:na) {
-      for (s in 1:2) {
-        Usub_tas[t,a,s] <- 1 - exp(-Fsub[t] * v[t,a,s,sub_mesh[t]])
-        Ucom_tas[t,a,s] <- 1 - exp(-Fcom[t] * v[t,a,s,com_mesh[t]])
-        
-        Hsub_tas[t,a,s] <- N_tas[t,a,s] * Usub_tas[t,a,s]
-        Hcom_tas[t,a,s] <- (N_tas[t,a,s] * (1 - Usub_tas[t,a,s])) * Ucom_tas[t,a,s]
-        S_tas[t,a,s] <- N_tas[t,a,s] - Hsub_tas[t,a,s] - Hcom_tas[t,a,s]
-        Utot_tas[t,a,s] <- (N_tas[t,a,s] - S_tas[t,a,s])/N_tas[t,a,s]
-      }
-      Hsub_ta[t,a] <- sum(Hsub_tas[t,a,1:2])
-      Hcom_ta[t,a] <- sum(Hcom_tas[t,a,1:2])
-      S_ta[t,a] <- sum(S_tas[t,a,1:2])
-      Utot_ta[t,a] <- (N_ta[t,a] - S_ta[t,a])/N_ta[t,a]
-    }
-    Hsub[t] <- sum(Hsub_ta[t,1:na])
-    Hcom[t] <- sum(Hcom_ta[t,1:na])
-    S_t[t] <- sum(S_ta[t,1:na])
-    Utot_t[t] <- (N_t[t] - S_t[t])/N_t[t]
-    for (s in 1:2) {
-      Utot_ts[t,s] <- (sum(N_tas[t,1:na,s]) - sum(S_tas[t,1:na,s]))/sum(N_tas[t,1:na,s])
-    }
-  }
-  
-  ### PART 4: OBSERVATION SUB MODEL ###
-  for (t in 1:nt) {
-    S_obs[t] ~ dlnorm(log(S_t[t]), 1/S_obs_sig[t]^2)
-    Hcom_obs[t] ~ dlnorm(log(Hcom[t]), 1/Hcom_obs_sig[t]^2)
-    Hsub_obs[t] ~ dlnorm(log(Hsub[t]), 1/Hsub_obs_sig[t]^2)
-    
-    # turn age/sex/year structured 3-d arrays into 2-d
-      # [1:na] is females (s == 1); [(na+1):(2*na)] is males
-      # allows fitting multinomial more easily
-    
-    N_tas_2d[t,1:na] <- N_tas[t,1:na,1]
-    N_tas_2d[t,(na+1):(2*na)] <- N_tas[t,1:na,2]
-    
-    S_tas_2d[t,1:na] <- S_tas[t,1:na,1]
-    S_tas_2d[t,(na+1):(2*na)] <- S_tas[t,1:na,2]
-    
-    Hcom_tas_2d[t,1:na] <- Hcom_tas[t,1:na,1]
-    Hcom_tas_2d[t,(na+1):(2*na)] <- Hcom_tas[t,1:na,2]
-    
-    Hsub_tas_2d[t,1:na] <- Hsub_tas[t,1:na,1]
-    Hsub_tas_2d[t,(na+1):(2*na)] <- Hsub_tas[t,1:na,2]
-    
-    for (as in 1:(na*2)) {
-      q_esc[t,as] <- S_tas_2d[t,as]/S_t[t]
-      q_com[t,as] <- Hcom_tas_2d[t,as]/Hcom[t]
-      q_sub[t,as] <- Hsub_tas_2d[t,as]/Hsub[t]
-      q_run[t,as] <- N_tas_2d[t,as]/N_t[t]
-    }
-    
-    x_esc[t,1:(2*na)] ~ dmulti(q_esc[t,1:(2*na)], n_esc[t])
-    x_com[t,1:(2*na)] ~ dmulti(q_com[t,1:(2*na)], n_com[t])
-    x_sub[t,1:(2*na)] ~ dmulti(q_sub[t,1:(2*na)], n_sub[t])
-  }
-}
-
+```{r, eval = model_code, echo = F, comment = NA}
+edit_full_model(
+  model_lines = readLines(file.path("../2-model-fit/model-files", "full-model.txt")),
+  outfile = "",
+  eggs = meta$eggs, eggs_trend = meta$eggs_trend, sex_trend = meta$sex_trend,
+  vuln_trend = meta$vuln_trend, mat_trend = meta$mat_trend,
+  keep_comments = T, keep_whitespace = T
+  )
 ```
 
 `r if (model_data) "# JAGS Data Inputs"`
