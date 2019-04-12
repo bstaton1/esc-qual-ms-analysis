@@ -18,8 +18,8 @@ awk 'NR==3 {$0="model="'$model'""} { print }' 0a-job.sh > 0b-job-$model.sh
 chmod +x 0b-job-$model.sh
 
 # execute the temporary verison with specific seed
-sh 0b-job-$model.sh
-# run_script 0b-job-$model.sh
+# sh 0b-job-$model.sh
+run_script 0b-job-$model.sh
 
 # random sleep to avoid crashes
 r=$(($RANDOM % $maxsleep))

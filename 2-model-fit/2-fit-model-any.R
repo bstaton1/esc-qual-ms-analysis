@@ -20,14 +20,14 @@ args = commandArgs(trailingOnly = T)
 model = as.numeric(args[1])
 # model = 1
 
-nchain =      2  # number of chains
+nchain =      5  # number of chains
 parallel =    T  # run chains in parallel?
 verbose =     F  # print JAGS messages to console?
 silent =      T  # print post processing progress?
 seed =        1  # seed for initial value and mcmc sampling
-mcmc_short =  T  # run with short mcmc settings?
+mcmc_short =  F  # run with short mcmc settings?
 mcmc_medium = F  # run with medium mcmc settings?
-mcmc_long =   F  # run with long mcmc settings?
+mcmc_long =   T  # run with long mcmc settings?
 calc_msy =    T  # calculate msy-based quantities?
 calc_EG =     T  # calculate escapement goal endpoints based on probability profiles?
 
@@ -52,7 +52,7 @@ EG_name = paste("goals-", model, ".rds", sep = "")
 # set mcmc per chain dimensions
 if (mcmc_short)  {npost = 100; nburn = 500; nthin = 1; nadapt = 50}
 if (mcmc_medium) {npost = 50000; nburn = 20000; nthin = 10 * nchain; nadapt = 10000}
-if (mcmc_long)   {npost = 250000; nburn = 20000; nthin = 100 * nchain/4; nadapt = 10000}
+if (mcmc_long)   {npost = 500000; nburn = 50000; nthin = 100 * nchain/2; nadapt = 10000}
 
 # set nodes to monitor
 jags_params = c(
