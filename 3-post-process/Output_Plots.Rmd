@@ -22,7 +22,7 @@ source("../2-model-fit/1-compile-data.R")
 
 # load in additional functions
 source("../new-func-source.R")
-model = 7
+model = 10
 
 # read in the saved posterior samples
 post = readRDS(paste("../../model-output/post-", model, ".rds", sep = ""))
@@ -484,8 +484,6 @@ legend("center", title = "Age", legend = rev(c(4:7)), pch = 22, pt.bg = rev(fill
 
 # Sex Trends
 
-Points are random beta deviates for each brood year. _Considering removing the random beta effects here._
-
 ```{r}
 par(mar = c(4,5,1,1))
 pi_f = summ_post(post, "mu_pi_f")
@@ -735,6 +733,12 @@ axis(side = 2, at = 1985 + seq(0, 30, 10), labels = rep("", 4), tcl = -0.35)
 
 `r if(meta$eggs) "_'Scaled' means each years' quantity divided by the max observed across years_"`
 
+```{r, eval = F}
+eggs_per_S_t = summ_post(post, "eggs_per_S_t[")
+
+plot(eggs_per_S_t[3,] ~ years)
+
+```
 
 ```{r, eval= F}
 tab = t(summ_post(post, c("alpha", "beta", "sigma_R_white", "phi")))

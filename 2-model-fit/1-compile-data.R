@@ -2,10 +2,10 @@
 ##### DATA COMPILATION FILE FOR ESCAPEMENT QUALITY MODEL #####
 
 # location of data: for fitting models
-data_dir = "inputs"
+# data_dir = "inputs"
 
 # location of data: when kniting Rmarkdowns: NEED TO FIX THIS
-# data_dir = "../2-model-fit/inputs"
+data_dir = "../2-model-fit/inputs"
 
 ### dimensional variables
 ft = 1976
