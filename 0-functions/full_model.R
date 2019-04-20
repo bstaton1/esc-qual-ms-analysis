@@ -148,6 +148,7 @@ jags_model_code = function() {
     S_t[t] <- sum(S_ta[t,1:na])
     eggs_t[t] <- sum(eggs_tas[t,1:na,1:2])
     eggs_per_S_t[t] <- eggs_t[t]/S_t[t]
+    eggs_per_female_t[t] <- eggs_t[t]/sum(S_tas[t,1:na,1])
     Utot_t[t] <- (N_t[t] - S_t[t])/N_t[t]
     for (s in 1:2) {
       Utot_ts[t,s] <- (sum(N_tas[t,1:na,s]) - sum(S_tas[t,1:na,s]))/sum(N_tas[t,1:na,s])

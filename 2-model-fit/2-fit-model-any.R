@@ -62,7 +62,7 @@ jags_params = c(
   "phi", "sigma_R_white", "sigma_R0", "Fcom", "Fsub", "v", "Vtau", "Vsig", "Vtha", "Vlam",
   "Vtau_prior", "Vsig_prior", "Vtha_prior", "Vlam_prior",
   "Vtau_yukon", "Vsig_yukon", "Vtha_yukon", "Vlam_yukon",
-  "Ucom_tas", "Usub_tas", "Utot_tas", "Utot_ta", "Utot_t", "Utot_ts", "eggs_per_S_t")
+  "Ucom_tas", "Usub_tas", "Utot_tas", "Utot_ta", "Utot_t", "Utot_ts", "eggs_per_S_t", "eggs_per_female_t")
 
 # set nodes to monitor diagnostics for
 diag_nodes = c("alpha", "beta", "R", "b0_sex", 
