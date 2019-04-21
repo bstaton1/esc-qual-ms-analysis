@@ -35,5 +35,3 @@ vignettes/*.pdf
 # Shiny token, see https://shiny.rstudio.com/articles/shinyapps.html
 rsconnect/
 
-# txt files from model output: this will prevent git tracking the JAGS model files
-*.txt
