@@ -18,14 +18,17 @@ mods = stringr::str_extract(msyfiles, "[0-9]+")
 
 msy = readRDS(file.path(out_dir, msyfiles[1]))
 goals = readRDS(file.path(out_dir, goalsfiles[1]))$EG
+probs = readRDS(file.path(out_dir, goalsfiles[1]))$probs
 post = list(); post[[1]] = readRDS(file.path(out_dir, postfiles[1]))
 
 for (i in 2:length(mods)) msy = abind::abind(msy, readRDS(file.path(out_dir, msyfiles[i])), along = 5) 
 for (i in 2:length(mods)) goals = abind::abind(goals, readRDS(file.path(out_dir, goalsfiles[i]))$EG, along = 5) 
+for (i in 2:length(mods)) probs = abind::abind(probs, readRDS(file.path(out_dir, goalsfiles[i]))$probs, along = 5) 
 for (i in 2:length(mods)) {cat("\r", i); post[[i]] = readRDS(file.path(out_dir, postfiles[i]))}
 
 dimnames(msy)[[5]] = mods
 dimnames(goals)[[5]] = mods
+dimnames(probs)[[5]] = mods
 names(post)[[5]] = mods
 
 keep_mods = as.character(1:10)
@@ -141,3 +144,71 @@ box()
 get_nodes(post[[1]])
 matrix(unlist(lapply(post, function(m) summ_post(m, "R[")[3,])), ny, 2)
 
+
+# plotting profiles
+esc = as.numeric(dimnames(probs)[[1]])
+
+p_early = probs[,"msy",,"early",]
+p_all = probs[,"msy",,"all",]
+p_late = probs[,"msy",,"late",]
+
+par(mfcol = c(2,2), xaxs = "i", yaxs = "i", mar = c(2,2,1,1))
+plot(1,1, ylim = c(0,1), xlim = c(0, 160000), ylab = "", xlab = "")
+lines(p_late[,"unr","1"] ~ esc, type = "l", lwd = 2)
+lines(p_early[,"unr","1"] ~ esc, type = "l", col = "grey50", lwd = 2)
+lines(p_all[,"unr","1"] ~ esc, type = "l", lty = 2, lwd = 2)
+box()
+
+plot(1,1, ylim = c(0,1), xlim = c(0, 160000), ylab = "", xlab = "")
+lines(p_late[,"unr","10"] ~ esc, type = "l", lwd = 2)
+lines(p_early[,"unr","10"] ~ esc, type = "l", col = "grey50", lwd = 2)
+lines(p_all[,"unr","10"] ~ esc, type = "l", lty = 2, lwd = 2)
+box()
+
+plot(1,1, ylim = c(0,1), xlim = c(0, 160000), ylab = "", xlab = "")
+lines(p_late[,"res","1"] ~ esc, type = "l", lwd = 2)
+lines(p_early[,"res","1"] ~ esc, type = "l", col = "grey50", lwd = 2)
+lines(p_all[,"res","1"] ~ esc, type = "l", lty = 2, lwd = 2)
+box()
+
+plot(1,1, ylim = c(0,1), xlim = c(0, 160000), ylab = "", xlab = "")
+lines(p_late[,"res","10"] ~ esc, type = "l", lwd = 2)
+lines(p_early[,"res","10"] ~ esc, type = "l", col = "grey50", lwd = 2)
+lines(p_all[,"res","10"] ~ esc, type = "l", lty = 2, lwd = 2)
+box()
+
+u = seq(0.0001, 0.9999, length = 1000)
+f = log(1/(1 - u))
+f
+
+hist(f)
+nF = 1000
+F_range = seq(0.0001, 5, length = nF)
+U_range = 1 - exp(-F_range)
+hist(U_range)
+hist(F_range)
+
+early_keep_t = 1:10; early_keep_y = 1:10
+late_keep_t = nt - 9:0; late_keep_y = ny - 9:0
+all_keep_t = 1:nt; all_keep_y = 1:ny
+
+early_keep_t = 1:10; early_keep_y = 1:10
+late_keep_t = nt - 9:0; late_keep_y = ny - 9:0
+all_keep_t = 1:nt; all_keep_y = 1:ny
+
+# post[[1]] = thin_post(post[[1]], thin_percent = 0.8)
+# post[[2]] = thin_post(post[[2]], thin_percent = 0.8)
+
+samps_all = prep_samples(post[[2]], keep_t = all_keep_t, keep_y = all_keep_y, eggs_trend = T, silent = F)
+
+info = get_EG(samps_all, spawn_units = "eggs", vuln = "unr")
+
+x = info$probs[,"Rmax"]
+
+esc[range(which(x > 0.9))]
+
+plot(x, type = "l")
+
+rm(F)
+F
+post.samps = samps_all
