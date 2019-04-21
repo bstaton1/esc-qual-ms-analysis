@@ -19,8 +19,8 @@ get_EG = function(post.samp, spawn_units, vuln, Rmax_p = 0.9, Rmax_prob = 0.9,
     if (!silent) cat("\r","      ", round(i/n_samp, 2) * 100, "%", sep = "")
     
     # calculate equilibrium H, S, and R at each F for this MCMC sample
-    tmp = matrix(NA, nF, 3)
-    for (f in 1:nF) {
+    tmp = matrix(NA, nU, 3)
+    for (f in 1:nU) {
       tmp[f,] = yield(
         log_F_max = log(F_range[f]), i = i, 
         post.samp = post.samp, 
