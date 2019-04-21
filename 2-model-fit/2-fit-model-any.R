@@ -53,7 +53,7 @@ EG_name = paste("goals-", model, ".rds", sep = "")
 # set mcmc per chain dimensions
 if (mcmc_short)  {npost = 100; nburn = 500; nthin = 1; nadapt = 50}
 if (mcmc_medium) {npost = 50000; nburn = 20000; nthin = 10 * nchain; nadapt = 10000}
-if (mcmc_long)   {npost = 500000; nburn = 50000; nthin = 100 * nchain/2; nadapt = 10000}
+if (mcmc_long)   {npost = 1000000; nburn = 100000; nthin = 100 * nchain/1; nadapt = 10000}
 
 # set nodes to monitor
 jags_params = c(
