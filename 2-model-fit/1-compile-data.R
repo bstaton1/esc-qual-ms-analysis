@@ -82,7 +82,7 @@ if (z_unit == "fish_count") {
     if (z_unit == "egg_mass") {
       z = egg_mass
     } else {
-      stop ("z_unit in mod-key.csv must be one of 'fish_count', 'egg_count', or 'egg_mass'")
+      stop ("z_unit must be one of 'fish_count', 'egg_count', or 'egg_mass'")
     }
   }
 }
@@ -111,7 +111,7 @@ n_sub = rowSums(x_sub_tas)
 ## bundle into a list for jags
 jags_dat = list(
   # dimensions
-  nt = nt, na = na, ny = ny, a_min = a_min, a_max = a_max, ages = ages,
+  nt = nt, na = na, ny = ny, a_min = a_min, a_max = a_max,
   
   # escapement estimates
   S_obs = states$S_tot_obs,
@@ -131,9 +131,6 @@ jags_dat = list(
   rlm = rlm,
   
   # reproductive units
-  egg_count = egg_count,
-  egg_mass = egg_mass,
-  z_unit = z_unit,
   z = z,
   
   # escapement age/sex comp
@@ -150,7 +147,7 @@ jags_dat = list(
 )
 
 # clean up workspace
-rm(list = setdiff(ls(), c("jags_dat", "data_dir", "years", "mod_key", "model")))
+rm(list = setdiff(ls(), c("jags_dat", "data_dir", "years", "mod_key", "model", "z_unit", "egg_count", "egg_mass", "ages")))
 
 # get all elements in as objects in workspace
 for (i in 1:length(jags_dat)) assign(x = names(jags_dat)[i], value = jags_dat[[i]])
