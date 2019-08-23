@@ -27,7 +27,7 @@ jags_model_code = function() {
   for (y in (na+a_min):ny) {
     log_R[y] ~ dnorm(log_Rmean2[y],tau_R_white)
     R[y] <- exp(log_R[y])
-    log_Rmean1[y] <- log_alpha + log(eggs_t[y-a_max]) - beta * eggs_t[y-a_max]
+    log_Rmean1[y] <- log_alpha + log(Z_t[y-a_max]) - beta * Z_t[y-a_max]
     log_resid[y] <- log_R[y] - log_Rmean1[y]
   }
   log_Rmean2[na+a_min] <- log_Rmean1[na+a_min] + phi * log_resid_0
@@ -135,7 +135,7 @@ jags_model_code = function() {
         Hsub_tas[t,a,s] <- N_tas[t,a,s] * Usub_tas[t,a,s]
         Hcom_tas[t,a,s] <- (N_tas[t,a,s] * (1 - Usub_tas[t,a,s])) * Ucom_tas[t,a,s]
         S_tas[t,a,s] <- N_tas[t,a,s] - Hsub_tas[t,a,s] - Hcom_tas[t,a,s]
-        eggs_tas[t,a,s] <- S_tas[t,a,s] * fecund[t,a,s]
+        Z_tas[t,a,s] <- S_tas[t,a,s] * z[t,a,s]
         Utot_tas[t,a,s] <- (N_tas[t,a,s] - S_tas[t,a,s])/N_tas[t,a,s]
       }
       Hsub_ta[t,a] <- sum(Hsub_tas[t,a,1:2])
@@ -146,9 +146,9 @@ jags_model_code = function() {
     Hsub[t] <- sum(Hsub_ta[t,1:na])
     Hcom[t] <- sum(Hcom_ta[t,1:na])
     S_t[t] <- sum(S_ta[t,1:na])
-    eggs_t[t] <- sum(eggs_tas[t,1:na,1:2])
-    eggs_per_S_t[t] <- eggs_t[t]/S_t[t]
-    eggs_per_female_t[t] <- eggs_t[t]/sum(S_tas[t,1:na,1])
+    Z_t[t] <- sum(Z_tas[t,1:na,1:2])
+    Z_per_S_t[t] <- Z_t[t]/S_t[t]
+    Z_per_female_t[t] <- Z_t[t]/sum(S_tas[t,1:na,1])
     Utot_t[t] <- (N_t[t] - S_t[t])/N_t[t]
     for (s in 1:2) {
       Utot_ts[t,s] <- (sum(N_tas[t,1:na,s]) - sum(S_tas[t,1:na,s]))/sum(N_tas[t,1:na,s])
@@ -189,3 +189,5 @@ jags_model_code = function() {
     x_sub[t,1:(2*na)] ~ dmulti(q_sub[t,1:(2*na)], n_sub[t])
   }
 }
+
+dput(jags_model_code, file = "model-files/full-model.txt", control = "all")# dput(jags_model_code, file = "model-files/full-model.txt", control = "all")
