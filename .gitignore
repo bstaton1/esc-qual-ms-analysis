@@ -35,3 +35,5 @@ vignettes/*.pdf
 # Shiny token, see https://shiny.rstudio.com/articles/shinyapps.html
 rsconnect/
 
+# model files
+2-model-fit/model-files/*
