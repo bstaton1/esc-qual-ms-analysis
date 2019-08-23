@@ -37,3 +37,6 @@ rsconnect/
 
 # model files
 2-model-fit/model-files/model*.txt
+
+# output files
+*.rds
