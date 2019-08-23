@@ -1,5 +1,4 @@
-
-edit_full_model = function(model_lines, outfile, len_trend = T, sex_trend = T, age_trend = T, keep_whitespace = F, keep_comments = F) {
+edit_full_model = function(model_lines, outfile, len_trend, sex_trend, age_trend, keep_whitespace = F, keep_comments = F) {
   
   # 1.) replace function() with model {
   model_lines[model_lines == "function() {"] = "model {"
@@ -50,5 +49,3 @@ edit_full_model = function(model_lines, outfile, len_trend = T, sex_trend = T, a
   
   cat(paste0(model_lines, collapse = "\n"), file = outfile)
 }
-
-
