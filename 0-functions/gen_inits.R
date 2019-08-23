@@ -1,4 +1,4 @@
-gen_inits = function(eggs = T, sex_trend = T, mat_trend = T) {
+gen_inits = function(z_unit, sex_trend, age_trend) {
   
   inits_list = list(
     D_scale = runif(1, 0.1, 0.2),
@@ -16,15 +16,19 @@ gen_inits = function(eggs = T, sex_trend = T, mat_trend = T) {
     b0_sex = runif(1, -0.1, 0.1)
   )
   
-  if (eggs) {
+  if (z_unit %in% c("egg_count", "egg_mass")) {
     log_alpha = list(log_alpha = log(0.002) + rnorm(1, 0, 0.001))
   } else {
-    log_alpha = list(log_alpha = log(6) + rnorm(1, 0, 0.1))
+    if (z_unit == "fish_count") {
+      log_alpha = list(log_alpha = log(6) + rnorm(1, 0, 0.1))
+    } else {
+      stop ("z_unit must be one of 'fish_count', 'egg_count', or 'egg_mass'")
+    }
   }
   
   inits_list = append(inits_list, log_alpha)
   
-  if (mat_trend) {
+  if (age_trend) {
     b1_mat = list(b1_mat = matrix(c(runif(3, c(0, 0, 0.05), c(0.1, 0.1, 0.15)), NA), 2, na, byrow = T))
     inits_list = append(inits_list, b1_mat)
   }
