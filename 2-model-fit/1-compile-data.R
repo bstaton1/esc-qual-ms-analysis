@@ -2,10 +2,10 @@
 ##### DATA COMPILATION FILE FOR ESCAPEMENT QUALITY MODEL #####
 
 # location of data: for fitting models
-# data_dir = "inputs"
+data_dir = "inputs"
 
 # location of data: when kniting Rmarkdowns: NEED TO FIX THIS
-data_dir = "../2-model-fit/inputs"
+# data_dir = "../2-model-fit/inputs"
 
 ### dimensional variables
 ft = 1976
@@ -50,10 +50,42 @@ rlm[,,2,2] = ldat[,m_ind]/res_perim  # males res
 ## gear types
 mesh = read.csv(file.path(data_dir, "mesh-types.csv"))
 
-## fecundity
-fecund = as.matrix(read.csv(file.path(data_dir, "predicted-fecundity.csv"))[,c(paste("f", ages, sep = ""))])
-fecund_m = matrix(0, nt, na)
-fecund = array(c(fecund, fecund_m), dim = c(nt, na, 2))
+## eggs per female of each age
+# this is using coefns from Jasper and Evenson (2006)
+# egg_count_f = as.matrix(read.csv(file.path(data_dir, "predicted-fecundity.csv"))[,c(paste("f", ages, sep = ""))])
+
+# this is with estimates from 2008-2010 from Eagle
+egg_count_f = 2.8e-4 * ldat[,f_ind]^2.54
+egg_count_m = matrix(0, nt, na)
+egg_count = array(c(egg_count_f, egg_count_m), dim = c(nt, na, 2))
+
+# egg mass per female: from Eagle
+egg_mass_f = 8.7e-12 * ldat[,f_ind]^4.83
+egg_mass_m = matrix(0, nt, na)
+egg_mass = array(c(egg_mass_f, egg_mass_m), dim = c(nt, na, 2))
+
+# fish contribution
+fish_f = matrix(1, nt, na)
+fish_m = matrix(1, nt, na)
+fish = array(c(fish_f, fish_m), dim = c(nt, na, 2))
+
+# decide on reproductive unit
+mod_key = read.csv("model-key.csv", stringsAsFactors = F)
+z_unit = mod_key[mod_key$model == model,"z_unit"]
+
+if (z_unit == "fish_count") {
+  z = fish
+} else {
+  if (z_unit == "egg_count") {
+    z = egg_count
+  } else {
+    if (z_unit == "egg_mass") {
+      z = egg_mass
+    } else {
+      stop ("z_unit in mod-key.csv must be one of 'fish_count', 'egg_count', or 'egg_mass'")
+    }
+  }
+}
 
 ## escapement age/sex composition
 e_ages = read.csv(file.path(data_dir, "esc-age-sex-comp.csv"))
@@ -61,12 +93,6 @@ e_ages$ess = e_ages$N_aged_tot/max(e_ages$N_aged_tot) * 100
 x_esc_tas = apply(e_ages[,A], 2, function(x) round(x * e_ages$ess))
 x_esc_tas[is.na(x_esc_tas)] = 0
 n_esc = rowSums(x_esc_tas)
-
-# x_esc_tas_new = matrix(NA, nt, na)
-# x_esc_tas_new[,1] = rowSums(x_esc_tas[,c(1,5)])
-# x_esc_tas_new[,2] = rowSums(x_esc_tas[,c(2,6)])
-# x_esc_tas_new[,3] = rowSums(x_esc_tas[,c(3,7)])
-# x_esc_tas_new[,4] = rowSums(x_esc_tas[,c(4,8)])
 
 ## commercial age/sex composition
 c_ages = read.csv(file.path(data_dir, "com-age-sex-comp.csv"))
@@ -84,35 +110,47 @@ n_sub = rowSums(x_sub_tas)
 
 ## bundle into a list for jags
 jags_dat = list(
+  # dimensions
   nt = nt, na = na, ny = ny, a_min = a_min, a_max = a_max, ages = ages,
   
+  # escapement estimates
   S_obs = states$S_tot_obs,
-  S_obs_sig = states$S_tot_obs_cv,
+  S_obs_sig = StatonMisc::cv2sig(states$S_tot_obs_cv),
   
+  # commerical harvest estimates
   Hcom_obs = states$H_com_tot_obs,
   Hcom_obs_sig = StatonMisc::cv2sig(states$H_com_tot_obs_cv),
   com_mesh = ifelse(mesh$com == "unr", 1, 2),
   
+  # subsistence harvest estimates
   Hsub_obs = states$H_sub_tot_obs,
   Hsub_obs_sig = StatonMisc::cv2sig(states$H_sub_tot_obs_cv),
   sub_mesh = ifelse(mesh$sub == "unr", 1, 2),
   
+  # ratio of fish length to mesh perimeter
   rlm = rlm,
   
-  fecund = fecund,
+  # reproductive units
+  egg_count = egg_count,
+  egg_mass = egg_mass,
+  z_unit = z_unit,
+  z = z,
   
+  # escapement age/sex comp
   x_esc = x_esc_tas,
   n_esc = n_esc,
   
+  # commercial age/sex comp
   x_com = x_com_tas,
   n_com = n_com,
   
+  # subsistence age/sex comp
   x_sub = x_sub_tas,
   n_sub = n_sub
 )
 
 # clean up workspace
-rm(list = setdiff(ls(), c("jags_dat", "data_dir", "years")))
+rm(list = setdiff(ls(), c("jags_dat", "data_dir", "years", "mod_key", "model")))
 
 # get all elements in as objects in workspace
 for (i in 1:length(jags_dat)) assign(x = names(jags_dat)[i], value = jags_dat[[i]])
