@@ -189,5 +189,3 @@ jags_model_code = function() {
     x_sub[t,1:(2*na)] ~ dmulti(q_sub[t,1:(2*na)], n_sub[t])
   }
 }
-
-dput(jags_model_code, file = "model-files/full-model.txt", control = "all")# dput(jags_model_code, file = "model-files/full-model.txt", control = "all")
