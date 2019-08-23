@@ -5,7 +5,9 @@ rm(list = ls(all = T))
 # settings
 args = commandArgs(trailingOnly = T)
 model = as.numeric(args[1])
-# model = 2
+
+# location of data files
+data_dir = "inputs"
 
 # compile the data
 source("1-compile-data.R")
@@ -13,16 +15,25 @@ source("1-compile-data.R")
 # load in additional functions
 source("../new-func-source.R")
 
-nchain =      2  # number of chains
-parallel =    F  # run chains in parallel?
-verbose =     T  # print JAGS messages to console?
-silent =      T  # print post processing progress?
-seed =        1  # seed for initial value and mcmc sampling
-mcmc_short =  T  # run with short mcmc settings?
+# starttime of everything
+starttime_all = Sys.time()
+
+nchain =      5  # number of chains
+parallel =    T  # run chains in parallel?
+verbose =     F  # print JAGS messages to console?
+silent =      F  # print post processing progress?
+seed =        9  # seed for initial value and mcmc sampling
+mcmc_vshort = F  # run with very short mcmc settings?
+mcmc_lshort = F  # run with less short mcmc settings?
 mcmc_medium = F  # run with medium mcmc settings?
-mcmc_long =   F  # run with long mcmc settings?
+mcmc_long =   T  # run with long mcmc settings?
 calc_msy =    T  # calculate msy-based quantities?
 calc_PP =     T  # calculate probability profiles?
+
+# make sure only one MCMC setting was specified
+if (sum(c(mcmc_vshort, mcmc_lshort, mcmc_medium, mcmc_long)) != 1) {
+  stop("you incorrectly specified how long to run the MCMC algorithm for")
+}
 
 # which time effects are included?
 len_trend = as.logical(mod_key$length_trend[mod_key$model == model])
@@ -32,17 +43,18 @@ age_trend = as.logical(mod_key$age_trend[mod_key$model == model])
 # names for output
 if (!dir.exists("model-files")) dir.create("model-files")
 model_file = file.path("model-files", paste("model-", model, ".txt", sep = ""))
-out_dir = "../../model-output/"
+out_dir = "../model-output/"
 if (!dir.exists(out_dir)) dir.create(out_dir)
 post_name = paste("post-", model, ".rds", sep = "")
 meta_name = paste("meta-", model, ".rds", sep = "")
 msy_name = paste("msy-", model, ".rds", sep = "")
-PP_name = paste("prop-profiles-", model, ".rds", sep = "")
+PP_name = paste("prob-profiles-", model, ".rds", sep = "")
 
 # set mcmc per chain dimensions
-if (mcmc_short)  {npost = 100; nburn = 500; nthin = 1; nadapt = 50}
-if (mcmc_medium) {npost = 50000; nburn = 20000; nthin = 10 * nchain; nadapt = 10000}
-if (mcmc_long)   {npost = 1000000; nburn = 100000; nthin = 100 * nchain/1; nadapt = 10000}
+if (mcmc_vshort)  {npost = 100; nburn = 500; nthin = 1; nadapt = 50}
+if (mcmc_lshort)  {npost = 5000; nburn = 1000; nthin = 2 * nchain; nadapt = 1000}
+if (mcmc_medium)  {npost = 50000; nburn = 20000; nthin = 10 * nchain; nadapt = 10000}
+if (mcmc_long)    {npost = 1000000; nburn = 100000; nthin = 100 * nchain/1; nadapt = 10000}
 
 # set nodes to monitor
 jags_params = c(
@@ -63,7 +75,11 @@ diag_nodes = c("alpha", "beta", "beta_e5", "R", "b0_sex",
 
 ## write the model file
 # the full model - this one gets simplified based on the specific trend assumptions
-write_full_model()
+# NOTE: when executed from the command line, this writes out a file
+# with the correct contents, but with improper formatting. I have no idea why dput works differently in these two cases
+# This causes edit_full_model() to bomb. Thus, you need to write out the full model 
+# BEFORE calling this script via Rscript
+# write_full_model()
 
 # stringr::str_magic!!
 edit_full_model(
@@ -74,17 +90,17 @@ edit_full_model(
   len_trend = len_trend
   )
 
-## create initial values
+# create initial values
 set.seed(seed)
 jags_inits = lapply(1:nchain, function(i) gen_inits(z_unit = z_unit, sex_trend = sex_trend, age_trend = age_trend))
 
 ## run the sampler
 # read gelman et al. 2004 for more information about DIC
-starttime = Sys.time()
+starttime_mcmc = Sys.time()
 
 print_start_mcmc_message()
 
-cat("\n    Started MCMC at:", format(starttime), "\n")
+cat("\n    Started MCMC at:", format(starttime_mcmc), "\n")
 
 post_info = jagsUI::jags(
   data = jags_dat,
@@ -98,13 +114,13 @@ post_info = jagsUI::jags(
   n.thin = nthin,
   parallel = parallel,
   verbose = verbose,
-  DIC = TRUE, 
+  DIC = TRUE,
   seed = seed
 )
 post = post_info$samples
-stoptime = Sys.time()
-cat("    Completed MCMC at:", format(stoptime), "\n")
-cat("    Elapsed MCMC time:", format(round(stoptime - starttime, 2)), "\n")
+stoptime_mcmc = Sys.time()
+cat("    Completed MCMC at:", format(stoptime_mcmc), "\n")
+cat("    Elapsed MCMC time:", format(round(stoptime_mcmc - starttime_mcmc, 2)), "\n")
 
 # summarize diagnostics
 diag_summ = function(x) {
@@ -123,16 +139,18 @@ cat("\n  Summarized n.eff values:\n")
 round(n.eff)
 cat("\n")
 
+starttime_after = Sys.time()
+
 ### process output: MSY calculations and EG derivation
 if (calc_PP | calc_msy) {
   early_keep_t = 1:10; early_keep_y = 1:10
   late_keep_t = nt - 9:0; late_keep_y = ny - 9:0
   all_keep_t = 1:nt; all_keep_y = 1:ny
-  
+
   early_keep_t = 1:10; early_keep_y = 1:10
   late_keep_t = nt - 9:0; late_keep_y = ny - 9:0
   all_keep_t = 1:nt; all_keep_y = 1:ny
-  
+
   cat("  |--- Extracting Samples for MSY Calculations ---|\n")
   starttime = Sys.time()
   cat("    Started at:", format(starttime), "\n")
@@ -166,17 +184,19 @@ if (calc_PP) {
   PP_res_early = get_PP(post.samp = samps_early, vuln = "res", silent = silent); cat("      Early (RES) period complete\n")
   PP_res_late  = get_PP(post.samp = samps_late, vuln = "res", silent = silent); cat("      Late (RES) period complete\n")
   PP_res_all   = get_PP(post.samp = samps_all, vuln = "res", silent = silent); cat("      All (RES) period complete\n")
-  
+
   PP_early = abind::abind(PP_unr_early, PP_res_early, along = 3)
   PP_late = abind::abind(PP_unr_late, PP_res_late, along = 3)
   PP_all = abind::abind(PP_unr_all, PP_res_all, along = 3)
   PP = abind::abind(PP_early, PP_all, PP_late, along = 4)
   dimnames(PP)[[3]] = c("unr", "res")
   dimnames(PP)[[4]] = c("early", "all", "late")
-  
+
   stoptime = Sys.time()
   cat("    Elapsed time:", format(round(stoptime - starttime, 1)), "\n")
 }
+
+stoptime_after = Sys.time()
 
 # save files
 cat("  |--- Saving Output Files ---|\n")
@@ -196,4 +216,11 @@ saveRDS(
       n.eff = n.eff
     )), file.path(out_dir, meta_name))
 
+stoptime_all = Sys.time()
+
+cat("\n", "#-----------------------------------#", "\n")
+cat("  Elapsed time (Total): ", format(round(stoptime_all - starttime_all, 1)), "\n")
+cat("  Elapsed time (MCMC):  ", format(round(stoptime_mcmc - starttime_mcmc, 1)), "\n")
+cat("  Elapsed time (Output):", format(round(stoptime_after - starttime_after, 1)), "\n")
+cat(" #-----------------------------------#", "\n")
 cat("\n  Model", model, "Done.\n")
