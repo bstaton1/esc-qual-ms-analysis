@@ -1,13 +1,11 @@
-# CRAN Packages: install these using the typical install.packages("pkgname")
-suppressMessages(suppressWarnings(library(jagsUI)))
-suppressMessages(suppressWarnings(library(abind)))
-
-# Staton Packages: install these using devtools::install_github("bstaton1/pkgname")
-suppressMessages(suppressWarnings(library(StatonMisc)))
-suppressMessages(suppressWarnings(library(codaTools)))
 
 # clear the workspace
 rm(list = ls(all = T))
+
+# settings
+args = commandArgs(trailingOnly = T)
+model = as.numeric(args[1])
+# model = 2
 
 # compile the data
 source("1-compile-data.R")
@@ -15,30 +13,21 @@ source("1-compile-data.R")
 # load in additional functions
 source("../new-func-source.R")
 
-# settings
-args = commandArgs(trailingOnly = T)
-model = as.numeric(args[1])
-# model = 1
-
-nchain =      5  # number of chains
-parallel =    T  # run chains in parallel?
-verbose =     F  # print JAGS messages to console?
+nchain =      2  # number of chains
+parallel =    F  # run chains in parallel?
+verbose =     T  # print JAGS messages to console?
 silent =      T  # print post processing progress?
 seed =        1  # seed for initial value and mcmc sampling
-mcmc_short =  F  # run with short mcmc settings?
+mcmc_short =  T  # run with short mcmc settings?
 mcmc_medium = F  # run with medium mcmc settings?
-mcmc_long =   T  # run with long mcmc settings?
+mcmc_long =   F  # run with long mcmc settings?
 calc_msy =    T  # calculate msy-based quantities?
-calc_EG =     T  # calculate escapement goal endpoints based on probability profiles?
+calc_PP =     T  # calculate probability profiles?
 
-# model assumptions
-mod_key = read.csv("model-key.csv")
-eggs = as.logical(mod_key$eggs[mod_key$model == model])
-eggs_trend = as.logical(mod_key$eggs_trend[mod_key$model == model])
+# which time effects are included?
+len_trend = as.logical(mod_key$length_trend[mod_key$model == model])
 sex_trend = as.logical(mod_key$sex_trend[mod_key$model == model])
-vuln_trend = as.logical(mod_key$vuln_trend[mod_key$model == model])
-mat_trend = as.logical(mod_key$mat_trend[mod_key$model == model])
-spawn_units = ifelse(eggs, "eggs", "fish")
+age_trend = as.logical(mod_key$age_trend[mod_key$model == model])
 
 # names for output
 if (!dir.exists("model-files")) dir.create("model-files")
@@ -48,7 +37,7 @@ if (!dir.exists(out_dir)) dir.create(out_dir)
 post_name = paste("post-", model, ".rds", sep = "")
 meta_name = paste("meta-", model, ".rds", sep = "")
 msy_name = paste("msy-", model, ".rds", sep = "")
-EG_name = paste("goals-", model, ".rds", sep = "")
+PP_name = paste("prop-profiles-", model, ".rds", sep = "")
 
 # set mcmc per chain dimensions
 if (mcmc_short)  {npost = 100; nburn = 500; nthin = 1; nadapt = 50}
@@ -57,63 +46,47 @@ if (mcmc_long)   {npost = 1000000; nburn = 100000; nthin = 100 * nchain/1; nadap
 
 # set nodes to monitor
 jags_params = c(
-  "alpha", "beta", "N_t", "S_t", "eggs_t", "S_tas", "R", "log_mean_R0", "R_sex", "Hcom", "Hsub",
+  "alpha", "beta", "beta_e5", "N_t", "S_t", "Z_t", "S_tas", "R", "log_mean_R0", "R_sex", "Hcom", "Hsub",
   "b0_sex", "b1_sex", "b0_mat", "b1_mat", "p", "mu_pi_f",
   "mu_pi_mat", "q_sub", "q_com", "q_esc", "q_run", "D_sum",
   "phi", "sigma_R_white", "sigma_R0", "Fcom", "Fsub", "v", "Vtau", "Vsig", "Vtha", "Vlam",
   "Vtau_prior", "Vsig_prior", "Vtha_prior", "Vlam_prior",
   "Vtau_yukon", "Vsig_yukon", "Vtha_yukon", "Vlam_yukon",
-  "Ucom_tas", "Usub_tas", "Utot_tas", "Utot_ta", "Utot_t", "Utot_ts", "eggs_per_S_t", "eggs_per_female_t")
+  "Ucom_tas", "Usub_tas", "Utot_tas", "Utot_ta", "Utot_t", "Utot_ts", "Z_per_S_t", "Z_per_female_t")
 
 # set nodes to monitor diagnostics for
-diag_nodes = c("alpha", "beta", "R", "b0_sex", 
+diag_nodes = c("alpha", "beta", "beta_e5", "R", "b0_sex", 
                "b1_sex", "b0_mat", "b1_mat", "p",
                "D_sum", "phi", "sigma_R_white", "sigma_R0", 
                "Fcom", "Fsub", "Vtau", "Vsig", "Vtha", "Vlam", "log_mean_R0"
 )
 
 ## write the model file
-# dput(jags_model_code, file = "model-files/full-model.txt", control = "all")
+# the full model - this one gets simplified based on the specific trend assumptions
+write_full_model()
+
+# stringr::str_magic!!
 edit_full_model(
   model_lines = readLines(file.path("model-files", "full-model.txt")),
   outfile = model_file,
-  eggs = eggs, eggs_trend = eggs_trend, sex_trend = sex_trend,
-  vuln_trend = vuln_trend, mat_trend = mat_trend
+  age_trend = age_trend, 
+  sex_trend = sex_trend,
+  len_trend = len_trend
   )
 
 ## create initial values
 set.seed(seed)
-jags_inits = list()
-for (c in 1:nchain) {
-  jags_inits[[c]] = gen_inits(eggs = eggs, sex_trend = sex_trend, mat_trend = mat_trend)
-}
+jags_inits = lapply(1:nchain, function(i) gen_inits(z_unit = z_unit, sex_trend = sex_trend, age_trend = age_trend))
 
 ## run the sampler
 # read gelman et al. 2004 for more information about DIC
 starttime = Sys.time()
-cat("\n  |--- Running JAGS on Model ", model, " ---|\n\n", sep = "")
 
-cat("    #-------------------------------#\n")
-cat("    Model Assumptions:\n")
-cat("      -> Spawing units: ", ifelse(eggs, "Eggs", "Fish"), "\n", sep = "")
-cat("      -> Fecundity trend: ", ifelse(eggs_trend, "Yes", "No"), "\n", sep = "")
-cat("      -> Sex trend: ", ifelse(sex_trend, "Yes", "No"), "\n", sep = "")
-cat("      -> Maturity trend: ", ifelse(mat_trend, "Yes", "No"), "\n", sep = "")
-cat("      -> Vulnerability trend: ", ifelse(vuln_trend, "Yes", "No"), "\n", sep = "")
-cat("    #-------------------------------#\n")
-cat("    MCMC Settings:\n")
-cat("      -> Parallel processing: ", ifelse(parallel, "Yes", "No"), "\n", sep = "")
-cat("      -> Adapt: ", prettify(nadapt), "\n", sep = "")
-cat("      -> Burn-in: ", prettify(nburn), "\n", sep = "")
-cat("      -> Post Burn-in: ", prettify(npost), "\n", sep = "")
-cat("      -> Thinning Interval: ", prettify(nthin), "\n", sep = "")
-cat("      -> Chains: ", prettify(nchain), "\n", sep = "")
-cat("      -> Saved: ", prettify((npost/nthin) * nchain), "\n", sep = "")
-cat("    #-------------------------------#\n")
+print_start_mcmc_message()
 
 cat("\n    Started MCMC at:", format(starttime), "\n")
 
-post = jags(
+post_info = jagsUI::jags(
   data = jags_dat,
   inits = jags_inits,
   parameters.to.save = jags_params,
@@ -128,6 +101,7 @@ post = jags(
   DIC = TRUE, 
   seed = seed
 )
+post = post_info$samples
 stoptime = Sys.time()
 cat("    Completed MCMC at:", format(stoptime), "\n")
 cat("    Elapsed MCMC time:", format(round(stoptime - starttime, 2)), "\n")
@@ -140,8 +114,8 @@ diag_summ = function(x) {
     max = max(x, na.rm = T))
 }
 
-R.hat = t(as.data.frame(lapply(post$Rhat[diag_nodes], diag_summ)))
-n.eff = t(as.data.frame(lapply(post$n.eff[diag_nodes], diag_summ)))
+R.hat = suppressWarnings(t(as.data.frame(lapply(post_info$Rhat[diag_nodes], diag_summ))))
+n.eff = suppressWarnings(t(as.data.frame(lapply(post_info$n.eff[diag_nodes], diag_summ))))
 
 cat("  Summarized R.hat values:\n")
 round(R.hat, 2)
@@ -150,7 +124,7 @@ round(n.eff)
 cat("\n")
 
 ### process output: MSY calculations and EG derivation
-if (calc_EG | calc_msy) {
+if (calc_PP | calc_msy) {
   early_keep_t = 1:10; early_keep_y = 1:10
   late_keep_t = nt - 9:0; late_keep_y = ny - 9:0
   all_keep_t = 1:nt; all_keep_y = 1:ny
@@ -162,9 +136,9 @@ if (calc_EG | calc_msy) {
   cat("  |--- Extracting Samples for MSY Calculations ---|\n")
   starttime = Sys.time()
   cat("    Started at:", format(starttime), "\n")
-  samps_early = prep_samples(post$samples, keep_t = early_keep_t, keep_y = early_keep_y, eggs_trend = eggs_trend, silent = silent); cat("      Early period complete\n")
-  samps_late = prep_samples(post$samples, keep_t = late_keep_t, keep_y = late_keep_y, eggs_trend = eggs_trend, silent = silent); cat("      Late period complete\n")
-  samps_all = prep_samples(post$samples, keep_t = all_keep_t, keep_y = all_keep_y, eggs_trend = eggs_trend, silent = silent); cat("      All period complete\n")
+  samps_early = prep_samples(post, keep_t = early_keep_t, keep_y = early_keep_y, len_trend = len_trend, silent = silent); cat("    Early period complete\n")
+  samps_late = prep_samples(post, keep_t = late_keep_t, keep_y = late_keep_y, len_trend = len_trend, silent = silent); cat("    Late period complete\n")
+  samps_all = prep_samples(post, keep_t = all_keep_t, keep_y = all_keep_y, len_trend = len_trend, silent = silent); cat("    All period complete\n")
   stoptime = Sys.time()
   cat("    Elapsed time:", format(round(stoptime - starttime, 1)), "\n")
 }
@@ -173,41 +147,32 @@ if (calc_msy) {
   cat("  |--- Performing MSY Calculations ---|\n")
   starttime = Sys.time()
   cat("    Started at:", format(starttime), "\n")
-  msy_early = msy_search(samps_early, spawn_units = spawn_units, silent = silent); cat("      Early period complete\n")
-  msy_late = msy_search(samps_late, spawn_units = spawn_units, silent = silent); cat("      Late period complete\n")
-  msy_all = msy_search(samps_all, spawn_units = spawn_units, silent = silent); cat("      All period complete\n")
+  msy_early = msy_search(samps_early, silent = silent); cat("      Early period complete\n")
+  msy_late = msy_search(samps_late, silent = silent); cat("      Late period complete\n")
+  msy_all = msy_search(samps_all, silent = silent); cat("      All period complete\n")
   msy = abind::abind(msy_early, msy_all, msy_late, along = 4)
   dimnames(msy)[[4]] = c("early", "all", "late")
   stoptime = Sys.time()
   cat("    Elapsed time:", format(round(stoptime - starttime, 1)), "\n")
 }
 
-if (calc_EG) {
-  cat("  |--- Estimating Escapement Goals ---|\n")
+if (calc_PP) {
+  cat("  |--- Calculating Probability Profiles ---|\n")
   starttime = Sys.time()
   cat("    Started at:", format(starttime), "\n")
-  EG_unr_early = get_EG(post.samp = samps_early, spawn_units = spawn_units, vuln = "unr", silent = silent); cat("      Early (UNR) period complete\n")
-  EG_unr_late = get_EG(post.samp = samps_late, spawn_units = spawn_units, vuln = "unr", silent = silent); cat("      Late (UNR) period complete\n")
-  EG_unr_all = get_EG(post.samp = samps_all, spawn_units = spawn_units, vuln = "unr", silent = silent); cat("      All (UNR) period complete\n")
-  EG_res_early = get_EG(post.samp = samps_early, spawn_units = spawn_units, vuln = "res", silent = silent); cat("      Early (RES) period complete\n")
-  EG_res_late= get_EG(post.samp = samps_late, spawn_units = spawn_units, vuln = "res", silent = silent); cat("      Late (RES) period complete\n")
-  EG_res_all = get_EG(post.samp = samps_all, spawn_units = spawn_units, vuln = "res", silent = silent); cat("      All (RES) period complete\n")
+  PP_unr_early = get_PP(post.samp = samps_early, vuln = "unr", silent = silent); cat("      Early (UNR) period complete\n")
+  PP_unr_late  = get_PP(post.samp = samps_late, vuln = "unr", silent = silent); cat("      Late (UNR) period complete\n")
+  PP_unr_all   = get_PP(post.samp = samps_all, vuln = "unr", silent = silent); cat("      All (UNR) period complete\n")
+  PP_res_early = get_PP(post.samp = samps_early, vuln = "res", silent = silent); cat("      Early (RES) period complete\n")
+  PP_res_late  = get_PP(post.samp = samps_late, vuln = "res", silent = silent); cat("      Late (RES) period complete\n")
+  PP_res_all   = get_PP(post.samp = samps_all, vuln = "res", silent = silent); cat("      All (RES) period complete\n")
   
-  EG_early = abind(EG_unr_early$goals, EG_res_early$goals, along = 3)
-  EG_late = abind(EG_unr_late$goals, EG_res_late$goals, along = 3)
-  EG_all = abind(EG_unr_all$goals, EG_res_all$goals, along = 3)
-  EG = abind(EG_early, EG_all, EG_late, along = 4)
-  dimnames(EG)[[3]] = c("unr", "res")
-  dimnames(EG)[[4]] = c("early", "all", "late")
-  
-  probs_early = abind(EG_unr_early$probs, EG_res_early$probs, along = 3)
-  probs_late = abind(EG_unr_late$probs, EG_res_late$probs, along = 3)
-  probs_all = abind(EG_unr_all$probs, EG_res_all$probs, along = 3)
-  probs = abind(probs_early, probs_all, probs_late, along = 4)
-  dimnames(probs)[[3]] = c("unr", "res")
-  dimnames(probs)[[4]] = c("early", "all", "late")
-  
-  EGinfo = list(EG = EG, probs = probs)
+  PP_early = abind::abind(PP_unr_early, PP_res_early, along = 3)
+  PP_late = abind::abind(PP_unr_late, PP_res_late, along = 3)
+  PP_all = abind::abind(PP_unr_all, PP_res_all, along = 3)
+  PP = abind::abind(PP_early, PP_all, PP_late, along = 4)
+  dimnames(PP)[[3]] = c("unr", "res")
+  dimnames(PP)[[4]] = c("early", "all", "late")
   
   stoptime = Sys.time()
   cat("    Elapsed time:", format(round(stoptime - starttime, 1)), "\n")
@@ -216,18 +181,17 @@ if (calc_EG) {
 # save files
 cat("  |--- Saving Output Files ---|\n")
 if (calc_msy) saveRDS(msy, file.path(out_dir, msy_name))
-if (calc_EG) saveRDS(EGinfo, file.path(out_dir, EG_name))
-saveRDS(post$samples, file.path(out_dir, post_name))
+if (calc_PP) saveRDS(PP, file.path(out_dir, PP_name))
+saveRDS(post, file.path(out_dir, post_name))
 saveRDS(
   append(
-    extract_jags_metadata(post),
+    extract_jags_metadata(post_info),
     list(
       model = model,
-      eggs = eggs,
-      eggs_trend = eggs_trend,
+      z_unit = z_unit,
+      len_trend = len_trend,
       sex_trend = sex_trend,
-      mat_trend = mat_trend,
-      vuln_trend = vuln_trend,
+      age_trend = age_trend,
       R.hat = R.hat,
       n.eff = n.eff
     )), file.path(out_dir, meta_name))
