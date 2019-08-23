@@ -36,4 +36,4 @@ vignettes/*.pdf
 rsconnect/
 
 # model files
-2-model-fit/model-files/*
+2-model-fit/model-files/model*.txt
