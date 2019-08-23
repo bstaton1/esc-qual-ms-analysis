@@ -1,4 +1,10 @@
-prep_samples = function(post, keep_t = NULL, keep_y = NULL, eggs_trend = F, silent = F) {
+# keep_t = all_keep_t
+# keep_y = all_keep_y
+# len_trend = F
+# silent = F
+# post = post$samples
+
+prep_samples = function(post, keep_t = NULL, keep_y = NULL, len_trend = F, silent = F) {
   
   # keep all years if not specified
   if (is.null(keep_t)) keep_t = 1:nt
@@ -13,15 +19,15 @@ prep_samples = function(post, keep_t = NULL, keep_y = NULL, eggs_trend = F, sile
   male = 2
   
   # extract necessary SRA parameters
-  sr_params = filter_post(post, c("alpha", "beta", "sigma_R_white", "phi"), "matrix")
-  n_samp = nrow(sr_params)
+  sr_params = postpack::post_subset(post, c("alpha", "beta", "sigma_R_white", "phi"), T)
+  n_samp = as.list(postpack::post_dim(post))$saved
   # extract the vulnerability schedules
   # averaging yearly values by age, sex, and gear over some time period
-  v = filter_post(post, "^v", "matrix")
+  v = postpack::post_subset(post, "^v", T)
   
-  if (!silent) cat("Calculating mean vulnerability by age, sex, and gear for keep_t years and each posterior sample\n")
+  if (!silent) cat("  Calculating mean vulnerability by age, sex, and gear for keep_t years and each posterior sample\n")
   mean_v = t(sapply(1:nrow(sr_params), function(i) {
-    if (!silent) cat("\r", " ", floor(i/n_samp * 100), "%", sep = "")
+    if (!silent) cat("\r", "   ", floor(i/n_samp * 100), "%", sep = "")
     
     v_out = NULL
     for (mesh in c(unr, res)) {
@@ -40,12 +46,12 @@ prep_samples = function(post, keep_t = NULL, keep_y = NULL, eggs_trend = F, sile
   colnames(mean_v) = c(paste(as, "v_unr", sep = "_"), paste(as, "v_res", sep = "_"))
   
   # extract the probability of maturation at age and sex
-  mu_pi_mat = filter_post(post, "mu_pi_mat", "matrix")
-  mu_pi_f = filter_post(post, "mu_pi_f", "matrix")
+  mu_pi_mat = postpack::post_subset(post, "mu_pi_mat", T)
+  mu_pi_f = postpack::post_subset(post, "mu_pi_f", T)
   
-  if (!silent) cat("\nCalculating mean maturity by age, sex, for keep_y years and each posterior sample\n")
+  if (!silent) cat("\n  Calculating mean maturity by age, sex, for keep_y years and each posterior sample\n")
   mean_pi = t(sapply(1:nrow(sr_params), function(i) {
-    if (!silent) cat("\r", " ", floor(i/n_samp * 100), "%", sep = "")
+    if (!silent) cat("\r", "   ", floor(i/n_samp * 100), "%", sep = "")
     
     nR = 1e10
     
@@ -67,17 +73,17 @@ prep_samples = function(post, keep_t = NULL, keep_y = NULL, eggs_trend = F, sile
   }))
   colnames(mean_pi) = paste(as, "pi", sep = "_")
   if (!silent) cat("\n")
-  # extract average fecundity over the time period of interest
-  if (eggs_trend) {
-    mean_fecund = colMeans(fecund[keep_t,,1])
+  # extract average z value over the time period of interest
+  if (len_trend) {
+    mean_z = colMeans(z[keep_t,,1])
   } else {
-    mean_fecund = colMeans(fecund[1:nt,,1])
+    mean_z = colMeans(z[1:nt,,1])
   }
-  mean_fecund = c(mean_fecund, rep(0, na))
-  mean_fecund = matrix(mean_fecund, nrow(sr_params), na * 2, byrow = T)
-  colnames(mean_fecund) = paste(as, "fecund", sep = "_")
+  mean_z = c(mean_z, rep(0, na))
+  mean_z = matrix(mean_z, n_samp, na * 2, byrow = T)
+  colnames(mean_z) = paste(as, "z", sep = "_")
   
   # combine them all together
-  post.samp = cbind(sr_params, mean_fecund, mean_pi, mean_v)
+  post.samp = cbind(sr_params, mean_z, mean_pi, mean_v)
   post.samp
 }

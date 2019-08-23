@@ -1,6 +1,5 @@
 
-
-yield = function(log_F_max, i, post.samp, vuln, spawn_units = "fish") {  
+yield = function(log_F_max, i, post.samp, vuln) {  
   
   # extract column names
   cn = colnames(post.samp)
@@ -14,57 +13,48 @@ yield = function(log_F_max, i, post.samp, vuln, spawn_units = "fish") {
   # extract and name the relevant age/sex-structured quantities
   pi_as = unname(post.samp[i,stringr::str_detect(cn, "pi")])
   vuln_as = unname(post.samp[i,stringr::str_detect(cn, vuln)])
-  if (spawn_units %in% c("fish", "eggs")) {
-    if (spawn_units == "fish") {
-      fec_as = rep(1, 8)
-    } else {
-      fec_as = unname(post.samp[i,stringr::str_detect(cn, "fecund")])
-    }
-  } else {
-    stop("'spawn_units' must be one of 'fish' or 'eggs'")
-  }
+  z_as = unname(post.samp[i,stringr::str_detect(cn, "z")])
   
-  F_max = exp(log_F_max)
-  
-  # get unfished eggs per recruit (EPR0)
-  EPR0_as = fec_as * pi_as
-  EPR0 = sum(EPR0_as)
+  # get unfished z per recruit (zPR0 - average reproductive units per spawner in unfished condition, z_as weighted by maturity)
+  zPR0_as = z_as * pi_as
+  zPR0 = sum(zPR0_as)
   
   # get unfished equilibrium recruitment (R0)
-  alpha.c = exp(log(alpha) + (sigma^2)/2/(1 - phi^2))
-  R0 = log(alpha.c * EPR0)/(beta * EPR0)
+  alphac = exp(log(alpha) + (sigma^2)/2/(1 - phi^2)) # corrected alpha
+  R0 = log(alphac * zPR0)/(beta * zPR0)
   
-  # get fishing mortality at age (F_a) and fished eggs per recruit at age (EPRO_f_a)
+  # get fishing mortality at age (F_a) and fished z per recruit at age (zPRO_f_a)
+  F_max = exp(log_F_max)
   F_as = F_max * vuln_as
   U_as = 1 - exp(-F_as)
-  EPR_f_as = (1 - U_as) * fec_as * pi_as
-  EPR_f = sum(EPR_f_as)
+  zPR_F_as = (1 - U_as) * z_as * pi_as
+  zPR_F = sum(zPR_F_as)
   
   # get fished equilibrium recruits, N_a, esc_a, harv_a
-  Rf = log(alpha.c * EPR_f)/(beta * EPR_f)
-  N_as = Rf * pi_as
-  esc_as = N_as * (1 - U_as)
-  esc = sum(esc_as)
-  eggs_as = esc_as * fec_as
-  eggs = sum(eggs_as)
-  harv_as = N_as * U_as
-  harv = sum(harv_as)
+  RF = log(alphac * zPR_F)/(beta * zPR_F)
+  N_as = RF * pi_as
+  S_as = N_as * (1 - U_as)
+  S = sum(S_as)
+  Z_as = S_as * z_as
+  Z = sum(Z_as)
+  H_as = N_as * U_as
+  H = sum(H_as)
   
   output = c(
-    harv = harv,
-    esc = esc,
-    recruits = Rf,
-    million_eggs = eggs/1e6
+    H = H,
+    S = S,
+    R = RF,
+    Z_million = Z/1e6
     )
   
   return(output)
 }
 
-yield_min = function(log_F_max, i, post.samp, vuln, spawn_units = "fish") {
-  yield(log_F_max, i, post.samp, vuln, spawn_units)["harv"] * -1
+yield_min = function(log_F_max, i, post.samp, vuln) {
+  yield(log_F_max, i, post.samp, vuln)["H"] * -1
 }
 
-msy_search = function(post.samp, spawn_units = "fish", silent = F) {
+msy_search = function(post.samp, silent = F) {
   n_samp = nrow(post.samp)
   out = array(NA, dim = c(n_samp, 4, 2))
   v_scenarios = c("unr", "res")
@@ -76,13 +66,14 @@ msy_search = function(post.samp, spawn_units = "fish", silent = F) {
           par = log(0.5), 
           fn = yield_min, 
           method = "Brent", lower = -10, upper = 3,
-          i = i, post.samp = post.samp, vuln = v_scenarios[v], spawn_units = spawn_units
+          i = i, post.samp = post.samp, vuln = v_scenarios[v]
         )$par
       
       out[i,,v] = 
         yield(
           log_F_max = fit_log_F_max, 
-          i = i, post.samp = post.samp, vuln = v_scenarios[v], spawn_units = spawn_units
+          i = i, post.samp = post.samp,
+          vuln = v_scenarios[v]
         )
     }
   }
@@ -99,12 +90,8 @@ msy_search = function(post.samp, spawn_units = "fish", silent = F) {
   
   dimnames(out) = list(
     names(StatonMisc::summ(rnorm(10), p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975)))[3:9],
-    c("harv", "esc", "recruits", "million_eggs"),
+    c("H", "S", "R", "Z_million"),
     v_scenarios
   )
-  
   out
 }
-
-
-
