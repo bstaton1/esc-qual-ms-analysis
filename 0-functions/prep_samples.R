@@ -19,7 +19,7 @@ prep_samples = function(post, keep_t = NULL, keep_y = NULL, len_trend = F, silen
   male = 2
   
   # extract necessary SRA parameters
-  sr_params = postpack::post_subset(post, c("alpha", "beta", "sigma_R_white", "phi"), T)
+  sr_params = postpack::post_subset(post, c("alpha", "^beta$", "sigma_R_white", "phi"), T)
   n_samp = as.list(postpack::post_dim(post))$saved
   # extract the vulnerability schedules
   # averaging yearly values by age, sex, and gear over some time period
