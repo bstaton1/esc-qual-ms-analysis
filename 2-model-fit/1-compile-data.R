@@ -65,7 +65,7 @@ fish_m = matrix(1, nt, na)
 fish = array(c(fish_f, fish_m), dim = c(nt, na, 2))
 
 # decide on reproductive unit
-mod_key = read.csv("model-key.csv", stringsAsFactors = F)
+mod_key = read.csv(file.path(data_dir, "../model-key.csv"), stringsAsFactors = F)
 z_unit = mod_key[mod_key$model == model,"z_unit"]
 
 if (z_unit == "fish_count") {
