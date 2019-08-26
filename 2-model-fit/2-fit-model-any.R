@@ -147,10 +147,6 @@ if (calc_PP | calc_msy) {
   late_keep_t = nt - 9:0; late_keep_y = ny - 9:0
   all_keep_t = 1:nt; all_keep_y = 1:ny
 
-  early_keep_t = 1:10; early_keep_y = 1:10
-  late_keep_t = nt - 9:0; late_keep_y = ny - 9:0
-  all_keep_t = 1:nt; all_keep_y = 1:ny
-
   cat("  |--- Extracting Samples for MSY Calculations ---|\n")
   starttime = Sys.time()
   cat("    Started at:", format(starttime), "\n")
