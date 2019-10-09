@@ -1,0 +1,518 @@
+---
+title: "**Comparsion Graphics**"
+date: "`r format(Sys.Date(), '%m/%d/%Y')`"
+output: 
+  html_document:
+    theme: cerulean
+    toc: true
+    toc_depth: 3
+    toc_float: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r knitr setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.align = "center", fig.width = 5, fig.height = 5, message = F, warning = F)
+```
+
+```{r}
+rm(list = ls(all = T))
+
+library(StatonMisc)
+library(postpack)
+library(abind)
+library(stringr)
+
+data_dir = "../2-model-fit/inputs/"
+model = 1
+
+source("../2-model-fit/1-compile-data.R")
+source("../new-func-source.R")
+
+out_dir = "../model-output-keep"
+out_files = dir(out_dir)
+
+
+label_trends = function(age_trend, sex_trend, len_trend) {
+  A = ifelse(age_trend, "A", "")
+  S = ifelse(sex_trend, "S", "")
+  L = ifelse(len_trend, "L", "")
+  
+  label = paste0(A, S, L, collapse = "")
+  ifelse(label == "", "0", label)
+}
+
+msy = NULL
+meta = list()
+# PP = NULL
+# post = NULL
+
+msyfiles = out_files[str_detect(out_files, "msy")]
+PPfiles = out_files[str_detect(out_files, "prob")]
+postfiles = out_files[str_detect(out_files, "post")]
+mods = str_extract(postfiles, "[0-9]+")
+metafiles = out_files[str_detect(out_files, "meta")]
+
+for (i in 1:length(mods)) msy = abind(msy, readRDS(file.path(out_dir, msyfiles[i])), along = 5) 
+for (i in 1:length(mods)) meta[[i]] = readRDS(file.path(out_dir, metafiles[i])) 
+# for (i in 2:length(mods)) PP = abind::abind(PP, readRDS(file.path(out_dir, PPfiles[i])), along = 5) 
+# for (i in 2:length(mods)) {cat("\r", i); post[[i]] = readRDS(file.path(out_dir, postfiles[i]))}
+
+dimnames(msy)[[5]] = mods
+names(meta) = mods
+
+
+# keep_mods = as.character(1:12)
+# keep_mods = as.character(c(1,2,3,6,5,4,9,8,7,10,11,12))
+keep_mods = as.character(c(1,3,6,5,4,10,11,12))
+
+meta = meta[keep_mods]
+msy = msy[,,,,keep_mods]
+
+z_units = unlist(lapply(meta, function(M) M$z_unit))
+f_eggc_mod = min(which(z_units == "egg_count"))
+l_eggc_mod = max(which(z_units == "egg_count"))
+
+
+mod_labs = unlist(lapply(meta, function(M) label_trends(M$age_trend, M$sex_trend, M$len_trend)))
+
+n_mods = length(keep_mods)
+# v = "unr"
+# q = c("2.5%", "25%", "50%", "75%", "97.5%")
+q = c("10%", "25%", "50%", "75%", "90%")
+
+
+compare_msy = function(v, value = "S", title = T, ylim, legend = F, labels = F) {
+  DUMMY_MATRIX = matrix(rnorm(n_mods * 10), nrow = 10, ncol = n_mods)
+  
+  off = 0.2
+  at_early = 1:n_mods - off
+  at_all = 1:n_mods
+  at_late = 1:n_mods + off
+  
+  bp = boxplot(DUMMY_MATRIX, plot = F); bp$out = NULL; bp$group = NULL
+  bp_early = bp_all = bp_late = bp
+  
+  bp_early$stats = msy[q,value,v,"early",]
+  bp_all$stats = msy[q,value,v,"all",]
+  bp_late$stats = msy[q,value,v,"late",]
+  # ylim = range(bp_early$stats, bp_all$stats, bp_late$stats)
+  
+  plot(1,1, xlab = "", ylab = ifelse(v == "unr", "Larger Mesh (~8 in)", "Smaller Mesh (~6 in)"), type = "n",
+       xlim = range(c(at_early, at_late)),
+       ylim = ylim,
+       # ylim = range(bp_early$stats, bp_all$stats, bp_late$stats),
+       # ylim = c(40000, 200000),
+       xaxt = "n", yaxt = "n")
+  lborder = par("usr")[1]
+  rborder = par("usr")[2]
+  fline = sum(at_all[f_eggc_mod + c(-1,0)])/2
+  lline = sum(at_all[l_eggc_mod + c(0,1)])/2
+  hline1 = bp_all$stats["50%",1]
+  hline2 = bp_all$stats["50%",f_eggc_mod]
+  hline3 = bp_all$stats["50%",l_eggc_mod+1]
+  
+  segments(lborder, hline1, fline, hline1, lty = 2)
+  segments(fline, hline2, lline, hline2, lty = 2)
+  segments(lline, hline3, rborder, hline3, lty = 2)
+  
+  if(labels) {
+      axis(side = 1, at = at_all, labels = mod_labs, las = 2)
+  } else {
+      axis(side = 1, at = at_all, labels = rep("", n_mods), las = 2)
+  }
+
+    
+  axis(side = 2, at = seq(0, 500000, 20000), labels = seq(0, 500, 20), las = 2)
+  bxp(bp_early, at = at_early, add = T, xaxt = "n", yaxt = "n", whisklty = 1, staplewex = 0, boxwex = 0.15, boxfill = "white")
+  bxp(bp_all, at = at_all, add = T, xaxt = "n", yaxt = "n", whisklty = 1, staplewex = 0, boxwex = 0.15, boxfill = "grey")
+  bxp(bp_late, at = at_late, add = T, xaxt = "n", yaxt = "n", whisklty = 1, staplewex = 0, boxwex = 0.15, boxfill = "grey40")
+  abline(v = c(fline, lline), lwd = 2, col = "grey")
+  if (title) {
+    text(x = c(lborder + fline, fline + lline, lline + rborder)/2,
+         y = rep(par("usr")[4] + diff(par("usr")[3:4]) * 0.05, 3), font = 2, xpd = T,
+         labels = c("Fish Count", "Egg Count", "Egg Mass"), cex = 0.8)
+  }
+  if (legend) {
+    legend("top", legend = c("First 10yrs", "All Yrs", "Last 10yrs"), 
+         pch = 22, pt.bg = c("white", "grey", "grey40"), pt.cex = 2, horiz = T, cex = 0.7)
+  }
+  
+  
+  box()
+  
+}
+
+# ppi = 600
+# png("out.png", h = 8 * ppi, w = 4 * ppi, res = ppi)
+# par(mfrow = c(3,1), mar = c(2,2,2,2))
+
+# dev.off()
+# early_msy = msy["50%",value,v,"early",]
+# all_msy = msy["50%",value,v,"all",]
+# late_msy = msy["50%",value,v,"late",]
+# 
+# round((late_msy - all_msy)/all_msy, 2) * 100
+# round((late_msy - early_msy)/early_msy, 2) * 100
+```
+
+
+## MSC Reference Points {.tabset .tabset-fade .tabset-pills}
+
+Each group of three boxes represents a model fitted with different assumptions about (1) reproductive unit (as shown in the upper-most title and separated by grey vertical lines) and (2) included time trends in age ("A"), sex ("S"), or length ("L"), with "0" indicating no demographic trends were estimated (x-axis). Grey shading indicates which block of years was used when calculating equilibrium values.
+
+Boxes and whiskers are the posterior central 50 and 80 percentile ranges, respectively, and heavy lines are the posterior medians.
+
+Horizontal dashed lines show the "all years" median for the no-trend model in each reproductive unit group for reference.
+
+```{r}
+mypar = function() {
+  par(mfrow = c(2,1), mar = c(0,3,1,1), oma = c(2,2,2,2), tcl = -0.25, mgp = c(2.2,0.4,0))
+}
+```
+
+### R
+
+```{r, fig.width = 5, fig.height = 7}
+mypar()
+ylim = c(160,320) * 1000
+compare_msy(v = "unr", value = "R", ylim = ylim, legend = T)
+compare_msy(v = "res", value = "R", ylim = ylim, labels = T, title = F)
+mtext(outer = T, side = 2, "Rmsc (1000s)", line = 1, cex = 1.2, font = 2)
+```
+
+### H
+
+```{r, fig.width = 5, fig.height = 7}
+mypar()
+ylim = c(40,260) * 1000
+compare_msy(v = "unr", value = "H", ylim = ylim, legend = T)
+compare_msy(v = "res", value = "H", ylim = ylim, labels = T, title = F)
+mtext(outer = T, side = 2, "Hmsc (1000s)", line = 1, cex = 1.2, font = 2)
+```
+
+### S
+
+```{r, fig.width = 5, fig.height = 7}
+mypar()
+ylim = c(40,150) * 1000
+compare_msy(v = "unr", value = "S", ylim = ylim, legend = T)
+compare_msy(v = "res", value = "S", ylim = ylim, labels = T, title = F)
+mtext(outer = T, side = 2, "Smsc (1000s)", line = 1, cex = 1.2, font = 2)
+```
+
+
+
+### S (All Models)
+
+```{r}
+mods = str_extract(postfiles, "[0-9]+")
+msy = NULL
+meta = list()
+for (i in 1:length(mods)) msy = abind(msy, readRDS(file.path(out_dir, msyfiles[i])), along = 5) 
+for (i in 1:length(mods)) meta[[i]] = readRDS(file.path(out_dir, metafiles[i])) 
+# for (i in 2:length(mods)) PP = abind::abind(PP, readRDS(file.path(out_dir, PPfiles[i])), along = 5) 
+# for (i in 2:length(mods)) {cat("\r", i); post[[i]] = readRDS(file.path(out_dir, postfiles[i]))}
+
+dimnames(msy)[[5]] = mods
+names(meta) = mods
+
+
+# keep_mods = as.character(1:12)
+keep_mods = as.character(c(1,2,3,6,5,4,9,8,7,10,11,12))
+# keep_mods = as.character(c(1,2,3,6,5,4,10,11,12))
+
+meta = meta[keep_mods]
+msy = msy[,,,,keep_mods]
+
+z_units = unlist(lapply(meta, function(M) M$z_unit))
+f_eggc_mod = min(which(z_units == "egg_count"))
+l_eggc_mod = max(which(z_units == "egg_count"))
+
+
+mod_labs = unlist(lapply(meta, function(M) label_trends(M$age_trend, M$sex_trend, M$len_trend)))
+
+n_mods = length(keep_mods)
+
+```
+
+```{r, fig.width = 5, fig.height = 7}
+mypar()
+ylim = c(40,150) * 1000
+compare_msy(v = "unr", value = "S", ylim = ylim, legend = T)
+compare_msy(v = "res", value = "S", ylim = ylim, labels = T, title = F)
+mtext(outer = T, side = 2, "Smsc (1000s)", line = 1, cex = 1.2, font = 2)
+```
+
+## Probability Profiles {.tabset .tabset-fade .tabset-pills}
+
+*  Solid line = Fish count, no trends
+*  Dashed line = Egg count, all trends
+*  Dotted line = Egg mass, all trends
+
+First pick a metric of interest, then a particular desired minimum level of that metric, and then look at how the probability of attainment would change over time. The vertical area is the current escapement goal.
+
+```{r}
+mods = str_extract(postfiles, "[0-9]+")
+pp = NULL
+meta = list()
+for (i in 1:length(mods)) pp = abind(pp, readRDS(file.path(out_dir, PPfiles[i])), along = 5) 
+for (i in 1:length(mods)) meta[[i]] = readRDS(file.path(out_dir, metafiles[i])) 
+# for (i in 2:length(mods)) PP = abind::abind(PP, readRDS(file.path(out_dir, PPfiles[i])), along = 5) 
+# for (i in 2:length(mods)) {cat("\r", i); post[[i]] = readRDS(file.path(out_dir, postfiles[i]))}
+
+dimnames(pp)[[5]] = mods
+names(meta) = mods
+
+
+# keep_mods = as.character(1:12)
+# keep_mods = as.character(c(1,2,3,6,5,4,9,8,7,10,11,12))
+keep_mods = as.character(c(1,10,12))
+
+meta = meta[keep_mods]
+pp = pp[,,,,keep_mods]
+
+z_units = unlist(lapply(meta, function(M) M$z_unit))
+f_eggc_mod = min(which(z_units == "egg_count"))
+l_eggc_mod = max(which(z_units == "egg_count"))
+
+
+mod_labs = unlist(lapply(meta, function(M) label_trends(M$age_trend, M$sex_trend, M$len_trend)))
+
+n_mods = length(keep_mods)
+
+pp_plot = function(value, desired, time, vuln) {
+  
+  keep = paste0(value, "_", desired)
+  sub = pp[,keep,vuln,time,]
+  
+  Sval = as.numeric(dimnames(pp)[[1]])/1000
+  
+  par(xaxs = "i", yaxs = "i")
+  plot(sub[,1] ~ Sval, xlim = c(0,200), ylim = c(0,1), type = "n", xlab = "Total Escapement", ylab = "Pr(Criterion Met)")
+  rect(65, 0, 120, 1, col = "grey90")
+  abline(v = c(65, 120), col = "grey", lwd = 2)
+  lines(sub[,1] ~ Sval, lty = 1, lwd = 2)
+  lines(sub[,2] ~ Sval, lty = 2, lwd = 2)
+  lines(sub[,3] ~ Sval, lty = 3, lwd = 2)
+  box()
+}
+
+mypar = function() {
+  par(mar = c(3,3,1,1), las = 1, mgp = c(2,0.5,0), tcl = -0.25)
+}
+
+```
+
+### Rmax {.tabset .tabset-fade .tabset-pills}
+
+#### >90% of Rmax {.tabset .tabset-fade .tabset-pills}
+
+##### First 10 Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("Rmax", "0.9", "early", "unr")
+```
+
+##### All Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("Rmax", "0.9", "all", "unr")
+```
+
+##### Last 10 Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("Rmax", "0.9", "late", "unr")
+```
+
+#### >80% of Rmax {.tabset .tabset-fade .tabset-pills}
+
+##### First 10 Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("Rmax", "0.8", "early", "unr")
+```
+
+##### All Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("Rmax", "0.8", "all", "unr")
+```
+
+##### Last 10 Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("Rmax", "0.8", "late", "unr")
+```
+
+#### >70% of Rmax {.tabset .tabset-fade .tabset-pills}
+
+##### First 10 Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("Rmax", "0.7", "early", "unr")
+```
+
+##### All Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("Rmax", "0.7", "all", "unr")
+```
+
+##### Last 10 Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("Rmax", "0.7", "late", "unr")
+```
+
+### MSY {.tabset .tabset-fade .tabset-pills}
+
+#### >90% of MSY {.tabset .tabset-fade .tabset-pills}
+
+##### First 10 Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("MSY", "0.9", "early", "unr")
+```
+
+##### All Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("MSY", "0.9", "all", "unr")
+```
+
+##### Last 10 Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("MSY", "0.9", "late", "unr")
+```
+
+#### >80% of MSY {.tabset .tabset-fade .tabset-pills}
+
+##### First 10 Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("MSY", "0.8", "early", "unr")
+```
+
+##### All Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("MSY", "0.8", "all", "unr")
+```
+
+##### Last 10 Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("MSY", "0.8", "late", "unr")
+```
+
+#### >70% of MSY {.tabset .tabset-fade .tabset-pills}
+
+##### First 10 Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("MSY", "0.7", "early", "unr")
+```
+
+##### All Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("MSY", "0.7", "all", "unr")
+```
+
+##### Last 10 Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("MSY", "0.7", "late", "unr")
+```
+
+### Fixed Harvest {.tabset .tabset-fade .tabset-pills}
+
+#### >100K {.tabset .tabset-fade .tabset-pills}
+
+##### First 10 Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("H", "100", "early", "unr")
+```
+
+##### All Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("H", "100", "all", "unr")
+```
+
+##### Last 10 Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("H", "100", "late", "unr")
+```
+
+#### >90K {.tabset .tabset-fade .tabset-pills}
+
+##### First 10 Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("H", "90", "early", "unr")
+```
+
+##### All Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("H", "90", "all", "unr")
+```
+
+##### Last 10 Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("H", "90", "late", "unr")
+```
+
+#### >80K {.tabset .tabset-fade .tabset-pills}
+
+##### First 10 Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("H", "80", "early", "unr")
+```
+
+##### All Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("H", "80", "all", "unr")
+```
+
+##### Last 10 Years
+
+```{r, fig.height = 4, fig.width = 6}
+mypar()
+pp_plot("H", "80", "late", "unr")
+```
