@@ -25,7 +25,7 @@ prep_samples = function(post, keep_t = NULL, keep_y = NULL, len_trend = F, silen
   # averaging yearly values by age, sex, and gear over some time period
   v = postpack::post_subset(post, "^v", T)
   
-  if (!silent) cat("  Calculating mean vulnerability by age, sex, and gear for keep_t years and each posterior sample\n")
+  if (!silent) cat("  Calculating mean vulnerability\n")
   mean_v = t(sapply(1:nrow(sr_params), function(i) {
     if (!silent) cat("\r", "   ", floor(i/n_samp * 100), "%", sep = "")
     
@@ -49,7 +49,7 @@ prep_samples = function(post, keep_t = NULL, keep_y = NULL, len_trend = F, silen
   mu_pi_mat = postpack::post_subset(post, "mu_pi_mat", T)
   mu_pi_f = postpack::post_subset(post, "mu_pi_f", T)
   
-  if (!silent) cat("\n  Calculating mean maturity by age, sex, for keep_y years and each posterior sample\n")
+  if (!silent) cat("\n  Calculating mean maturity\n")
   mean_pi = t(sapply(1:nrow(sr_params), function(i) {
     if (!silent) cat("\r", "   ", floor(i/n_samp * 100), "%", sep = "")
     
