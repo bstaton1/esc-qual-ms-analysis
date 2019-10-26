@@ -64,6 +64,9 @@ yield_min = function(log_F_max, i, post.samp, vuln, sex_penalty = F) {
   out["H"] * -1 + ifelse(sex_penalty & out["male_per_fem"] < 1, 1e6, 0)
 }
 
+# pass this function to optim to find the F that places S close to S_target
+esc_target = function(log_F_max, i, post.samp, vuln, S_target) {
+  abs(yield(log_F_max, i, post.samp, vuln)["S"] - S_target)
 }
 
 # wrapper to find MSC related quantities
@@ -112,4 +115,79 @@ msy_search = function(post.samp, sex_penalty = F, silent = F) {
     v_scenarios
   )
   out
+}
+
+# target a particular escapement, for one posterior sample and vuln scenario
+use_esc_target = function(S_target, i, post.samp, vuln) {
+  fit = optim(
+    par = log(2),
+    fn = function(log_f) {
+      esc_target(log_f, i, post.samp, vuln, S_target)
+    },
+    method = "Brent",
+    lower = log(0.000001),
+    upper = log(10)
+  )
+  
+  F_level = exp(fit$par)
+  
+  c(F_level = round(F_level, 2), yield(log_F_max = log(F_level), i = i, post.samp = post.samp, vuln = vuln))
+}
+
+# calculate equilibrium quantities across S_range for all posterior samples and one vuln
+opt_profile = function(post.samp, vuln, S_range = seq(1000, 200000, 1000), silent = F) {
+  
+  # obtain equilibrium quantities for each posterior sample at each level of escapement
+  out = array(NA, dim = c(length(S_range), 5, nrow(post.samp)))
+  for (i in 1:nrow(post.samp)) {
+    if (!silent) cat("\r", " ", round(i/nrow(post.samp) * 100, 4), "% (", vuln, ")", sep = "")
+    out[,,i] = t(sapply(S_range, function(S) use_esc_target(S_target = S, i = i, post.samp, vuln = vuln)))
+  }
+  dimnames(out)[[2]] = c("F_level", "H", "S", "R", "Z_million")
+  dimnames(out)[[3]] = 1:nrow(post.samp)
+  cat("\n")
+  ## summarize equilibrium quantities across posterior samples at each escapement level
+  
+  p_summ = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975)
+  
+  # F_full required to keep S at S_target
+  F_level = t(apply(out[,"F_level",], 1, summ, p = p_summ))
+  
+  # equilibrium escapement
+  S = t(apply(out[,"S",], 1, summ, p = p_summ))
+  
+  # equilibrium harvest
+  H = t(apply(out[,"H",], 1, summ, p = p_summ))
+  
+  # prob profile for exceeding harvest thresholds
+  H70k = t(apply(out[,"H",] >= 70000, 1, summ, p = p_summ))
+  H80k = t(apply(out[,"H",] >= 80000, 1, summ, p = p_summ))
+  H90k = t(apply(out[,"H",] >= 90000, 1, summ, p = p_summ))
+  H100k = t(apply(out[,"H",] >= 100000, 1, summ, p = p_summ))
+  
+  # prob profile for exceeding MSY thresholds
+  MSY70p = t(apply(sapply(1:dim(out)[3], function(i) out[,"H",i] >= (max(out[,"H",i]) * 0.7)), 1, summ, p = p_summ))
+  MSY80p = t(apply(sapply(1:dim(out)[3], function(i) out[,"H",i] >= (max(out[,"H",i]) * 0.8)), 1, summ, p = p_summ))
+  MSY90p = t(apply(sapply(1:dim(out)[3], function(i) out[,"H",i] >= (max(out[,"H",i]) * 0.9)), 1, summ, p = p_summ))
+  
+  # prob profiles for exceeding RMAX thresholds
+  RMAX70p = t(apply(sapply(1:dim(out)[3], function(i) out[,"R",i] >= (max(out[,"R",i]) * 0.7)), 1, summ, p = p_summ))
+  RMAX80p = t(apply(sapply(1:dim(out)[3], function(i) out[,"R",i] >= (max(out[,"R",i]) * 0.8)), 1, summ, p = p_summ))
+  RMAX90p = t(apply(sapply(1:dim(out)[3], function(i) out[,"R",i] >= (max(out[,"R",i]) * 0.9)), 1, summ, p = p_summ))
+  
+  # combine output into a large array
+  out = abind::abind(
+    F_level, S, H, H70k, H80k, H90k, H100k, 
+    MSY70p, MSY80p, MSY90p, 
+    RMAX70p, RMAX80p, RMAX90p, 
+    along = 3
+  )
+  
+  # assign dimension names
+  dimnames(out)[[1]] = S_range
+  dimnames(out)[[3]] = c("F_level", "S", "H", "H70k", "H80k", "H90k", "H100k",
+                         "MSY70p", "MSY80p", "MSY90p", "RMAX70p", "RMAX80p", "RMAX90p")
+  
+  # return the output
+  return(out)
 }
