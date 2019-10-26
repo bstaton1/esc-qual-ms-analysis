@@ -170,7 +170,7 @@ Horizontal dashed lines show the "all years" median for the no-trend model in ea
 
 ```{r}
 mypar = function() {
-  par(mfrow = c(2,1), mar = c(0,3,1,1), oma = c(2,2,2,2), tcl = -0.25, mgp = c(2.2,0.4,0))
+  par(mfrow = c(2,1), mar = c(0,3,1,1), oma = c(2,2,2,2.8), tcl = -0.25, mgp = c(2.2,0.4,0))
 }
 ```
 
@@ -179,9 +179,10 @@ mypar = function() {
 ```{r, fig.width = 5, fig.height = 7}
 mypar()
 ylim = c(160,320) * 1000
-compare_msy(v = "unr", value = "R", ylim = ylim, legend = T)
-compare_msy(v = "res", value = "R", ylim = ylim, labels = T, title = F)
+compare_msy(v = "unr", value = "R", ylim = ylim, legend = T, letter = "(a)")
+compare_msy(v = "res", value = "R", ylim = ylim, labels = T, title = F, letter = "(b)")
 mtext(outer = T, side = 2, "Rmsc (1000s)", line = 1, cex = 1.2, font = 2)
+mtext(outer = T, side = 4, "Change from N-0", line = 1.4, cex = 1.2, font = 2)
 ```
 
 ### H
@@ -189,9 +190,10 @@ mtext(outer = T, side = 2, "Rmsc (1000s)", line = 1, cex = 1.2, font = 2)
 ```{r, fig.width = 5, fig.height = 7}
 mypar()
 ylim = c(40,260) * 1000
-compare_msy(v = "unr", value = "H", ylim = ylim, legend = T)
-compare_msy(v = "res", value = "H", ylim = ylim, labels = T, title = F)
+compare_msy(v = "unr", value = "H", ylim = ylim, legend = T, letter = "(a)")
+compare_msy(v = "res", value = "H", ylim = ylim, labels = T, title = F, letter = "(b)")
 mtext(outer = T, side = 2, "Hmsc (1000s)", line = 1, cex = 1.2, font = 2)
+mtext(outer = T, side = 4, "Change from N-0", line = 1.4, cex = 1.2, font = 2)
 ```
 
 ### S
@@ -199,12 +201,11 @@ mtext(outer = T, side = 2, "Hmsc (1000s)", line = 1, cex = 1.2, font = 2)
 ```{r, fig.width = 5, fig.height = 7}
 mypar()
 ylim = c(40,150) * 1000
-compare_msy(v = "unr", value = "S", ylim = ylim, legend = T)
-compare_msy(v = "res", value = "S", ylim = ylim, labels = T, title = F)
+compare_msy(v = "unr", value = "S", ylim = ylim, legend = T, letter = "(a)")
+compare_msy(v = "res", value = "S", ylim = ylim, labels = T, title = F, letter = "(b)")
 mtext(outer = T, side = 2, "Smsc (1000s)", line = 1, cex = 1.2, font = 2)
+mtext(outer = T, side = 4, "Change from N-0", line = 1.4, cex = 1.2, font = 2)
 ```
-
-
 
 ### S (All Models)
 
@@ -242,9 +243,11 @@ n_mods = length(keep_mods)
 ```{r, fig.width = 5, fig.height = 7}
 mypar()
 ylim = c(40,150) * 1000
-compare_msy(v = "unr", value = "S", ylim = ylim, legend = T)
-compare_msy(v = "res", value = "S", ylim = ylim, labels = T, title = F)
+compare_msy(v = "unr", value = "S", ylim = ylim, legend = T, letter = c("(a)"))
+compare_msy(v = "res", value = "S", ylim = ylim, labels = T, title = F, letter = "(b)")
 mtext(outer = T, side = 2, "Smsc (1000s)", line = 1, cex = 1.2, font = 2)
+mtext(outer = T, side = 4, "Change from N-0", line = 1.4, cex = 1.2, font = 2)
+```
 ```
 
 ## Probability Profiles {.tabset .tabset-fade .tabset-pills}
