@@ -329,10 +329,13 @@ make_table = function(value, vuln) {
 
 `r make_table("S", "res")`
 
+# Probability Profiles {.tabset .tabset-fade .tabset-pills}
 
 First pick a metric of interest, then a particular desired minimum level of that metric, and then look at how the probability of attainment would change over time. The vertical area is the current escapement goal.
 
 ```{r}
+pp_eval = T
+
 mods = str_extract(postfiles, "[0-9]+")
 pp = NULL
 meta = list()
@@ -369,12 +372,15 @@ pp_plot = function(value, desired, time, vuln) {
   Sval = as.numeric(dimnames(pp)[[1]])/1000
   
   par(xaxs = "i", yaxs = "i")
-  plot(sub[,1] ~ Sval, xlim = c(0,200), ylim = c(0,1), type = "n", xlab = "Total Escapement", ylab = "Pr(Criterion Met)")
+  plot(sub[,1] ~ Sval, xlim = c(0,200), ylim = c(0,1), type = "n", xlab = "Total Escapement",
+       ylab = "Pr(Criterion Met)")
   rect(65, 0, 120, 1, col = "grey90")
   abline(v = c(65, 120), col = "grey", lwd = 2)
   lines(sub[,1] ~ Sval, lty = 1, lwd = 2)
   lines(sub[,2] ~ Sval, lty = 2, lwd = 2)
   lines(sub[,3] ~ Sval, lty = 3, lwd = 2)
+  legend("topright", horiz = F, legend = c("N-0", "E-ASL", "EM-ASL"), lty = c(1,2,3), cex = 0.8, bty = "n",
+         lwd = 2, seg.len = 3, title = "Model")
   box()
 }
 
@@ -384,215 +390,215 @@ mypar = function() {
 
 ```
 
-### Rmax {.tabset .tabset-fade .tabset-pills}
+## Rmax {.tabset .tabset-fade .tabset-pills}
 
-#### >90% of Rmax {.tabset .tabset-fade .tabset-pills}
+### >90% of Rmax {.tabset .tabset-fade .tabset-pills}
 
-##### First 10 Years
+#### First 10 Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("Rmax", "0.9", "early", "unr")
 ```
 
-##### All Years
+#### All Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("Rmax", "0.9", "all", "unr")
 ```
 
-##### Last 10 Years
+#### Last 10 Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("Rmax", "0.9", "late", "unr")
 ```
 
-#### >80% of Rmax {.tabset .tabset-fade .tabset-pills}
+### >80% of Rmax {.tabset .tabset-fade .tabset-pills}
 
-##### First 10 Years
+#### First 10 Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("Rmax", "0.8", "early", "unr")
 ```
 
-##### All Years
+#### All Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("Rmax", "0.8", "all", "unr")
 ```
 
-##### Last 10 Years
+#### Last 10 Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("Rmax", "0.8", "late", "unr")
 ```
 
-#### >70% of Rmax {.tabset .tabset-fade .tabset-pills}
+### >70% of Rmax {.tabset .tabset-fade .tabset-pills}
 
-##### First 10 Years
+#### First 10 Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("Rmax", "0.7", "early", "unr")
 ```
 
-##### All Years
+#### All Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("Rmax", "0.7", "all", "unr")
 ```
 
-##### Last 10 Years
+#### Last 10 Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("Rmax", "0.7", "late", "unr")
 ```
 
-### MSY {.tabset .tabset-fade .tabset-pills}
+## MSC {.tabset .tabset-fade .tabset-pills}
 
-#### >90% of MSY {.tabset .tabset-fade .tabset-pills}
+### >90% of MSC {.tabset .tabset-fade .tabset-pills}
 
-##### First 10 Years
+#### First 10 Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("MSY", "0.9", "early", "unr")
 ```
 
-##### All Years
+#### All Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("MSY", "0.9", "all", "unr")
 ```
 
-##### Last 10 Years
+#### Last 10 Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("MSY", "0.9", "late", "unr")
 ```
 
-#### >80% of MSY {.tabset .tabset-fade .tabset-pills}
+### >80% of MSC {.tabset .tabset-fade .tabset-pills}
 
-##### First 10 Years
+#### First 10 Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("MSY", "0.8", "early", "unr")
 ```
 
-##### All Years
+#### All Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("MSY", "0.8", "all", "unr")
 ```
 
-##### Last 10 Years
+#### Last 10 Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("MSY", "0.8", "late", "unr")
 ```
 
-#### >70% of MSY {.tabset .tabset-fade .tabset-pills}
+### >70% of MSC {.tabset .tabset-fade .tabset-pills}
 
-##### First 10 Years
+#### First 10 Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("MSY", "0.7", "early", "unr")
 ```
 
-##### All Years
+#### All Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("MSY", "0.7", "all", "unr")
 ```
 
-##### Last 10 Years
+#### Last 10 Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("MSY", "0.7", "late", "unr")
 ```
 
-### Fixed Harvest {.tabset .tabset-fade .tabset-pills}
+## Fixed Harvest {.tabset .tabset-fade .tabset-pills}
 
-#### >100K {.tabset .tabset-fade .tabset-pills}
+### >100K {.tabset .tabset-fade .tabset-pills}
 
-##### First 10 Years
+#### First 10 Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("H", "100", "early", "unr")
 ```
 
-##### All Years
+#### All Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("H", "100", "all", "unr")
 ```
 
-##### Last 10 Years
+#### Last 10 Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("H", "100", "late", "unr")
 ```
 
-#### >90K {.tabset .tabset-fade .tabset-pills}
+### >90K {.tabset .tabset-fade .tabset-pills}
 
-##### First 10 Years
+#### First 10 Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("H", "90", "early", "unr")
 ```
 
-##### All Years
+#### All Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("H", "90", "all", "unr")
 ```
 
-##### Last 10 Years
+#### Last 10 Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("H", "90", "late", "unr")
 ```
 
-#### >80K {.tabset .tabset-fade .tabset-pills}
+### >80K {.tabset .tabset-fade .tabset-pills}
 
-##### First 10 Years
+#### First 10 Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("H", "80", "early", "unr")
 ```
 
-##### All Years
+#### All Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("H", "80", "all", "unr")
 ```
 
-##### Last 10 Years
+#### Last 10 Years
 
-```{r, fig.height = 4, fig.width = 6}
+```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
 mypar()
 pp_plot("H", "80", "late", "unr")
 ```
