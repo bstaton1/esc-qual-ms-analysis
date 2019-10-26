@@ -58,7 +58,7 @@ if (mcmc_long)    {npost = 1000000; nburn = 100000; nthin = 100 * nchain/1; nada
 
 # set nodes to monitor
 jags_params = c(
-  "alpha", "beta", "beta_e5", "N_t", "S_t", "Z_t", "S_tas", "R", "log_mean_R0", "R_sex", "Hcom", "Hsub",
+  "alpha", "beta", "beta_e10", "N_t", "S_t", "Z_t", "S_tas", "R", "log_mean_R0", "R_sex", "Hcom", "Hsub",
   "b0_sex", "b1_sex", "b0_mat", "b1_mat", "p", "mu_pi_f",
   "mu_pi_mat", "q_sub", "q_com", "q_esc", "q_run", "D_sum",
   "phi", "sigma_R_white", "sigma_R0", "Fcom", "Fsub", "v", "Vtau", "Vsig", "Vtha", "Vlam",
@@ -67,7 +67,7 @@ jags_params = c(
   "Ucom_tas", "Usub_tas", "Utot_tas", "Utot_ta", "Utot_t", "Utot_ts", "Z_per_S_t", "Z_per_female_t")
 
 # set nodes to monitor diagnostics for
-diag_nodes = c("alpha", "beta", "beta_e5", "R", "b0_sex", 
+diag_nodes = c("alpha", "beta", "beta_e10", "R", "b0_sex", 
                "b1_sex", "b0_mat", "b1_mat", "p",
                "D_sum", "phi", "sigma_R_white", "sigma_R0", 
                "Fcom", "Fsub", "Vtau", "Vsig", "Vtha", "Vlam", "log_mean_R0"

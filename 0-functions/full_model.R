@@ -3,7 +3,7 @@ jags_model_code = function() {
   # Priors for SR portion
   log_alpha ~ dnorm(0,0.01) %_% I(,3.5)
   beta ~ dunif(0,0.5)
-  beta_e5 <- beta * 1e5
+  beta_e10 <- beta * 1e10
   phi ~ dunif(-1, 0.99)
   tau_R_white ~ dgamma(0.01, 0.01)
   tau_R_red <- tau_R_white * (1 - phi * phi)
