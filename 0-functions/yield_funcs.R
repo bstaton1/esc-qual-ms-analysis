@@ -1,5 +1,6 @@
 
-yield = function(log_F_max, i, post.samp, vuln) {  
+# Function to calculate yield at a given F for a particular posterior sample and vuln scenario
+yield = function(log_F_max, i, post.samp, vuln, include_sex_ratio = F) {  
   
   # extract column names
   cn = colnames(post.samp)
@@ -47,16 +48,33 @@ yield = function(log_F_max, i, post.samp, vuln) {
     Z_million = Z/1e6
     )
   
+  if (include_sex_ratio) {
+    S_female = sum(S_as[1:(length(S_as)/2)])
+    output = c(output, male_per_fem = (S - S_female)/S_female)
+  }
+  
   return(output)
 }
 
-yield_min = function(log_F_max, i, post.samp, vuln) {
-  yield(log_F_max, i, post.samp, vuln)["H"] * -1
+# pass this function to optim to find equilibrium states at MSC
+# option to include a sex penalty - won't consider F's which place the ratio below
+# some number - 1 is used below
+yield_min = function(log_F_max, i, post.samp, vuln, sex_penalty = F) {
+  out = yield(log_F_max, i, post.samp, vuln, include_sex_ratio = T)
+  out["H"] * -1 + ifelse(sex_penalty & out["male_per_fem"] < 1, 1e6, 0)
 }
 
-msy_search = function(post.samp, silent = F) {
+}
+
+# wrapper to find MSC related quantities
+msy_search = function(post.samp, sex_penalty = F, silent = F) {
   n_samp = nrow(post.samp)
-  out = array(NA, dim = c(n_samp, 4, 2))
+  nms = names(yield(
+    log_F_max = log(1), 
+    i = 1, post.samp = post.samp,
+    vuln = "unr", include_sex_ratio = sex_penalty
+  ))
+  out = array(NA, dim = c(n_samp, length(nms), 2))
   v_scenarios = c("unr", "res")
   for (v in 1:2) {
     for (i in 1:n_samp) {
@@ -66,14 +84,14 @@ msy_search = function(post.samp, silent = F) {
           par = log(0.5), 
           fn = yield_min, 
           method = "Brent", lower = -10, upper = 3,
-          i = i, post.samp = post.samp, vuln = v_scenarios[v]
+          i = i, post.samp = post.samp, vuln = v_scenarios[v], sex_penalty = sex_penalty
         )$par
       
       out[i,,v] = 
         yield(
           log_F_max = fit_log_F_max, 
           i = i, post.samp = post.samp,
-          vuln = v_scenarios[v]
+          vuln = v_scenarios[v], include_sex_ratio = sex_penalty
         )
     }
   }
@@ -82,15 +100,15 @@ msy_search = function(post.samp, silent = F) {
   
   out = array(
     c(
-      apply(out[,,1], 2, StatonMisc::summ, p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975))[3:9,],
-      apply(out[,,2], 2, StatonMisc::summ, p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975))[3:9,]
+      apply(out[,,1], 2, StatonMisc::summ, p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975), na.rm = T)[3:9,],
+      apply(out[,,2], 2, StatonMisc::summ, p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975), na.rm = T)[3:9,]
     ),
-    dim = c(7, 4, 2)
+    dim = c(7, length(nms), 2)
   )
   
   dimnames(out) = list(
     names(StatonMisc::summ(rnorm(10), p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975)))[3:9],
-    c("H", "S", "R", "Z_million"),
+    nms,
     v_scenarios
   )
   out
