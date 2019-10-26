@@ -41,7 +41,7 @@ pp_name = paste("prob-profiles-", model, ".rds", sep = "")
 # read in the saved posterior samples
 post = readRDS(file.path(out_dir, post_name))
 meta = readRDS(file.path(out_dir, meta_name))
-pp = readRDS(file.path(out_dir, pp_name))
+# pp = readRDS(file.path(out_dir, pp_name))
 msy = paste(file.path(out_dir, msy_name))
 ```
 
@@ -218,13 +218,15 @@ diag_plots(post, c("^R["))
 
 # Fit to Data 
 
-In all cases, the black points represent observed information, black lines represent the posterior median, and grey regions represent 95% equal-tailed credible intervals.
+In all figures, the black points represent observed information, black lines represent the posterior median, and grey regions represent 95% equal-tailed credible intervals.
 
 ## Composition {.tabset .tabset-fade .tabset-pills}
 
-### By Age/Sex {.tabset .tabset-fade .tabset-pills}
+### Figures {.tabset .tabset-fade .tabset-pills}
 
-#### Escapement
+#### By Age/Sex {.tabset .tabset-fade .tabset-pills}
+
+##### Escapement
 
 ```{r esc-age-sex-fit, fig.height = 8, fig.width = 6}
 q_fit = array_format(post_summ(post, "q_esc")[3,])
@@ -247,7 +249,7 @@ for (as in 1:8) {
 
 ```
 
-#### Commercial
+##### Commercial
 
 _Vertical dashed lines represent the year the fishery switched from unrestricted mesh to restricted mesh._
 
@@ -272,7 +274,7 @@ for (as in 1:8) {
 }
 ```
 
-#### Subsistence
+##### Subsistence
 
 _Vertical dashed lines represent the year the fishery switched from unrestricted mesh to restricted mesh._
 
@@ -297,11 +299,11 @@ for (as in 1:8) {
 }
 ```
 
-### By Sex {.tabset .tabset-fade .tabset-pills}
+#### By Sex {.tabset .tabset-fade .tabset-pills}
 
 Although the model fits to sex data on an age-specific basis by data source, we can still look at how well it captures patterns in sex composition.
 
-#### Escapement
+##### Escapement
 
 ```{r esc-sex-fit}
 pf_fit_esc = rowSums(array_format(post_summ(post, "q_esc")[3,])[,1:4])
@@ -317,7 +319,7 @@ lines(pf_upr_esc ~ years, col = "grey")
 points(pf_esc ~ years, pch = 16, cex = 1.2)
 ```
 
-#### Commercial
+##### Commercial
 
 _Vertical dashed line represents the year the fishery switched from unrestricted mesh to restricted mesh._
 
@@ -336,7 +338,7 @@ points(pf_com ~ years, pch = 16, cex = 1.2)
 abline(v = years[min(which(com_mesh == 2))] - 0.5, lty = 2)
 ```
 
-#### Subsistence
+##### Subsistence
 
 _Vertical dashed line represents the year the fishery switched from unrestricted mesh to restricted mesh._
 
@@ -355,11 +357,11 @@ points(pf_sub ~ years, pch = 16, cex = 1.2)
 abline(v = years[min(which(sub_mesh == 2))] - 0.5, lty = 2)
 ```
 
-### Multinomial Effective Sample Size  {.tabset .tabset-fade .tabset-pills}
+#### Multinomial Effective Sample Size  {.tabset .tabset-fade .tabset-pills}
 
 The multinomial effective sample size for each data set was rescaled such that the year with the most fish sampled for a given data set received an effective sample size of 100. All other years were scaled proportionately to that value, e.g., `ESS = n_aged_year/max(n_aged_year) * 100`
 
-#### Escapement
+##### Escapement
 
 ```{r esc-ess}
 par(xaxs = "i", yaxs = "i", mar = c(3,3,1,1), mgp = c(2,0.75,0), cex.axis = 1.2)
@@ -369,7 +371,7 @@ axis(side = 1, at = mp[2:(nt+1)], labels = rep("", nt), line = 0, las = 2, tcl =
 box()
 ```
 
-#### Commercial
+##### Commercial
 
 ```{r com-ess}
 par(xaxs = "i", yaxs = "i", mar = c(3,3,1,1), mgp = c(2,0.75,0), cex.axis = 1.2)
@@ -379,7 +381,7 @@ axis(side = 1, at = mp[2:(nt+1)], labels = rep("", nt), line = 0, las = 2, tcl =
 box()
 ```
 
-#### Subsistence
+##### Subsistence
 
 ```{r sub-ess}
 par(xaxs = "i", yaxs = "i", mar = c(3,3,1,1), mgp = c(2,0.75,0), cex.axis = 1.2)
@@ -387,6 +389,80 @@ mp = barplot(c(NA, n_sub, NA), las = 2, ylim = c(0, 100))
 axis(side = 1, at = mp[c(NA, years, NA) %in% seq(1980, 2015, 5)], labels = seq(1980, 2015, 5), line = 0, las = 2)
 axis(side = 1, at = mp[2:(nt+1)], labels = rep("", nt), line = 0, las = 2, tcl = -0.2)
 box()
+```
+
+### Tables {.tabset .tabset-fade .tabset-pills}
+
+The following tables show goodness-of-fit statistics for each data set.
+
+```{r}
+by = "sex"
+make_gof_table = function(by) {
+  q_esc = array_format(post_summ(post, "q_esc")["mean",])
+  q_com = array_format(post_summ(post, "q_com")["mean",])
+  q_sub = array_format(post_summ(post, "q_sub")["mean",])
+  
+  
+  esc_tot = ceiling(calc_mult_gof(x_esc, q_esc, per_n = F, by = by))
+  com_tot = ceiling(calc_mult_gof(x_com, q_com, per_n = F, by = by))
+  sub_tot = ceiling(calc_mult_gof(x_sub, q_sub, per_n = F, by = by))
+  all_tot = ceiling(calc_mult_gof(rbind(x_esc, x_com, x_sub), rbind(q_esc, q_com, q_sub), per_n = F, by = by))
+  esc_per = round(calc_mult_gof(x_esc, q_esc, per_n = T, by = by),2)
+  com_per = round(calc_mult_gof(x_com, q_com, per_n = T, by = by),2)
+  sub_per = round(calc_mult_gof(x_sub, q_sub, per_n = T, by = by),2)
+  all_per = round(calc_mult_gof(rbind(x_esc, x_com, x_sub), rbind(q_esc, q_com, q_sub), per_n = T, by = by), 2)
+  
+  esc_fit = paste0(esc_tot, " (", esc_per, ")")
+  com_fit = paste0(com_tot, " (", com_per, ")")
+  sub_fit = paste0(sub_tot, " (", sub_per, ")")
+  all_fit = paste0(all_tot, " (", all_per, ")")
+  
+  tab = rbind(esc_fit, com_fit, sub_fit, all_fit)
+  tab = cbind(c("Escapement", "Commercial", "Subsistence", "Overall"), tab)
+  rownames(tab) = NULL
+  "Source"
+  if (by == "sex") {
+    colnames(tab) = c("Source", "Females", "Males")
+  }
+  if (by == "age/sex") {
+    colnames(tab) = c("Source", paste(paste("Age", 4:7), "Females"), paste(paste("Age", 4:7), "Males"))
+  }
+  if (by == "age") {
+    colnames(tab) = c("Source", paste("Age", 4:7))
+  }
+  if (by == "total") {
+    colnames(tab) = c("Source", "Total")
+  }
+  
+  kable(tab, "html", align = paste0("l", rep("c", ncol(tab) - 1), collapse = "")) %>%
+    kable_styling(full_width = F, bootstrap_options = c("condensed")) %>%
+    column_spec(1, bold = T) %>%
+    row_spec(4, bold = T)
+}
+```
+
+#### Total
+
+```{r}
+make_gof_table("total")
+```
+
+#### By Sex
+
+```{r}
+make_gof_table("sex")
+```
+
+#### By Age
+
+```{r}
+make_gof_table("age")
+```
+
+#### By Age/Sex
+
+```{r}
+make_gof_table("age/sex")
 ```
 
 ## Abundance States {.tabset .tabset-fade .tabset-pills}
@@ -748,7 +824,7 @@ lines(Z_per_fS[3,] ~ years, lwd = 2)
 edit_full_model(
   model_lines = readLines(file.path("../2-model-fit/model-files", "full-model.txt")),
   outfile = "", len_trend = meta$len_trend, age_trend = meta$age_trend, sex_trend = meta$sex_trend,
-  keep_comments = T, keep_whitespace = T
+  keep_comments = T, keep_whitespace = T, rand_age = F
   )
 ```
 
