@@ -30,6 +30,7 @@ mcmc_long =   T  # run with long mcmc settings?
 calc_msy =    T  # calculate msy-based quantities?
 calc_PP =     T  # calculate probability profiles?
 save_files =  F  # save output?
+rand_age =    F  # use dirichlet-distributed ages?
 
 # make sure only one MCMC setting was specified
 if (sum(c(mcmc_vshort, mcmc_lshort, mcmc_medium, mcmc_long)) != 1) {
@@ -88,7 +89,8 @@ edit_full_model(
   outfile = model_file,
   age_trend = age_trend, 
   sex_trend = sex_trend,
-  len_trend = len_trend
+  len_trend = len_trend,
+  rand_age = rand_age
   )
 
 # create initial values

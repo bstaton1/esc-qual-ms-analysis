@@ -1,4 +1,5 @@
-edit_full_model = function(model_lines, outfile, len_trend, sex_trend, age_trend, keep_whitespace = F, keep_comments = F) {
+
+edit_full_model = function(model_lines, outfile, len_trend, sex_trend, age_trend, rand_age, keep_whitespace = F, keep_comments = F) {
   
   # 1.) replace function() with model {
   model_lines[model_lines == "function() {"] = "model {"
@@ -47,5 +48,17 @@ edit_full_model = function(model_lines, outfile, len_trend, sex_trend, age_trend
     model_lines[which(model_lines == match)] = paste(white_space, replace, sep = "")
   }
   
+  # handle brood year random age variability
+  # cuts the random link at the p node assignment
+  # if rand_age == T: p[y,,] are dirichlet distributed around mu_pi_mat
+  # if rand_age == F: p[y,,] are are set to mu_pi_mat[y,]
+  if (!rand_age) {
+    match = model_lines[stringr::str_detect(model_lines, "p\\[y,a,s\\] <- ")]
+    white_space = unlist(stringr::str_extract_all(match, "  +"))
+    replace = "p[y,a,s] <- mu_pi_mat[y,a,s]"
+    model_lines[which(model_lines == match)] = paste(white_space, replace, sep = "")
+  }
+  
   cat(paste0(model_lines, collapse = "\n"), file = outfile)
 }
+
