@@ -29,6 +29,7 @@ mcmc_medium = F  # run with medium mcmc settings?
 mcmc_long =   T  # run with long mcmc settings?
 calc_msy =    T  # calculate msy-based quantities?
 calc_PP =     T  # calculate probability profiles?
+save_files =  F  # save output?
 
 # make sure only one MCMC setting was specified
 if (sum(c(mcmc_vshort, mcmc_lshort, mcmc_medium, mcmc_long)) != 1) {
@@ -195,23 +196,26 @@ if (calc_PP) {
 stoptime_after = Sys.time()
 
 # save files
-cat("  |--- Saving Output Files ---|\n")
-if (calc_msy) saveRDS(msy, file.path(out_dir, msy_name))
-if (calc_PP) saveRDS(PP, file.path(out_dir, PP_name))
-saveRDS(post, file.path(out_dir, post_name))
-saveRDS(
-  append(
-    extract_jags_metadata(post_info),
-    list(
-      model = model,
-      z_unit = z_unit,
-      len_trend = len_trend,
-      sex_trend = sex_trend,
-      age_trend = age_trend,
-      R.hat = R.hat,
-      n.eff = n.eff
-    )), file.path(out_dir, meta_name))
-
+if (save_files) {
+  cat("  |--- Saving Output Files ---|\n")
+  if (calc_msy) saveRDS(msy, file.path(out_dir, msy_name))
+  if (calc_PP) saveRDS(PP, file.path(out_dir, PP_name))
+  saveRDS(post, file.path(out_dir, post_name))
+  saveRDS(
+    append(
+      extract_jags_metadata(post_info),
+      list(
+        model = model,
+        z_unit = z_unit,
+        len_trend = len_trend,
+        sex_trend = sex_trend,
+        age_trend = age_trend,
+        rand_age = rand_age,
+        R.hat = R.hat,
+        n.eff = n.eff
+      )), file.path(out_dir, meta_name))
+  
+}
 stoptime_all = Sys.time()
 
 cat("\n", "#-----------------------------------#", "\n")
