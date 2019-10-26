@@ -160,7 +160,7 @@ compare_msy = function(v, value = "S", title = T, ylim, legend = F, labels = F, 
 ```
 
 
-## MSC Reference Points {.tabset .tabset-fade .tabset-pills}
+# MSC Reference Points {.tabset .tabset-fade .tabset-pills}
 
 Each group of three boxes represents a model fitted with different assumptions about (1) reproductive unit (as shown in the upper-most title and separated by grey vertical lines) and (2) included time trends in age ("A"), sex ("S"), or length ("L"), with "0" indicating no demographic trends were estimated (x-axis). Grey shading indicates which block of years was used when calculating equilibrium values.
 
@@ -174,7 +174,7 @@ mypar = function() {
 }
 ```
 
-### R
+## R
 
 ```{r, fig.width = 5, fig.height = 7}
 mypar()
@@ -185,7 +185,7 @@ mtext(outer = T, side = 2, "Rmsc (1000s)", line = 1, cex = 1.2, font = 2)
 mtext(outer = T, side = 4, "Change from N-0", line = 1.4, cex = 1.2, font = 2)
 ```
 
-### H
+## H
 
 ```{r, fig.width = 5, fig.height = 7}
 mypar()
@@ -196,7 +196,7 @@ mtext(outer = T, side = 2, "Hmsc (1000s)", line = 1, cex = 1.2, font = 2)
 mtext(outer = T, side = 4, "Change from N-0", line = 1.4, cex = 1.2, font = 2)
 ```
 
-### S
+## S
 
 ```{r, fig.width = 5, fig.height = 7}
 mypar()
@@ -207,7 +207,7 @@ mtext(outer = T, side = 2, "Smsc (1000s)", line = 1, cex = 1.2, font = 2)
 mtext(outer = T, side = 4, "Change from N-0", line = 1.4, cex = 1.2, font = 2)
 ```
 
-### S (All Models)
+## S (All Models)
 
 ```{r}
 mods = str_extract(postfiles, "[0-9]+")
