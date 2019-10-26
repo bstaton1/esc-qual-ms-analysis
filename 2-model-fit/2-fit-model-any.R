@@ -32,6 +32,11 @@ calc_PP =     T  # calculate probability profiles?
 save_files =  F  # save output?
 rand_age =    F  # use dirichlet-distributed ages?
 
+# fraction of samples to remove prior to probability profile calculations
+# calculation rate on laptop: 0.01086667 mins per iter; approx 2hrs for 10000 iters
+# but have 6 scenarios to calculate for (2 vuln * 3 time periods)
+thin_percent_for_PP = 0.8
+
 # make sure only one MCMC setting was specified
 if (sum(c(mcmc_vshort, mcmc_lshort, mcmc_medium, mcmc_long)) != 1) {
   stop("you incorrectly specified how long to run the MCMC algorithm for")
@@ -176,20 +181,25 @@ if (calc_msy) {
 if (calc_PP) {
   cat("  |--- Calculating Probability Profiles ---|\n")
   starttime = Sys.time()
+  post_pp = post_thin(post, thin_percent_for_PP)
   cat("    Started at:", format(starttime), "\n")
-  PP_unr_early = get_PP(post.samp = samps_early, vuln = "unr", silent = silent); cat("      Early (UNR) period complete\n")
-  PP_unr_late  = get_PP(post.samp = samps_late, vuln = "unr", silent = silent); cat("      Late (UNR) period complete\n")
-  PP_unr_all   = get_PP(post.samp = samps_all, vuln = "unr", silent = silent); cat("      All (UNR) period complete\n")
-  PP_res_early = get_PP(post.samp = samps_early, vuln = "res", silent = silent); cat("      Early (RES) period complete\n")
-  PP_res_late  = get_PP(post.samp = samps_late, vuln = "res", silent = silent); cat("      Late (RES) period complete\n")
-  PP_res_all   = get_PP(post.samp = samps_all, vuln = "res", silent = silent); cat("      All (RES) period complete\n")
+  samps_early = prep_samples(post_pp, keep_t = early_keep_t, keep_y = early_keep_y, len_trend = len_trend, silent = T)
+  samps_late = prep_samples(post_pp, keep_t = late_keep_t, keep_y = late_keep_y, len_trend = len_trend, silent = T)
+  samps_all = prep_samples(post_pp, keep_t = all_keep_t, keep_y = all_keep_y, len_trend = len_trend, silent = T)
+  
+  PP_unr_early = opt_profile(post.samp = samps_early, vuln = "unr", silent = silent); cat("      Early (UNR) period complete\n")
+  PP_unr_late  = opt_profile(post.samp = samps_late, vuln = "unr", silent = silent); cat("      Late (UNR) period complete\n")
+  PP_unr_all   = opt_profile(post.samp = samps_all, vuln = "unr", silent = silent); cat("      All (UNR) period complete\n")
+  PP_res_early = opt_profile(post.samp = samps_early, vuln = "res", silent = silent); cat("      Early (RES) period complete\n")
+  PP_res_late  = opt_profile(post.samp = samps_late, vuln = "res", silent = silent); cat("      Late (RES) period complete\n")
+  PP_res_all   = opt_profile(post.samp = samps_all, vuln = "res", silent = silent); cat("      All (RES) period complete\n")
 
-  PP_early = abind::abind(PP_unr_early, PP_res_early, along = 3)
-  PP_late = abind::abind(PP_unr_late, PP_res_late, along = 3)
-  PP_all = abind::abind(PP_unr_all, PP_res_all, along = 3)
-  PP = abind::abind(PP_early, PP_all, PP_late, along = 4)
-  dimnames(PP)[[3]] = c("unr", "res")
-  dimnames(PP)[[4]] = c("early", "all", "late")
+  PP_early = abind::abind(PP_unr_early, PP_res_early, along = 4)
+  PP_late = abind::abind(PP_unr_late, PP_res_late, along = 4)
+  PP_all = abind::abind(PP_unr_all, PP_res_all, along = 4)
+  PP = abind::abind(PP_early, PP_all, PP_late, along = 5)
+  dimnames(PP)[[4]] = c("unr", "res")
+  dimnames(PP)[[5]] = c("early", "all", "late")
 
   stoptime = Sys.time()
   cat("    Elapsed time:", format(round(stoptime - starttime, 1)), "\n")
