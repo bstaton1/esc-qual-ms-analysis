@@ -248,13 +248,87 @@ compare_msy(v = "res", value = "S", ylim = ylim, labels = T, title = F, letter =
 mtext(outer = T, side = 2, "Smsc (1000s)", line = 1, cex = 1.2, font = 2)
 mtext(outer = T, side = 4, "Change from N-0", line = 1.4, cex = 1.2, font = 2)
 ```
+
+# MSC Median Tables {.tabset .tabset-fade .tabset-pills}
+
+```{r}
+
+
+library(knitr)
+library(kableExtra)
+library(magrittr)
+
+# build model names
+unit= ifelse(mod_key$z_unit == "fish_count", "N", 
+       ifelse(mod_key$z_unit == "egg_count", "E", "EM"))
+trends = sapply(1:12, function(m) label_trends(
+  as.logical(mod_key$age_trend[m]),
+  as.logical(mod_key$sex_trend[m]),
+  as.logical(mod_key$length_trend[m])
+  ))
+
+mod_names = paste(unit, trends, sep = "-")
+names(mod_names) = 1:12
+
+
+make_table = function(value, vuln) {
+
+  base_median = msy["50%",value,vuln,"all","1"]
+  meds = data.frame(
+    early = msy["50%",value,vuln,"early",],
+    all = msy["50%",value,vuln,"all",],
+    late = msy["50%",value,vuln,"late",]
+  )
+
+
+  med_tab = tab = apply(meds, 2, function(x) prettify(round(x, -3)))
+  p_tab = apply(round((meds - base_median)/base_median, 2) * 100, 2, function(x) paste0(x, "%"))
+  tab = cbind(med_tab, p_tab)
+
+  
+  colnames(tab) = rep(c("Early", "All", "Late"), 2)
+  tab = cbind(Model = mod_names[dimnames(msy)[[5]]], tab)
+
+  rownames(tab) = NULL
+  
+  kable(tab, "html", escape = F, align = "lcccccc") %>%
+    kable_styling(full_width = F, 
+                  bootstrap_options = c("striped", "condensed", "bordered")) %>%
+    column_spec(1, bold = T) %>%
+    add_header_above(c(" " = 1, "Number" = 3, "% Change from N-0" = 3))
+}
 ```
 
-## Probability Profiles {.tabset .tabset-fade .tabset-pills}
+## $R_{\text{MSC}}$ {.tabset .tabset-fade .tabset-pills}
 
-*  Solid line = Fish count, no trends
-*  Dashed line = Egg count, all trends
-*  Dotted line = Egg mass, all trends
+### Large Mesh
+
+`r make_table("R", "unr")`
+
+### Small Mesh
+
+`r make_table("R", "res")`
+
+## $H_{\text{MSC}}$ {.tabset .tabset-fade .tabset-pills}
+
+### Large Mesh
+
+`r make_table("H", "unr")`
+
+### Small Mesh
+
+`r make_table("H", "res")`
+
+## $S_{\text{MSC}}$ {.tabset .tabset-fade .tabset-pills}
+
+### Large Mesh
+
+`r make_table("S", "unr")`
+
+### Small Mesh
+
+`r make_table("S", "res")`
+
 
 First pick a metric of interest, then a particular desired minimum level of that metric, and then look at how the probability of attainment would change over time. The vertical area is the current escapement goal.
 
