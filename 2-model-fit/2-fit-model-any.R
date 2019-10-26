@@ -18,17 +18,20 @@ source("../new-func-source.R")
 # starttime of everything
 starttime_all = Sys.time()
 
+# location of output files
+out_dir = "../model-output/"
+
 nchain =      5  # number of chains
 parallel =    T  # run chains in parallel?
-verbose =     F  # print JAGS messages to console?
+verbose =     T  # print JAGS messages to console?
 silent =      F  # print post processing progress?
 seed =        9  # seed for initial value and mcmc sampling
-mcmc_vshort = F  # run with very short mcmc settings?
+mcmc_vshort = T  # run with very short mcmc settings?
 mcmc_lshort = F  # run with less short mcmc settings?
 mcmc_medium = F  # run with medium mcmc settings?
-mcmc_long =   T  # run with long mcmc settings?
+mcmc_long =   F  # run with long mcmc settings?
 calc_msy =    T  # calculate msy-based quantities?
-calc_PP =     T  # calculate probability profiles?
+calc_PP =     F  # calculate probability profiles?
 save_files =  F  # save output?
 rand_age =    F  # use dirichlet-distributed ages?
 
@@ -50,8 +53,7 @@ age_trend = as.logical(mod_key$age_trend[mod_key$model == model])
 # names for output
 if (!dir.exists("model-files")) dir.create("model-files")
 model_file = file.path("model-files", paste("model-", model, ".txt", sep = ""))
-out_dir = "../model-output/"
-if (!dir.exists(out_dir)) dir.create(out_dir)
+if (!dir.exists(out_dir) & save_files) dir.create(out_dir)
 post_name = paste("post-", model, ".rds", sep = "")
 meta_name = paste("meta-", model, ".rds", sep = "")
 msy_name = paste("msy-", model, ".rds", sep = "")
