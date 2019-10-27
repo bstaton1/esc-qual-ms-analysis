@@ -29,7 +29,7 @@ model = 1
 source("../2-model-fit/1-compile-data.R")
 source("../new-func-source.R")
 
-out_dir = "../model-output-keep"
+out_dir = "../model-output-rand-age/"
 out_files = dir(out_dir)
 
 
@@ -48,7 +48,7 @@ meta = list()
 # post = NULL
 
 msyfiles = out_files[str_detect(out_files, "msy")]
-PPfiles = out_files[str_detect(out_files, "prob")]
+PPfiles = out_files[str_detect(out_files, "prob.+\\.rds$")]
 postfiles = out_files[str_detect(out_files, "post")]
 mods = str_extract(postfiles, "[0-9]+")
 metafiles = out_files[str_detect(out_files, "meta")]
@@ -339,12 +339,12 @@ pp_eval = T
 mods = str_extract(postfiles, "[0-9]+")
 pp = NULL
 meta = list()
-for (i in 1:length(mods)) pp = abind(pp, readRDS(file.path(out_dir, PPfiles[i])), along = 5) 
+for (i in 1:length(mods)) pp = abind(pp, readRDS(file.path(out_dir, PPfiles[i])), along = 6) 
 for (i in 1:length(mods)) meta[[i]] = readRDS(file.path(out_dir, metafiles[i])) 
 # for (i in 2:length(mods)) PP = abind::abind(PP, readRDS(file.path(out_dir, PPfiles[i])), along = 5) 
 # for (i in 2:length(mods)) {cat("\r", i); post[[i]] = readRDS(file.path(out_dir, postfiles[i]))}
 
-dimnames(pp)[[5]] = mods
+dimnames(pp)[[6]] = mods
 names(meta) = mods
 
 
@@ -353,7 +353,7 @@ names(meta) = mods
 keep_mods = as.character(c(1,10,12))
 
 meta = meta[keep_mods]
-pp = pp[,,,,keep_mods]
+pp = pp[,,,,,keep_mods]
 
 z_units = unlist(lapply(meta, function(M) M$z_unit))
 f_eggc_mod = min(which(z_units == "egg_count"))
@@ -364,10 +364,10 @@ mod_labs = unlist(lapply(meta, function(M) label_trends(M$age_trend, M$sex_trend
 
 n_mods = length(keep_mods)
 
-pp_plot = function(value, desired, time, vuln) {
+profile_plot = function(value, desired = "", time, vuln) {
   
-  keep = paste0(value, "_", desired)
-  sub = pp[,keep,vuln,time,]
+  keep = paste0(value, desired)
+  sub = pp[,"mean",keep,vuln,time,]
   
   Sval = as.numeric(dimnames(pp)[[1]])/1000
   
@@ -385,7 +385,7 @@ pp_plot = function(value, desired, time, vuln) {
 }
 
 mypar = function() {
-  par(mar = c(3,3,1,1), las = 1, mgp = c(2,0.5,0), tcl = -0.25)
+  par(mfrow = c(1,2), mar = c(3,3,1,1), las = 1, mgp = c(2,0.5,0), tcl = -0.25)
 }
 
 ```
@@ -396,69 +396,78 @@ mypar = function() {
 
 #### First 10 Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("Rmax", "0.9", "early", "unr")
+profile_plot("RMAX", "90p", "early", "unr")
+profile_plot("RMAX", "90p", "early", "res")
 ```
 
 #### All Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("Rmax", "0.9", "all", "unr")
+profile_plot("RMAX", "90p", "all", "unr")
+profile_plot("RMAX", "90p", "all", "res")
 ```
 
 #### Last 10 Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("Rmax", "0.9", "late", "unr")
+profile_plot("RMAX", "90p", "late", "unr")
+profile_plot("RMAX", "90p", "late", "res")
 ```
 
 ### >80% of Rmax {.tabset .tabset-fade .tabset-pills}
 
 #### First 10 Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("Rmax", "0.8", "early", "unr")
+profile_plot("RMAX", "80p", "early", "unr")
+profile_plot("RMAX", "80p", "early", "res")
 ```
 
 #### All Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("Rmax", "0.8", "all", "unr")
+profile_plot("RMAX", "80p", "all", "unr")
+profile_plot("RMAX", "80p", "all", "res")
 ```
 
 #### Last 10 Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("Rmax", "0.8", "late", "unr")
+profile_plot("RMAX", "80p", "late", "unr")
+profile_plot("RMAX", "80p", "late", "res")
 ```
 
 ### >70% of Rmax {.tabset .tabset-fade .tabset-pills}
 
 #### First 10 Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("Rmax", "0.7", "early", "unr")
+profile_plot("RMAX", "70p", "early", "unr")
+profile_plot("RMAX", "70p", "early", "res")
 ```
 
 #### All Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("Rmax", "0.7", "all", "unr")
+profile_plot("RMAX", "70p", "all", "unr")
+profile_plot("RMAX", "70p", "all", "res")
 ```
 
 #### Last 10 Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("Rmax", "0.7", "late", "unr")
+profile_plot("RMAX", "70p", "late", "unr")
+profile_plot("RMAX", "70p", "late", "res")
 ```
 
 ## MSC {.tabset .tabset-fade .tabset-pills}
@@ -467,69 +476,78 @@ pp_plot("Rmax", "0.7", "late", "unr")
 
 #### First 10 Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("MSY", "0.9", "early", "unr")
+profile_plot("MSY", "90p", "early", "unr")
+profile_plot("MSY", "90p", "early", "res")
 ```
 
 #### All Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("MSY", "0.9", "all", "unr")
+profile_plot("MSY", "90p", "all", "unr")
+profile_plot("MSY", "90p", "all", "res")
 ```
 
 #### Last 10 Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("MSY", "0.9", "late", "unr")
+profile_plot("MSY", "90p", "late", "unr")
+profile_plot("MSY", "90p", "late", "res")
 ```
 
 ### >80% of MSC {.tabset .tabset-fade .tabset-pills}
 
 #### First 10 Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("MSY", "0.8", "early", "unr")
+profile_plot("MSY", "80p", "early", "unr")
+profile_plot("MSY", "80p", "early", "res")
 ```
 
 #### All Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("MSY", "0.8", "all", "unr")
+profile_plot("MSY", "80p", "all", "unr")
+profile_plot("MSY", "80p", "all", "res")
 ```
 
 #### Last 10 Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("MSY", "0.8", "late", "unr")
+profile_plot("MSY", "80p", "late", "unr")
+profile_plot("MSY", "80p", "late", "res")
 ```
 
 ### >70% of MSC {.tabset .tabset-fade .tabset-pills}
 
 #### First 10 Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("MSY", "0.7", "early", "unr")
+profile_plot("MSY", "70p", "early", "unr")
+profile_plot("MSY", "70p", "early", "res")
 ```
 
 #### All Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("MSY", "0.7", "all", "unr")
+profile_plot("MSY", "70p", "all", "unr")
+profile_plot("MSY", "70p", "all", "res")
 ```
 
 #### Last 10 Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("MSY", "0.7", "late", "unr")
+profile_plot("MSY", "70p", "late", "unr")
+profile_plot("MSY", "70p", "late", "res")
 ```
 
 ## Fixed Harvest {.tabset .tabset-fade .tabset-pills}
@@ -538,67 +556,102 @@ pp_plot("MSY", "0.7", "late", "unr")
 
 #### First 10 Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("H", "100", "early", "unr")
+profile_plot("H", "100k", "early", "unr")
+profile_plot("H", "100k", "early", "res")
 ```
 
 #### All Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("H", "100", "all", "unr")
+profile_plot("H", "100k", "all", "unr")
+profile_plot("H", "100k", "all", "res")
 ```
 
 #### Last 10 Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("H", "100", "late", "unr")
+profile_plot("H", "100k", "late", "unr")
+profile_plot("H", "100k", "late", "res")
 ```
 
 ### >90K {.tabset .tabset-fade .tabset-pills}
 
 #### First 10 Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("H", "90", "early", "unr")
+profile_plot("H", "90k", "early", "unr")
+profile_plot("H", "90k", "early", "res")
 ```
 
 #### All Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("H", "90", "all", "unr")
+profile_plot("H", "90k", "all", "unr")
+profile_plot("H", "90k", "all", "res")
 ```
 
 #### Last 10 Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("H", "90", "late", "unr")
+profile_plot("H", "90k", "late", "unr")
+profile_plot("H", "90k", "late", "res")
 ```
 
 ### >80K {.tabset .tabset-fade .tabset-pills}
 
 #### First 10 Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("H", "80", "early", "unr")
+profile_plot("H", "80k", "early", "unr")
+profile_plot("H", "80k", "early", "res")
 ```
 
 #### All Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("H", "80", "all", "unr")
+profile_plot("H", "80k", "all", "unr")
+profile_plot("H", "80k", "all", "res")
 ```
 
 #### Last 10 Years
 
-```{r, fig.height = 4, fig.width = 6, eval = pp_eval}
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
 mypar()
-pp_plot("H", "80", "late", "unr")
+profile_plot("H", "80k", "late", "unr")
+profile_plot("H", "80k", "late", "res")
+```
+
+### >70K {.tabset .tabset-fade .tabset-pills}
+
+#### First 10 Years
+
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
+mypar()
+profile_plot("H", "70k", "early", "unr")
+profile_plot("H", "70k", "early", "res")
+```
+
+#### All Years
+
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
+mypar()
+profile_plot("H", "70k", "all", "unr")
+profile_plot("H", "70k", "all", "res")
+```
+
+#### Last 10 Years
+
+```{r, fig.height = 4, fig.width = 8, eval = pp_eval}
+mypar()
+profile_plot("H", "70k", "late", "unr")
+profile_plot("H", "70k", "late", "res")
 ```
