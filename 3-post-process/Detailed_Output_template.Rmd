@@ -46,9 +46,10 @@ msy = paste(file.path(out_dir, msy_name))
 ```
 
 ```{r settings}
-mcmc_info = T
-jags_code = T
-jags_data = T
+mcmc_info = F
+pp_check = F
+jags_code = F
+jags_data = F
 ```
 
 # Model Description
@@ -214,7 +215,6 @@ diag_plots(post, c("Fsub"))
 ```{r R-diag-plots, fig.height = 6, fig.width = 9, eval = mcmc_info}
 diag_plots(post, c("^R["))
 ```
-
 
 # Fit to Data 
 
@@ -396,12 +396,10 @@ box()
 The following tables show goodness-of-fit statistics for each data set.
 
 ```{r}
-by = "sex"
 make_gof_table = function(by) {
   q_esc = array_format(post_summ(post, "q_esc")["mean",])
   q_com = array_format(post_summ(post, "q_com")["mean",])
   q_sub = array_format(post_summ(post, "q_sub")["mean",])
-  
   
   esc_tot = ceiling(calc_mult_gof(x_esc, q_esc, per_n = F, by = by))
   com_tot = ceiling(calc_mult_gof(x_com, q_com, per_n = F, by = by))
@@ -423,21 +421,37 @@ make_gof_table = function(by) {
   "Source"
   if (by == "sex") {
     colnames(tab) = c("Source", "Females", "Males")
+    g_fun = function(x) {
+      x %>%
+        add_header_above(c(" " = 1, "Sex" = 2))
+    }
   }
   if (by == "age/sex") {
-    colnames(tab) = c("Source", paste(paste("Age", 4:7), "Females"), paste(paste("Age", 4:7), "Males"))
+    colnames(tab) = c("Source", paste(paste("Age", 4:7)), paste(paste("Age", 4:7)))
+    g_fun = function(x) {
+      x %>%
+        add_header_above(c(" " = 1, "Females" = 4, "Males" = 4))
+    }
   }
   if (by == "age") {
-    colnames(tab) = c("Source", paste("Age", 4:7))
+    colnames(tab) = c("Source", paste("", 4:7))
+    g_fun = function(x) {
+      x %>%
+        add_header_above(c(" " = 1, "Age" = 4))
+    }
   }
   if (by == "total") {
     colnames(tab) = c("Source", "Total")
+    g_fun = function(x) {
+      x
+    }
   }
   
-  kable(tab, "html", align = paste0("l", rep("c", ncol(tab) - 1), collapse = "")) %>%
+  kable(tab, "html", align = paste0("l", paste0(rep("c", ncol(tab) - 1), collapse = ""), collapse = "")) %>%
     kable_styling(full_width = F, bootstrap_options = c("condensed")) %>%
     column_spec(1, bold = T) %>%
-    row_spec(4, bold = T)
+    row_spec(4, bold = T) %>%
+    g_fun()
 }
 ```
 
