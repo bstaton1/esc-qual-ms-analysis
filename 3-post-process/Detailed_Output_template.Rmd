@@ -526,6 +526,179 @@ lines(Hsub_fit[3,] ~ years, lwd = 2)
 points(I(Hsub_obs/1000) ~ years, pch = 16, cex = 1.2)
 ```
 
+
+`r if (pp_check) "# Posterior Predictive Checks {.tabset .tabset-fade .tabset-pills}"`
+
+```{r pp-check-funcs, eval = pp_check}
+mult_pp_check = function(q_samps, x_obs) {
+  saved = nrow(q_samps)
+  n = rowSums(x_obs)
+  
+  fit_obs = fit_new = matrix(NA, saved, 8)
+  for (i in 1:saved) {
+    q_fit = array_format(q_samps[i,])
+    expected = apply(q_fit, 2, function(x) x * n)
+    x_new = t(sapply(1:nrow(x_obs), function(j) rmultinom(1, n[j], q_fit[j,])))
+    x_diff_new = (x_new - expected)^2/expected
+    x_diff_obs = (x_obs - expected)^2/expected
+    
+    fit_new[i,] = colSums(x_diff_new, na.rm = T)
+    fit_obs[i,] = colSums(x_diff_obs, na.rm = T)
+  }
+  
+  list(
+    fit_new = fit_new,
+    fit_obs = fit_obs
+    )
+}
+
+lnorm_pp_check = function(x_samps, x_sig, x_obs) {
+  fit_new = fit_obs = numeric(nrow(x_samps))
+  for (i in 1:nrow(x_samps)) {
+    fit_new[i] = sum((log(rlnorm(ncol(x_samps), log(x_samps[i,]), x_sig)) - log(x_samps[i,]))^2)
+    fit_obs[i] = sum((log(x_obs) - log(x_samps[i,]))^2)
+  }
+  list(
+    fit_new = fit_new,
+    fit_obs = fit_obs
+  )
+}
+
+pp_check_plot = function(check_list, main = NULL, axis_q = NULL) {
+  with(check_list, {
+    if (!is.null(axis_q)) {
+      lim = range(quantile(fit_new, axis_q), quantile(fit_obs, axis_q))
+    } else {
+      lim = range(fit_new, fit_obs)
+    }
+    
+    mean_obs = mean(fit_obs)
+    mean_new = mean(fit_new)
+    # lim = c(0,10)
+    
+    plot(fit_new ~ fit_obs , xlim = lim, ylim = lim, 
+         xlab = "Observed Fit Measure",
+         ylab = "Simulated Fit Measure",
+         main = main,
+         pch = 16, col = scales::alpha("grey20", 0.05))
+    abline(v = mean_obs, col = "blue", lty = 2)
+    abline(h = mean_new, col = "blue", lty = 2)
+    abline(0,1, col = "blue", lty = 2)
+    usr = par("usr"); xdiff = diff(usr[1:2]); ydiff = diff(usr[3:4])
+    text(usr[1] - xdiff * 0.015, usr[4] - ydiff * 0.05, pos = 4, labels = round(mean(fit_obs > fit_new), 2), font = 2)
+  })
+  
+}
+
+mypar = function() {
+  par(mar = c(3,3,1,1), tcl = -0.25, mgp = c(2,0.5,0))
+}
+
+mypar_age = function() {
+  par(mfcol = c(4,2), mar = c(1.5,1.5,1.5,1), tcl = -0.25, mgp = c(2,0.5,0),
+      oma = c(2,2,0,0))
+
+}
+
+```
+
+`r if (pp_check) "## Composition {.tabset .tabset-fade .tabset-pills}"`
+
+`r if (pp_check) "### Escapement"`
+
+```{r esc-comp-pp-check, fig.height=6, fig.width = 4, eval = pp_check}
+mypar_age()
+check = mult_pp_check(post_subset(post, "q_esc", T), x_esc)
+sex_v = rep(c("Females", "Males"), each = na)
+age_v = rep(a_min:a_max, 2)
+
+for (as in 1:8) {
+  pp_check_plot(
+    list(
+      fit_new = check$fit_new[,as],
+      fit_obs = check$fit_obs[,as]
+      ), 
+    axis_q = c(0, 0.975),
+    main = paste("Age", age_v[as], sex_v[as])
+    )
+}
+
+mtext(side = 1, outer = T, line = 1, "Observed Fit Measure")
+mtext(side = 2, outer = T, line = 0.75, "Simulated Fit Measure")
+```
+
+`r if (pp_check) "### Commercial"`
+
+```{r com-comp-pp-check, fig.height=6, fig.width = 4, eval = pp_check}
+mypar_age()
+check = mult_pp_check(post_subset(post, "q_com", T), x_com)
+sex_v = rep(c("Females", "Males"), each = na)
+age_v = rep(a_min:a_max, 2)
+
+for (as in 1:8) {
+  pp_check_plot(
+    list(
+      fit_new = check$fit_new[,as],
+      fit_obs = check$fit_obs[,as]
+      ), 
+    axis_q = c(0, 0.975),
+    main = paste("Age", age_v[as], sex_v[as])
+    )
+}
+
+mtext(side = 1, outer = T, line = 1, "Observed Fit Measure")
+mtext(side = 2, outer = T, line = 0.75, "Simulated Fit Measure")
+```
+
+`r if (pp_check) "### Subsistence"`
+
+```{r sub-comp-pp-check, fig.height=6, fig.width = 4, eval = pp_check}
+mypar_age()
+check = mult_pp_check(post_subset(post, "q_sub", T), x_sub)
+sex_v = rep(c("Females", "Males"), each = na)
+age_v = rep(a_min:a_max, 2)
+
+for (as in 1:8) {
+  pp_check_plot(
+    list(
+      fit_new = check$fit_new[,as],
+      fit_obs = check$fit_obs[,as]
+      ), 
+    axis_q = c(0, 0.975),
+    main = paste("Age", age_v[as], sex_v[as])
+    )
+}
+
+mtext(side = 1, outer = T, line = 1, "Observed Fit Measure")
+mtext(side = 2, outer = T, line = 0.75, "Simulated Fit Measure")
+```
+
+`r if (pp_check) "## Abundance {.tabset .tabset-fade .tabset-pills}"`
+
+`r if (pp_check) "### Escapement"`
+
+```{r esc-N-pp-check, fig.height=5, fig.width = 5, eval = pp_check}
+mypar()
+S_check = lnorm_pp_check(post_subset(post, "^S_t[", T), S_obs_sig, S_obs)
+pp_check_plot(S_check, axis_q = c(0, 0.975))
+```
+
+`r if (pp_check) "### Commercial"`
+
+```{r com-N-pp-check, fig.height=5, fig.width = 5, eval = pp_check}
+mypar()
+Hcom_check = lnorm_pp_check(post_subset(post, "^Hcom[", T), Hcom_obs_sig, Hcom_obs)
+pp_check_plot(Hcom_check, axis_q = c(0, 0.975))
+```
+
+`r if (pp_check) "### Subsistence"`
+
+```{r sub-N-pp-check, fig.height=5, fig.width = 5, eval = pp_check}
+mypar()
+Hsub_check = lnorm_pp_check(post_subset(post, "^Hsub[", T), Hsub_obs_sig, Hsub_obs)
+pp_check_plot(Hsub_check, axis_q = c(0, 0.975))
+```
+
 # Selectivity Patterns {.tabset .tabset-fade .tabset-pills}
 
 ## Relative Selectivity
