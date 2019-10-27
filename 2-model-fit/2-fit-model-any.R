@@ -19,20 +19,20 @@ source("../new-func-source.R")
 starttime_all = Sys.time()
 
 # location of output files
-out_dir = "../model-output/"
+out_dir = "../model-output-no-rand-age/"
 
 nchain =      5  # number of chains
 parallel =    T  # run chains in parallel?
 verbose =     T  # print JAGS messages to console?
 silent =      F  # print post processing progress?
 seed =        9  # seed for initial value and mcmc sampling
-mcmc_vshort = T  # run with very short mcmc settings?
+mcmc_vshort = F  # run with very short mcmc settings?
 mcmc_lshort = F  # run with less short mcmc settings?
 mcmc_medium = F  # run with medium mcmc settings?
-mcmc_long =   F  # run with long mcmc settings?
+mcmc_long =   T  # run with long mcmc settings?
 calc_msy =    T  # calculate msy-based quantities?
-calc_PP =     F  # calculate probability profiles?
-save_files =  F  # save output?
+calc_PP =     T  # calculate probability profiles?
+save_files =  T  # save output?
 rand_age =    F  # use dirichlet-distributed ages?
 
 # fraction of samples to remove prior to probability profile calculations
