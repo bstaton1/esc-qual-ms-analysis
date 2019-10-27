@@ -151,29 +151,29 @@ opt_profile = function(post.samp, vuln, S_range = seq(1000, 200000, 1000), silen
   p_summ = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975)
   
   # F_full required to keep S at S_target
-  F_level = t(apply(out[,"F_level",], 1, summ, p = p_summ))
+  F_level = t(apply(out[,"F_level",], 1, StatonMisc::summ, p = p_summ))
   
   # equilibrium escapement
-  S = t(apply(out[,"S",], 1, summ, p = p_summ))
+  S = t(apply(out[,"S",], 1, StatonMisc::summ, p = p_summ))
   
   # equilibrium harvest
-  H = t(apply(out[,"H",], 1, summ, p = p_summ))
+  H = t(apply(out[,"H",], 1, StatonMisc::summ, p = p_summ))
   
   # prob profile for exceeding harvest thresholds
-  H70k = t(apply(out[,"H",] >= 70000, 1, summ, p = p_summ))
-  H80k = t(apply(out[,"H",] >= 80000, 1, summ, p = p_summ))
-  H90k = t(apply(out[,"H",] >= 90000, 1, summ, p = p_summ))
-  H100k = t(apply(out[,"H",] >= 100000, 1, summ, p = p_summ))
+  H70k = t(apply(out[,"H",] >= 70000, 1, StatonMisc::summ, p = p_summ))
+  H80k = t(apply(out[,"H",] >= 80000, 1, StatonMisc::summ, p = p_summ))
+  H90k = t(apply(out[,"H",] >= 90000, 1, StatonMisc::summ, p = p_summ))
+  H100k = t(apply(out[,"H",] >= 100000, 1, StatonMisc::summ, p = p_summ))
   
   # prob profile for exceeding MSY thresholds
-  MSY70p = t(apply(sapply(1:dim(out)[3], function(i) out[,"H",i] >= (max(out[,"H",i]) * 0.7)), 1, summ, p = p_summ))
-  MSY80p = t(apply(sapply(1:dim(out)[3], function(i) out[,"H",i] >= (max(out[,"H",i]) * 0.8)), 1, summ, p = p_summ))
-  MSY90p = t(apply(sapply(1:dim(out)[3], function(i) out[,"H",i] >= (max(out[,"H",i]) * 0.9)), 1, summ, p = p_summ))
+  MSY70p = t(apply(sapply(1:dim(out)[3], function(i) out[,"H",i] >= (max(out[,"H",i]) * 0.7)), 1, StatonMisc::summ, p = p_summ))
+  MSY80p = t(apply(sapply(1:dim(out)[3], function(i) out[,"H",i] >= (max(out[,"H",i]) * 0.8)), 1, StatonMisc::summ, p = p_summ))
+  MSY90p = t(apply(sapply(1:dim(out)[3], function(i) out[,"H",i] >= (max(out[,"H",i]) * 0.9)), 1, StatonMisc::summ, p = p_summ))
   
   # prob profiles for exceeding RMAX thresholds
-  RMAX70p = t(apply(sapply(1:dim(out)[3], function(i) out[,"R",i] >= (max(out[,"R",i]) * 0.7)), 1, summ, p = p_summ))
-  RMAX80p = t(apply(sapply(1:dim(out)[3], function(i) out[,"R",i] >= (max(out[,"R",i]) * 0.8)), 1, summ, p = p_summ))
-  RMAX90p = t(apply(sapply(1:dim(out)[3], function(i) out[,"R",i] >= (max(out[,"R",i]) * 0.9)), 1, summ, p = p_summ))
+  RMAX70p = t(apply(sapply(1:dim(out)[3], function(i) out[,"R",i] >= (max(out[,"R",i]) * 0.7)), 1, StatonMisc::summ, p = p_summ))
+  RMAX80p = t(apply(sapply(1:dim(out)[3], function(i) out[,"R",i] >= (max(out[,"R",i]) * 0.8)), 1, StatonMisc::summ, p = p_summ))
+  RMAX90p = t(apply(sapply(1:dim(out)[3], function(i) out[,"R",i] >= (max(out[,"R",i]) * 0.9)), 1, StatonMisc::summ, p = p_summ))
   
   # combine output into a large array
   out = abind::abind(

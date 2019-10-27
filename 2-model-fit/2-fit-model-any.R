@@ -183,7 +183,7 @@ if (calc_msy) {
 if (calc_PP) {
   cat("  |--- Calculating Probability Profiles ---|\n")
   starttime = Sys.time()
-  post_pp = post_thin(post, thin_percent_for_PP)
+  post_pp = postpack::post_thin(post, thin_percent_for_PP)
   cat("    Started at:", format(starttime), "\n")
   samps_early = prep_samples(post_pp, keep_t = early_keep_t, keep_y = early_keep_y, len_trend = len_trend, silent = T)
   samps_late = prep_samples(post_pp, keep_t = late_keep_t, keep_y = late_keep_y, len_trend = len_trend, silent = T)
