@@ -283,19 +283,23 @@ diag_plots(post, "b0_mat", show_diags = "always")
 diag_plots(post, "b1_mat", show_diags = "always")
 ```
 
-# Fit to Data 
+`r create_label("Figure", cntr, T, level = 3, sub = "j", subb = "", text = "D_sum", tabset = F, mcmc_info & meta$rand_age)`
 
-In all figures, the black points represent observed information, black lines represent the posterior median, and grey regions represent 95% equal-tailed credible intervals.
+```{r D-sum-diag-plot, eval = mcmc_info & meta$rand_age}
+par(oma = c(0,0,2,0)); diag_plots(post, "D_sum", show_diags = "always")
+```
 
-## Composition {.tabset .tabset-fade .tabset-pills}
+`r cntr = up_cntr("Section", cntr, fit); create_label("Section", cntr, F, level = 1, sub = "", subb = "", text = "Fit to Data", tabset = T, fit)`
 
-### Figures {.tabset .tabset-fade .tabset-pills}
+`r if (fit) "In all figures, the black points represent observed information, black lines represent the posterior median, and grey regions represent 95% equal-tailed credible intervals."`
 
-#### By Age/Sex {.tabset .tabset-fade .tabset-pills}
+`r cntr = up_cntr("Figure", cntr, fit); create_label("Figure", cntr, T, level = 2, sub = "", subb = "", text = "Composition", tabset = T, fit)`
 
-##### Escapement
+`r create_label("Figure", cntr, F, level = 3, sub = "a", subb = "", text = "By Age/Sex", tabset = T, fit)`
 
-```{r esc-age-sex-fit, fig.height = 8, fig.width = 6}
+`r create_label("Figure", cntr, F, level = 4, sub = "a", subb = "1", text = "Escapement", tabset = F, fit)`
+
+```{r esc-age-sex-fit, fig.height = 8, fig.width = 6, eval = fit}
 q_fit = array_format(post_summ(post, "q_esc")[3,])
 q_lwr = array_format(post_summ(post, "q_esc")[4,])
 q_upr = array_format(post_summ(post, "q_esc")[5,])
@@ -316,11 +320,11 @@ for (as in 1:8) {
 
 ```
 
-##### Commercial
+`r create_label("Figure", cntr, F, level = 4, sub = "a", subb = "2", text = "Commercial", tabset = F, fit)`
 
-_Vertical dashed lines represent the year the fishery switched from unrestricted mesh to restricted mesh._
+`r if (fit) "_Vertical dashed lines represent the year the fishery switched from unrestricted mesh to restricted mesh._"`
 
-```{r com-age-sex-fit, fig.height = 8, fig.width = 6}
+```{r com-age-sex-fit, fig.height = 8, fig.width = 6, eval = fit}
 q_fit = array_format(post_summ(post, "q_com")[3,])
 q_lwr = array_format(post_summ(post, "q_com")[4,])
 q_upr = array_format(post_summ(post, "q_com")[5,])
@@ -341,11 +345,11 @@ for (as in 1:8) {
 }
 ```
 
-##### Subsistence
+`r create_label("Figure", cntr, F, level = 4, sub = "a", subb = "3", text = "Subsistence", tabset = F, fit)`
 
-_Vertical dashed lines represent the year the fishery switched from unrestricted mesh to restricted mesh._
+`r if (fit) "_Vertical dashed lines represent the year the fishery switched from unrestricted mesh to restricted mesh._"`
 
-```{r sub-age-sex-fit, fig.height = 8, fig.width = 6}
+```{r sub-age-sex-fit, fig.height = 8, fig.width = 6, eval = fit}
 q_fit = array_format(post_summ(post, "q_sub")[3,])
 q_lwr = array_format(post_summ(post, "q_sub")[4,])
 q_upr = array_format(post_summ(post, "q_sub")[5,])
@@ -366,13 +370,13 @@ for (as in 1:8) {
 }
 ```
 
-#### By Sex {.tabset .tabset-fade .tabset-pills}
+`r create_label("Figure", cntr, F, level = 3, sub = "b", subb = "", text = "By Sex", tabset = T, fit)`
 
-Although the model fits to sex data on an age-specific basis by data source, we can still look at how well it captures patterns in sex composition.
+`r if (fit) "Although the model fits to sex data on an age-specific basis by data source, we can still look at how well it captures patterns in sex composition."`
 
-##### Escapement
+`r create_label("Figure", cntr, F, level = 4, sub = "b", subb = "1", text = "Escapement", tabset = F, fit)`
 
-```{r esc-sex-fit}
+```{r esc-sex-fit, eval = fit}
 pf_fit_esc = rowSums(array_format(post_summ(post, "q_esc")[3,])[,1:4])
 pf_lwr_esc = rowSums(array_format(post_summ(post, "q_esc")[4,])[,1:4])
 pf_upr_esc = rowSums(array_format(post_summ(post, "q_esc")[5,])[,1:4])
@@ -386,11 +390,11 @@ lines(pf_upr_esc ~ years, col = "grey")
 points(pf_esc ~ years, pch = 16, cex = 1.2)
 ```
 
-##### Commercial
+`r create_label("Figure", cntr, F, level = 4, sub = "b", subb = "2", text = "Commercial", tabset = F, fit)`
 
-_Vertical dashed line represents the year the fishery switched from unrestricted mesh to restricted mesh._
+`r if (fit) "_Vertical dashed line represents the year the fishery switched from unrestricted mesh to restricted mesh._"`
 
-```{r com-sex-fit}
+```{r com-sex-fit, eval = fit}
 pf_fit_com = rowSums(array_format(post_summ(post, "q_com")[3,])[,1:4])
 pf_lwr_com = rowSums(array_format(post_summ(post, "q_com")[4,])[,1:4])
 pf_upr_com = rowSums(array_format(post_summ(post, "q_com")[5,])[,1:4])
@@ -405,11 +409,11 @@ points(pf_com ~ years, pch = 16, cex = 1.2)
 abline(v = years[min(which(com_mesh == 2))] - 0.5, lty = 2)
 ```
 
-##### Subsistence
+`r create_label("Figure", cntr, F, level = 4, sub = "b", subb = "3", text = "Subsistence", tabset = F, fit)`
 
-_Vertical dashed line represents the year the fishery switched from unrestricted mesh to restricted mesh._
+`r if (fit) "_Vertical dashed line represents the year the fishery switched from unrestricted mesh to restricted mesh._"`
 
-```{r sub-sex-fit}
+```{r sub-sex-fit, eval = fit}
 pf_fit_sub = rowSums(array_format(post_summ(post, "q_sub")[3,])[,1:4])
 pf_lwr_sub = rowSums(array_format(post_summ(post, "q_sub")[4,])[,1:4])
 pf_upr_sub = rowSums(array_format(post_summ(post, "q_sub")[5,])[,1:4])
@@ -424,13 +428,13 @@ points(pf_sub ~ years, pch = 16, cex = 1.2)
 abline(v = years[min(which(sub_mesh == 2))] - 0.5, lty = 2)
 ```
 
-#### Multinomial Effective Sample Size  {.tabset .tabset-fade .tabset-pills}
+`r create_label("Figure", cntr, F, level = 3, sub = "", subb = "", text = "Multinomial Effective Sample Size", tabset = T, fit)`
 
-The multinomial effective sample size for each data set was rescaled such that the year with the most fish sampled for a given data set received an effective sample size of 100. All other years were scaled proportionately to that value, e.g., `ESS = n_aged_year/max(n_aged_year) * 100`
+`r if (fit) "The multinomial effective sample size for each data set was rescaled such that the year with the most fish sampled for a given data set received an effective sample size of 100. All other years were scaled proportionately to that value, e.g., ESS = n_aged_year/max(n_aged_year) * 100"`
 
-##### Escapement
+`r create_label("Figure", cntr, F, level = 4, sub = "c", subb = "1", text = "Escapement", tabset = F, fit)`
 
-```{r esc-ess}
+```{r esc-ess, eval = fit}
 par(xaxs = "i", yaxs = "i", mar = c(3,3,1,1), mgp = c(2,0.75,0), cex.axis = 1.2)
 mp = barplot(c(NA, n_esc, NA), las = 2, ylim = c(0, 100))
 axis(side = 1, at = mp[c(NA, years, NA) %in% seq(1980, 2015, 5)], labels = seq(1980, 2015, 5), line = 0, las = 2)
@@ -438,9 +442,9 @@ axis(side = 1, at = mp[2:(nt+1)], labels = rep("", nt), line = 0, las = 2, tcl =
 box()
 ```
 
-##### Commercial
+`r create_label("Figure", cntr, F, level = 4, sub = "c", subb = "2", text = "Commercial", tabset = F, fit)`
 
-```{r com-ess}
+```{r com-ess, eval = fit}
 par(xaxs = "i", yaxs = "i", mar = c(3,3,1,1), mgp = c(2,0.75,0), cex.axis = 1.2)
 mp = barplot(c(NA, n_com, NA), las = 2, ylim = c(0, 100))
 axis(side = 1, at = mp[c(NA, years, NA) %in% seq(1980, 2015, 5)], labels = seq(1980, 2015, 5), line = 0, las = 2)
@@ -448,9 +452,9 @@ axis(side = 1, at = mp[2:(nt+1)], labels = rep("", nt), line = 0, las = 2, tcl =
 box()
 ```
 
-##### Subsistence
+`r create_label("Figure", cntr, F, level = 4, sub = "c", subb = "3", text = "Subsistence", tabset = F, fit)`
 
-```{r sub-ess}
+```{r sub-ess, eval = fit}
 par(xaxs = "i", yaxs = "i", mar = c(3,3,1,1), mgp = c(2,0.75,0), cex.axis = 1.2)
 mp = barplot(c(NA, n_sub, NA), las = 2, ylim = c(0, 100))
 axis(side = 1, at = mp[c(NA, years, NA) %in% seq(1980, 2015, 5)], labels = seq(1980, 2015, 5), line = 0, las = 2)
@@ -521,8 +525,9 @@ make_gof_table = function(by) {
     g_fun()
 }
 ```
+`r cntr = up_cntr("Figure", cntr, fit); create_label("Figure", cntr, T, level = 2, sub = "", subb = "", text = "Abundance", tabset = T, eval = fit)`
 
-#### Total
+`r create_label("Figure", cntr, F, level = 3, sub = "a", subb = "", text = "Escapement", tabset = F, fit)`
 
 ```{r}
 make_gof_table("total")
@@ -551,6 +556,7 @@ make_gof_table("age/sex")
 ### Escapement
 
 ```{r esc-fit}
+```{r Sesc-fit, eval = fit}
 S_fit = post_summ(post, "^S_t[")/1000
 mean_S_cv = paste0(round(mean(sig2cv(S_obs_sig)), 2) * 100, "%")
 par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
@@ -563,9 +569,9 @@ lines(S_fit[3,] ~ years, lwd = 2)
 points(I(S_obs/1000) ~ years, pch = 16, cex = 1.2)
 ```
 
-### Commercial
+`r create_label("Figure", cntr, F, level = 3, sub = "b", subb = "", text = "Commercial", tabset = F, fit)`
 
-```{r}
+```{r Hcom-fit, eval = fit}
 Hcom_fit = post_summ(post, "Hcom")/1000
 mean_com_cv = paste0(round(mean(sig2cv(Hcom_obs_sig)), 2) * 100, "%")
 par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
@@ -578,9 +584,9 @@ lines(Hcom_fit[3,] ~ years, lwd = 2)
 points(I(Hcom_obs/1000) ~ years, pch = 16, cex = 1.2)
 ```
 
-### Subsistence
+`r create_label("Figure", cntr, F, level = 3, sub = "c", subb = "", text = "Subsistence", tabset = F, fit)`
 
-```{r}
+```{r Hsub-fit, eval = fit}
 Hsub_fit = post_summ(post, "Hsub")/1000
 mean_sub_cv = paste0(round(mean(sig2cv(Hsub_obs_sig)), 2) * 100, "%")
 par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
@@ -592,7 +598,6 @@ lines(Hsub_fit[5,] ~ years, col = "grey")
 lines(Hsub_fit[3,] ~ years, lwd = 2)
 points(I(Hsub_obs/1000) ~ years, pch = 16, cex = 1.2)
 ```
-
 
 `r if (pp_check) "# Posterior Predictive Checks {.tabset .tabset-fade .tabset-pills}"`
 
