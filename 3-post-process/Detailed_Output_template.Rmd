@@ -85,7 +85,7 @@ create_label = function(type, cntr, inc_type = T, level, sub = "", subb = "", te
 }
 ```
 
-# Model Description
+`r cntr = up_cntr("Section", cntr, T); create_label("Section", cntr, F, level = 1, sub = "", subb = "", text = "Model Description", tabset = F)`
 
 ```{r model-description-table}
 pretty_z_unit = paste(capitalize(str_split(z_unit, "_")[[1]]), collapse = " ")
@@ -110,9 +110,11 @@ kable(tab, caption = "Assumptions regarding trends and reproductive units in thi
   group_rows("Trends", 3, 5, italic = T, bold = F)
 ```
 
-`r if (mcmc_info) "# MCMC {.tabset .tabset-fade .tabset-pills}"`
+`r cntr = up_cntr("Section", cntr, mcmc_info); create_label("Section", cntr, F, level = 1, sub = "", subb = "", text = "MCMC", tabset = T, mcmc_info)`
 
-`r if (mcmc_info) "## Dimensions"`
+`r cntr = up_cntr("Table", cntr, mcmc_info); create_label("Table", cntr, T, level = 2, sub = "", subb = "", text = "Info", tabset = T, mcmc_info)`
+
+`r create_label("Table", cntr, F, level = 3, sub = "a", subb = "", text = "Dimensions", tabset = T, mcmc_info)`
 
 ```{r mcmc-dimesion-info, eval = mcmc_info}
 n_burn = unname(meta$mcmc.info["n.burnin"])
@@ -143,7 +145,7 @@ kable(tab, caption = "The MCMC settings used in this run.") %>%
   row_spec(row = 7, bold = T)
 ```
 
-`r if (mcmc_info) "## Run Time"`
+`r create_label("Table", cntr, F, level = 3, sub = "b", subb = "", text = "Run Time", tabset = F, mcmc_info)`
 
 ```{r model-runtime-info, eval = mcmc_info}
 elapse = meta$elapsed
@@ -167,9 +169,9 @@ kable(round(tab), caption = "Model fit statistics.", row.names = F) %>%
   kable_styling(full_width = F)
 ```
 
-`r if (mcmc_info) "## Diagnostics {.tabset .tabset-fade .tabset-pills}"`
+`r cntr = cntr = up_cntr("Table", cntr, mcmc_info); create_label("Table", cntr, T, level = 2, sub = "", subb = "", text = "Diagnostic Summaries", tabset = T, mcmc_info)`
 
-`r if (mcmc_info) "### Rhat"`
+`r create_label("Table", cntr, F, level = 3, sub = "a", subb = "", text = "$\\hat{R}$", tabset = F, mcmc_info)`
 
 ```{r Rhat-info, eval = mcmc_info}
 Rhat = meta$R.hat
@@ -185,7 +187,7 @@ kable(
   kable_styling(full_width = F)
 ```
 
-`r if (mcmc_info) "### Effective Samples"`
+`r create_label("Table", cntr, F, level = 3, sub = "b", subb = "", text = "Effective MCMC Samples", tabset = F, mcmc_info)`
 
 ```{r ess-info, eval = mcmc_info}
 ess = meta$n.eff
@@ -201,53 +203,84 @@ kable(
   kable_styling(full_width = F)
 ```
 
-`r if (mcmc_info) "### Sampling Behavior {.tabset .tabset-fade .tabset-pills}"`
+`r cntr = up_cntr("Figure", cntr, mcmc_info); create_label("Figure", cntr, T, level = 2, sub = "", subb = "", text = "Diagnostic Plots", tabset = T, mcmc_info)`
 
-`r if (mcmc_info) "#### D_sum"`
-
-```{r D-sum-diag-plot, eval = mcmc_info}
-par(oma = c(0,0,2,0))
-diag_plots(post, "D_sum")
-```
-
-`r if (mcmc_info) "#### alpha"`
+`r create_label("Figure", cntr, F, level = 3, sub = "a", subb = "", text = "$\\alpha$", tabset = F, mcmc_info)`
 
 ```{r alpha-diag-plot, eval = mcmc_info}
-par(oma = c(0,0,2,0))
-diag_plots(post, "alpha")
+par(oma = c(0,0,2,0)); diag_plots(post, "alpha", show_diags = "always")
 ```
 
-`r if (mcmc_info) "#### beta"`
+`r create_label("Figure", cntr, F, level = 3, sub = "b", subb = "", text = "$\\beta$", tabset = F, mcmc_info)`
 
 ```{r beta-diag-plot, eval = mcmc_info}
-par(oma = c(0,0,2,0))
-diag_plots(post, "beta$")
+par(oma = c(0,0,2,0)); diag_plots(post, "beta$", show_diags = "always")
 ```
 
-`r if (mcmc_info) "#### Selectivity Parameters"`
+`r create_label("Figure", cntr, F, level = 3, sub = "c", subb = "", text = "$\\phi$", tabset = F, mcmc_info)`
+
+```{r phi-diag-plot, eval = mcmc_info}
+par(oma = c(0,0,2,0)); diag_plots(post, "phi", show_diags = "always")
+```
+
+`r create_label("Figure", cntr, F, level = 3, sub = "d", subb = "", text = "$\\sigma_R$", tabset = F, mcmc_info)`
+
+```{r sigmaR-diag-plot, eval = mcmc_info}
+par(oma = c(0,0,2,0)); diag_plots(post, "sigma_R", show_diags = "always")
+```
+
+`r create_label("Figure", cntr, F, level = 3, sub = "e", subb = "", text = "Selectivity", tabset = F, mcmc_info)`
 
 ```{r V-params-diag-plots, eval = mcmc_info, fig.height = 7}
-diag_plots(post, c("^Vtau$", "^Vsig$", "^Vtha$", "^Vlam$"))
+diag_plots(post, c("^Vtau$", "^Vsig$", "^Vtha$", "^Vlam$"), show_diags = "always")
 ```
 
-`r if (mcmc_info) "#### Fishing Mortality {.tabset .tabset-fade .tabset-pills}"`
+`r create_label("Figure", cntr, F, level = 3, sub = "f", subb = "", text = "Fishing Mortality", tabset = T, mcmc_info)`
 
-`r if (mcmc_info) "##### Commercial"`
+`r create_label("Figure", cntr, F, level = 4, sub = "f", subb = "1", text = "Commercial", tabset = F, mcmc_info)`
 
 ```{r Fcom-diag-plots, fig.height = 6, fig.width = 9, eval = mcmc_info}
-diag_plots(post, c("Fcom"))
+diag_plots(post, "Fcom", show_diags = "always")
 ```
 
-`r if (mcmc_info) "##### Subsistence"`
+`r create_label("Figure", cntr, F, level = 4, sub = "f", subb = "2", text = "Subsistence", tabset = F, mcmc_info)`
 
 ```{r Fsub-diag-plots, fig.height = 6, fig.width = 9, eval = mcmc_info}
-diag_plots(post, c("Fsub"))
+diag_plots(post, "Fsub", show_diags = "always")
 ```
 
-`r if (mcmc_info) "#### Recruitment"`
+`r create_label("Figure", cntr, F, level = 3, sub = "g", subb = "", text = "$R_y$", tabset = F, mcmc_info)`
 
 ```{r R-diag-plots, fig.height = 6, fig.width = 9, eval = mcmc_info}
-diag_plots(post, c("^R["))
+diag_plots(post, "^R[", show_diags = "always")
+```
+
+`r create_label("Figure", cntr, F, level = 3, sub = "h", subb = "", text = "$\\delta$", tabset = T, mcmc_info)`
+
+`r create_label("Figure", cntr, F, level = 4, sub = "h", subb = "1", text = "$\\delta_0$", tabset = F, mcmc_info)`
+
+```{r b0-sex-diag-plots, fig.height = 6, fig.width = 9, eval = mcmc_info}
+diag_plots(post, "b0_sex", show_diags = "always")
+```
+
+`r create_label("Figure", cntr, F, level = 4, sub = "h", subb = "2", text = "$\\delta_1$", tabset = F, mcmc_info)`
+
+```{r b1-sex-diag-plots, fig.height = 6, fig.width = 9, eval = mcmc_info}
+diag_plots(post, "b1_sex", show_diags = "always")
+```
+
+`r create_label("Figure", cntr, F, level = 3, sub = "i", subb = "", text = "$\\gamma$", tabset = T, mcmc_info)`
+
+`r create_label("Figure", cntr, F, level = 4, sub = "i", subb = "1", text = "$\\gamma_{0,a,s}$", tabset = F, mcmc_info)`
+
+```{r b0-mat-diag-plots, fig.height = 7, eval = mcmc_info}
+diag_plots(post, "b0_mat", show_diags = "always")
+```
+
+`r create_label("Figure", cntr, F, level = 4, sub = "i", subb = "2", text = "$\\gamma_{1,a,s}$", tabset = F, mcmc_info)`
+
+```{r b1-mat-diag-plots, fig.height = 7, eval = mcmc_info}
+diag_plots(post, "b1_mat", show_diags = "always")
 ```
 
 # Fit to Data 
