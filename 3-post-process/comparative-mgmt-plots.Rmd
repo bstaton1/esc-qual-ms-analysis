@@ -29,7 +29,7 @@ model = 1
 source("../2-model-fit/1-compile-data.R")
 source("../new-func-source.R")
 
-out_dir = "../model-output-rand-age/"
+out_dir = "../../model-output-no-rand-age/"
 out_files = dir(out_dir)
 
 
