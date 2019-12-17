@@ -509,16 +509,22 @@ lines(Hsub_fit[3,] ~ years, lwd = 2)
 points(I(Hsub_obs/1000) ~ years, pch = 16, cex = 1.2)
 ```
 
-`r if (pp_check) "# Posterior Predictive Checks {.tabset .tabset-fade .tabset-pills}"`
+`r cntr = up_cntr("Section", cntr, pp_check); create_label("Section", cntr, F, level = 1, sub = "", subb = "", text = "Posterior Predictive Checks", tabset = T, pp_check)`
 
-`r if (pp_check) "## Abundance"`
+`r cntr = up_cntr("Figure", cntr, pp_check); create_label("Figure", cntr, T, level = 2, sub = "", subb = "", text = "Abundance", tabset = F, pp_check)`
 
-```{r N-pp-check, fig.height = 4, fig.width = 8, eval = pp_check}
+`r if (pp_check) "The metric used to summarize the fit of simulated and observed abundance data from source $k$ in each posterior sample $i$ was:"`
+
+`r if (pp_check) "$$SSQ_{k,i} = \\sum_t^{n_t} \\left(\\log(x_{k,t,i}) - \\log(\\hat{x}_{k,t,i})\\right)^2$$"`
+
+`r if (pp_check) "where $x$ represents the observed or simulated data, and $\\hat{x}$ represents the model expectation for MCMC iteration $i$. If $x$ represents the observed data, it does not have a $i$ subscript but the calculation is the same. The Bayesian $p$-value (upper left corner in the figure below) represents the proportion of MCMC iterations in which $SSQ_{k}$ of the observed data was greater than $SSQ_{k}$ of the simulated data; values close to 0.5 are ideal."`
+
+```{r N-pp-check, fig.height = 3, fig.width = 8, eval = pp_check}
 S_check = lnorm_pp_check(post_subset(post, "^S_t[", T), S_obs_sig, S_obs)
 Hcom_check = lnorm_pp_check(post_subset(post, "Hcom[", T), Hcom_obs_sig, Hcom_obs)
 Hsub_check = lnorm_pp_check(post_subset(post, "Hsub[", T), Hsub_obs_sig, Hsub_obs)
 
-par(mfrow = c(1,3), mar = c(2,2,1,1), tcl = -0.25, mgp = c(5,0.5,0), oma = c(2,2,0,0))
+par(mfrow = c(1,3), mar = c(2,2,3,1), tcl = -0.25, mgp = c(5,0.5,0), oma = c(2,2,0,0))
 pp_check_plot(S_check, "Escapement", p_val = T)
 pp_check_plot(Hcom_check, "Commercial", p_val = T)
 pp_check_plot(Hsub_check, "Subsistence", p_val = T)
@@ -526,14 +532,20 @@ mtext(side = 1, outer = T, "Observed Data Fit Measure", line = 0.5)
 mtext(side = 2, outer = T, "Simulated Data Fit Measure", line = 0.5)
 ```
 
-`r if (pp_check) "## Composition"`
+`r cntr = up_cntr("Figure", cntr, pp_check); create_label("Figure", cntr, T, level = 2, sub = "", subb = "", text = "Composition", tabset = F, pp_check)`
 
-```{r comp-pp-check, fig.height = 4, fig.width = 8, eval = pp_check}
+`r if (pp_check) "The metric used to summarize the fit of simulated and observed composition data from source $k$ in each posterior sample $i$ was:"`
+
+`r if (pp_check) "$$\\chi_{k,i}^2 = \\sum_t^{n_t} \\sum_j^{n_s \\cdot n_a} \\frac{(x_{k,t,j,i} - \\hat{x}_{k,t,j,i})^2}{\\hat{x}_{k,t,j,i}}$$"`
+
+`r if (pp_check) "where $x$ represents the observed or simulated data, and $\\hat{x}$ represents the model expectation for MCMC iteration $i$. $j$ represents a unique age/sex class. If $x$ represents the observed data, it does not have a $i$ subscript but the calculation is the same. The Bayesian $p$-value (upper left corner in the figure below) represents the proportion of MCMC iterations in which $\\chi_{k}^2$ of the observed data was greater than $\\chi_{k}^2$ of the simulated data; values close to 0.5 are ideal."`
+
+```{r comp-pp-check, fig.height = 3, fig.width = 8, eval = pp_check}
 com_check = mult_pp_check(post_subset(post, "q_com", T), x_com)
 sub_check = mult_pp_check(post_subset(post, "q_sub", T), x_sub)
 esc_check = mult_pp_check(post_subset(post, "q_esc", T), x_esc)
 
-par(mfrow = c(1,3), mar = c(2,2,1,1), tcl = -0.25, mgp = c(5,0.5,0), oma = c(2,2,0,0))
+par(mfrow = c(1,3), mar = c(2,2,2,1), tcl = -0.25, mgp = c(5,0.5,0), oma = c(2,2,0,0))
 pp_check_plot(com_check, "Commercial", p_val = T, axis_q = c(0, 0.99))
 pp_check_plot(sub_check, "Subsistence", p_val = T, axis_q = c(0, 0.99))
 pp_check_plot(esc_check, "Escapement", p_val = T, axis_q = c(0, 0.99))
