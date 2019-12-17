@@ -1,13 +1,21 @@
+# clear the workspace
 rm(list = ls(all = T))
 
-models = c(1,2,10,12)
+# where to put the output
+html_dir = "os-detailed"
+if (!dir.exists(html_dir)) dir.create(html_dir)
+
+models = c(1,2,3,7,8,9)
 for (model in models) {
   out_file = paste0("Detailed_Output_", model, ".html", sep = "")
   rmarkdown::render(
     input = "Detailed_Output_template.Rmd",
-    output_format = "html_document",
-    output_file = out_file)
-  out_file = paste0("Detailed_Output_", model, ".html", sep = "")
-  browseURL(out_file)
+    output_file = file.path(html_dir, out_file))
+  
+  # if you want to open each file when complete
+  # environment is cleared when running each document, so you have to specify the file location again
+  # html_dir = "os-detailed"
+  # out_file = file.path(html_dir, paste0("Detailed_Output_", model, ".html", sep = ""))
+  # browseURL(out_file)
 }
 
