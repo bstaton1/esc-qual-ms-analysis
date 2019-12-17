@@ -41,3 +41,6 @@ rsconnect/
 # output files
 *.rds
 *.html
+
+# output figures
+3-post-process/ms-figs/*
