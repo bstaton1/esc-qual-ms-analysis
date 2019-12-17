@@ -30,18 +30,16 @@ source("../2-model-fit/1-compile-data.R")
 source("../new-func-source.R")
 
 # location of output files
-out_dir = "../model-output-keep/"
+out_dir = "../../model-output-no-rand-age"
 
 # names of output files
 post_name = paste("post-", model, ".rds", sep = "")
 meta_name = paste("meta-", model, ".rds", sep = "")
 msy_name = paste("msy-", model, ".rds", sep = "")
-pp_name = paste("prob-profiles-", model, ".rds", sep = "")
 
-# read in the saved posterior samples
+# read in the saved output samples
 post = readRDS(file.path(out_dir, post_name))
 meta = readRDS(file.path(out_dir, meta_name))
-# pp = readRDS(file.path(out_dir, pp_name))
 msy = paste(file.path(out_dir, msy_name))
 ```
 
@@ -878,7 +876,7 @@ edit_full_model(
 
 `r if (jags_data) "## JAGS Data"`
 
-```{r jags-data, comment = NA}
+```{r jags-data, comment = NA, eval = jags_data}
 jags_dat
 ```
 
