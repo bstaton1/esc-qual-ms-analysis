@@ -48,6 +48,41 @@ mcmc_info = F
 pp_check = F
 jags_code = F
 jags_data = F
+
+```{r cntr}
+# set up a counter
+cntr = c(
+  Model = model,
+  Section = 0,
+  Figure = 0,
+  Table = 0
+)
+
+# function to increment the counter
+up_cntr = function(type, cntr, eval = T) {
+  if (eval) {
+    cntr[type] = cntr[type] + 1
+  }
+  return(cntr)
+}
+
+# function to print a header
+create_label = function(type, cntr, inc_type = T, level, sub = "", subb = "", text = "", tabset = F, eval = T) {
+  type_text = paste0(type, ". ")
+  id = paste0(
+    "**", 
+    ifelse(inc_type & type != "Section", type_text, ""),
+    cntr[type], 
+    ifelse(nchar(sub) > 0, "(", ""), 
+    sub, subb,
+    ifelse(nchar(sub) > 0, ")", ""), 
+    "**"
+    )
+  hash = paste(rep("#", level), collapse = "")
+  tabset_text = " {.tabset .tabset-fade .tabset-pills}"
+  
+  if (eval) paste0(hash, " ", id, " ", text, ifelse(tabset, tabset_text, ""))
+}
 ```
 
 # Model Description
