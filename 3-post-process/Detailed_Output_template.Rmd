@@ -815,22 +815,6 @@ plot.new()
 legend("center", title = "Age", legend = rev(c(4:7)), pch = 22, pt.bg = rev(fill_col), bty = "n", cex = 2, pt.cex = 4)
 ```
 
-```{r}
-df = t(as.data.frame(apply(post_subset(post, "b1_mat[1,", matrix = T), 2, function(x) summ(x, rnd = 4))))
-rownames(df) = paste("`", rownames(df), "`", sep = "")
-df %>%
-  kable(caption = "Posterior summary of the slopes of the female relationships (from a baseline-category logit model)") %>%
-  kable_styling(position = "center", full_width = F)
-```
-
-```{r}
-df = t(as.data.frame(apply(post_subset(post, "b1_mat[2,", matrix = T), 2, function(x) summ(x, rnd = 4))))
-rownames(df) = paste("`", rownames(df), "`", sep = "")
-df %>%
-  kable(caption = "Posterior summary of the slopes of the male relationships (from a baseline-category logit model)") %>%
-  kable_styling(position = "center", full_width = F)
-```
-
 `r if (meta$rand_age) "### Random Variables"`
 
 ```{r mat-age-sex-random, fig.width = 8, fig.height = 4, eval = meta$rand_age}
@@ -873,12 +857,6 @@ polygon(x = c(by, rev(by)), y = c(pi_f[4,], rev(pi_f[5,])), col = "grey80", bord
 lines(pi_f[4,] ~ by, col = "grey")
 lines(pi_f[5,] ~ by, col = "grey")
 lines(pi_f[3,] ~ by, col = "black", lwd = 2)
-```
-
-```{r}
-t(as.data.frame(summ(post_subset(post, "b1_sex", matrix = T), rnd = 4))) %>%
-  kable(caption = "Posterior summary of the slope of this relationship (from a logit-linear model)", row.names = F) %>%
-  kable_styling(position = "center", full_width = F)
 ```
 
 # Exploitation Rates {.tabset .tabset-fade .tabset-pills}
