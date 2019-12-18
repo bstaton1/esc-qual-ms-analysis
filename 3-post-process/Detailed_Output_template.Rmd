@@ -48,6 +48,7 @@ mcmc_info = F
 pp_check = F
 jags_code = F
 jags_data = F
+```
 
 ```{r cntr}
 # set up a counter
@@ -72,6 +73,7 @@ create_label = function(type, cntr, inc_type = T, level, sub = "", subb = "", te
   id = paste0(
     "**", 
     ifelse(inc_type & type != "Section", type_text, ""),
+    ifelse(inc_type & type != "Section", paste0(type, " "), ""),
     cntr[type], 
     ifelse(nchar(sub) > 0, "(", ""), 
     sub, subb,
@@ -553,68 +555,154 @@ mtext(side = 1, outer = T, "Observed Data Fit Measure", line = 0.5)
 mtext(side = 2, outer = T, "Simulated Data Fit Measure", line = 0.5)
 ```
 
-# Selectivity Patterns {.tabset .tabset-fade .tabset-pills}
+`r cntr = up_cntr("Section", cntr, selectivity); create_label("Section", cntr, T, level = 1, sub = "", subb = "", text = "Selectivity", tabset = T, selectivity)`
 
-## Relative Selectivity
+`r cntr = up_cntr("Figure", cntr, selectivity); create_label("Figure", cntr, T, level = 2, sub = "a", subb = "", text = "Pearson Function", tabset = F, selectivity)`
 
-Error bars are the central 95% of all years. 
+`r if (selectivity) "100 posterior draws of the fitted Pearson function. Blue line represents the median across all draws."`
 
-```{r}
+```{r pearson-fig, eval = selectivity}
+
+pearson = function(rlm, lambda, theta, sigma, tau) {
+  
+  # separate calculation into 5 steps
+  t1 = (1 + lambda^2/(4 * theta^2))^theta
+  t2 = rlm - (sigma * lambda)/(2 * theta) - tau
+  t3 = (1 + t2^2/sigma^2)^-theta
+  t4 = exp(-lambda * (atan(t2/sigma) + atan(lambda/(2 * theta))))
+  
+  v = t1 * t3 * t4
+  
+  # standardize the output so only one age/sex is fully vuln for a gear
+  v/max(v)
+}
+
+V_post = post_subset(post, "^V...$", T)
+
+my_pearson = function(rlm, i) {
+  unname(pearson(
+    rlm, 
+    tau = V_post[i,"Vtau"], sigma = V_post[i,"Vsig"], theta = V_post[i,"Vtha"], lambda = V_post[i,"Vlam"]
+  ))
+}
+
+rlm_seq = seq(min(rlm), max(rlm), length = 100)
+
+V_out = sapply(1:nrow(V_post), my_pearson, rlm = rlm_seq)
+V_med = apply(V_out, 1, median)
+
+par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
+plot(1,1, type = "n", xlim = range(rlm_seq), ylim = c(min(V_out),1),
+     ylab = "Selectivity", xlab = "MEFL:Mesh Perimeter (RLM)", las = 1)
+junk = sapply(sample(1:nrow(V_post), 100), function(i) {
+  lines(V_out[,i] ~ rlm_seq, col = scales::alpha("grey20", 0.2))
+})
+lines(V_med ~ rlm_seq, col = "blue", lwd = 4)
+       
+```
+`r create_label("Figure", cntr, T, level = 2, sub = "b", subb = "", text = "Age/Sex/Mesh Values", tabset = T, selectivity)`
+```{r sel-8, eval = selectivity}
+
 v = array_format(post_summ(post, "v[")[3,])
 
 unr_fit = apply(v[,,,1], 3, function(x) apply(x, 2, mean))
 unr_lwr = apply(v[,,,1], 3, function(x) apply(x, 2, function(z) quantile(z, 0.025)))
 unr_upr = apply(v[,,,1], 3, function(x) apply(x, 2, function(z) quantile(z, 0.975)))
-res_fit = apply(v[,,,2], 3, function(x) apply(x, 2, mean))
-res_lwr = apply(v[,,,2], 3, function(x) apply(x, 2, function(z) quantile(z, 0.025)))
 res_upr = apply(v[,,,2], 3, function(x) apply(x, 2, function(z) quantile(z, 0.975)))
+v = array_format(post_summ(post, "v[")[3,])
 
 xf = a_min:a_max - 0.05
 xm = a_min:a_max + 0.05
 
 par(mfrow = c(1,2), mar = c(2,2,2,0.5), oma = c(1,1.5,0,0))
 plot(unr_fit[,1] ~ xf, ylim = c(0,1), xlim = range(xf, xm),
-     main = "Unrestricted",
-     col = "red", pch = 16, type = "o", xaxt = "n", las = 2)
 points(unr_fit[,2] ~ xm, xlim = range(xf, xm), col = "blue", pch = 16, type = "o")
 segments(xf, unr_lwr[,1], xf, unr_upr[,1], col = "red")
 segments(xm, unr_lwr[,2], xm, unr_upr[,2], col = "blue")
-legend("bottomright", legend = c("Males", "Females"), pch = 16, col = c("Blue", "red"), lty = 1, pt.cex = 1.2, bg = "grey90", cex = 0.8)
+legend("bottomright", legend = c("Males", "Females"), pch = 16,
+       col = c("Blue", "red"), lty = 1, pt.cex = 1.2, cex = 0.8)
 axis(side = 1, at = 4:7, labels = 4:7)
 
-par(mar = c(2,0.5,2,2))
+```
+
+`r create_label("Figure", cntr, F, level = 3, sub = "b", subb = "2", text = "6-inch", tabset = F, selectivity)`
+
+```{r sel-6, eval = selectivity}
+
+v = array_format(post_summ(post, "v[")[3,])
+
+res_fit = apply(v[,,,2], 3, function(x) apply(x, 2, mean))
+res_upr = apply(v[,,,2], 3, function(x) apply(x, 2, function(z) quantile(z, 0.975)))
+
+xf = a_min:a_max - 0.05
+xm = a_min:a_max + 0.05
 plot(res_fit[,1] ~ xf, ylim = c(0,1), xlim = range(xf, xm),
-     main = "Restricted",
-     yaxt = "n", xaxt = "n", col = "red", pch = 16, type = "o")
 points(res_fit[,2] ~ xm, xlim = range(xf, xm), col = "blue", pch = 16, type = "o")
 segments(xf, res_lwr[,1], xf, res_upr[,1], col = "red")
 segments(xm, res_lwr[,2], xm, res_upr[,2], col = "blue")
 
+legend("bottomright", legend = c("Males", "Females"), pch = 16,
+       col = c("Blue", "red"), lty = 1, pt.cex = 1.2, cex = 0.8)
 axis(side = 1, at = 4:7, labels = 4:7)
 
-mtext(side = 1, line = 0, outer = T, "Age")
-mtext(side = 2, line = 0.5, outer = T, "Selectivity")
 ```
 
-## Posterior v. Prior 
+`r create_label("Figure", cntr, T, level = 2, sub = "c", subb = "", text = "Posterior vs. Prior", tabset = T, selectivity)`
 
-The prior on each selectivity parameter (lambda, sigma, theta, and tau) was normal with mean equal to the estimates presented in Bromaghin (2006), and standard deviation equal to the standard error presented therein times 10 (purposefully uninformative). The "Yukon" estimates are from Bromaghin (2006) with unaltered standard error.
 
-```{r}
-par(mfrow = c(2,2), mar = c(2,2,2,2))
-junk = sapply(c("Vlam", "Vsig", "Vtha", "Vtau"), function(x) {
-  samps = post_subset(post, x, matrix = T)
+```{r sel-prior-plot-func, eval = selectivity}
+  samps = post_subset(post, paste0("V", p), matrix = T)
   dens = apply(samps, 2, density)
-  plot(1,1, type = "n", main = x, xlab = "", ylab = "",
-       ylim = c(0, max(dens[[1]]$y, dens[[2]]$y, dens[[3]]$y)),
+  par(mar = c(3,3,1,1), xaxs = "i", yaxs = "i", mgp = c(2,0.5,0), tcl = -0.25)
+  plot(1,1, type = "n", xlab = "Parameter Value", ylab = "Density",
+       ylim = c(0, max(dens[[1]]$y, dens[[2]]$y, dens[[3]]$y)) * 1.2,
        xlim = range(dens[[1]]$x, dens[[2]]$x, dens[[3]]$x))
+  
+  # the prior
+  with(dens[[2]], polygon(x = c(x, rev(x)), y = c(y, rep(0, length(y))), col = scales::alpha("orange", 0.5), border = NA))
+  lines(dens[[2]]$y ~ dens[[2]]$x, col = "black")
+  
+  # the posterior
+  with(dens[[1]], polygon(x = c(x, rev(x)), y = c(y, rep(0, length(y))), col = scales::alpha("skyblue4", 0.3), border = NA))
   lines(dens[[1]]$y ~ dens[[1]]$x, col = "blue")
-  lines(dens[[2]]$y ~ dens[[2]]$x, col = "red")
-  lines(dens[[3]]$y ~ dens[[3]]$x, col = "red", lty = 2)
-  if (x == "Vlam") {
-    legend("topleft", legend = c("Prior", "Posterior", "Yukon"), lty = c(1,1,2), col = c("red", "blue", "red"))
-  }
-})
+  
+  # yukon 
+  with(dens[[3]], polygon(x = c(x, rev(x)), y = c(y, rep(0, length(y))), col = scales::alpha("salmon4", 0.3), border = NA))
+  lines(dens[[3]]$y ~ dens[[3]]$x, col = "red")
+  
+  box()
+  legend("top", legend = c("Prior", "Posterior", "Yukon"), pch = 22,
+         pt.bg = scales::alpha(c("orange", "skyblue4", "salmon4"), c(0.5, 0.3, 0.3)),
+         col = c("black", "blue", "red"), horiz = T, bty = "n", pt.cex = 3)
+
+}
+
+```
+
+`r if (selectivity) 'The prior on each selectivity parameter ($\\tau$, $\\sigma$, $\\theta$, and $\\lambda$) was normal with mean equal to the estimates presented in Bromaghin ([2005](https://doi.org/10.1016/j.fishres.2005.03.004){target="_blank"}), and standard deviation equal to the standard error presented therein times 10 (purposefully uninformative). The "Yukon" estimates are from Bromaghin ([2005](https://doi.org/10.1016/j.fishres.2005.03.004){target="_blank"}) with unaltered standard error.'`
+
+`r create_label("Figure", cntr, F, level = 3, sub = "c", subb = "1", text = "$\\tau$", tabset = F, selectivity)`
+
+```{r Vtau-plot, eval = selectivity}
+v_prior_plot("tau")
+```
+
+`r create_label("Figure", cntr, F, level = 3, sub = "c", subb = "2", text = "$\\sigma$", tabset = F, selectivity)`
+
+```{r Vsig-plot, eval = selectivity}
+v_prior_plot("sig")
+```
+
+`r create_label("Figure", cntr, F, level = 3, sub = "c", subb = "3", text = "$\\theta$", tabset = F, selectivity)`
+
+```{r Vtha-plot, eval = selectivity}
+v_prior_plot("tha")
+```
+
+`r create_label("Figure", cntr, F, level = 3, sub = "c", subb = "4", text = "$\\lambda$", tabset = F, selectivity)`
+
+```{r Vlam-plot, eval = selectivity}
+v_prior_plot("lam")
 ```
 
 # Trends in Composition-at-Return {.tabset .tabset-fade .tabset-pills}
