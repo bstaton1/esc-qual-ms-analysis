@@ -100,7 +100,9 @@ pp_check_plot = function(check_list, main = NULL, axis_q = NULL, p_val = F) {
          xlab = "Observed Fit Measure",
          ylab = "Simulated Fit Measure",
          main = main,
-         pch = 16, col = scales::alpha("grey20", 0.05))
+         pch = 21, 
+         bg = scales::alpha("salmon", 0.3),
+         col = scales::alpha("red", 0.3))
     abline(v = mean_obs, col = "blue", lty = 2)
     abline(h = mean_new, col = "blue", lty = 2)
     abline(0,1, col = "blue", lty = 2)
