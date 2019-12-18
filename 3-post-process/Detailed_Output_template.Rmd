@@ -223,15 +223,24 @@ kable(round(tab), caption = "Model fit statistics.", row.names = F) %>%
 ```{r Rhat-info, eval = mcmc_info}
 Rhat = meta$R.hat
 params = rownames(Rhat)
-params = paste("`", params, "`", sep = "")
-rownames(Rhat) = NULL
-Rhat = apply(Rhat, 2, function(x) round(x, 2))
-Rhat = cbind(Parameter = params, Rhat)
+if (!meta$rand_age) {
+  params = params[-which(params %in% c("p", "D_sum"))]
+}
+Rhat = Rhat[params,]
+Rhat = round(Rhat, 3)
 
+latex = math_key[params]
+params = paste("`", params, "`", sep = "")
+Rhat = cbind(data.frame(latex = latex, params = params), data.frame(Rhat))
+rownames(Rhat) = NULL
+
+Rhat[is.na(Rhat) | Rhat == "Inf" | Rhat == "-Inf"] = "--"
+colnames(Rhat) = c("In Text", "In Code", "Mean", "Min", "2.5%", "10%", "25%", "50%", "75%", "90%", "97.5%", "Max")
 kable(
-  Rhat, 
-  caption = "Summaries of the Rhat convergence diagnostic for key parameters/states across years, where applicable.", escape = F, row.names = F) %>%
-  kable_styling(full_width = F)
+  Rhat, format = "html", digits = 2, align = "llcccccccccc",
+  caption = "Summaries of the $\\hat{R}$ convergence diagnostic for all estimated parameters/states. Values close to 1 are ideal, values greater than 1.1 of moderate concern. Summaries were generated across indices of the parameter; for example the max value for $F_{\\text{com},t}$ represents the maximum $\\hat{R}$ value across all years. Parameters that were fixed to have the same value each MCMC iteration have empty cells.", escape = F, row.names = F) %>%
+  kable_styling(full_width = F, bootstrap_options = c("condensed")) %>%
+  add_header_above(c("Quantity" = 2, "Summary Across Indices (where applicable)" = 10))
 ```
 
 `r create_label("Table", cntr, F, level = 3, sub = "b", subb = "", text = "Effective MCMC Samples", tabset = F, mcmc_info)`
@@ -239,15 +248,25 @@ kable(
 ```{r ess-info, eval = mcmc_info}
 ess = meta$n.eff
 params = rownames(ess)
-params = paste("`", params, "`", sep = "")
-rownames(ess) = NULL
-ess = apply(ess, 2, function(x) prettify(round(x)))
-ess = cbind(Parameter = params, ess)
+if (!meta$rand_age) {
+  params = params[-which(params %in% c("p", "D_sum"))]
+}
+params = params[-which(params == "beta")]
+ess = ess[params,]
+ess = apply(round(ess, -2), 2, prettify)
+ess[ess == "0"] = 1
 
+latex = math_key[params]
+params = paste("`", params, "`", sep = "")
+ess = cbind(data.frame(latex = latex, params = params), data.frame(ess))
+rownames(ess) = NULL
+
+colnames(ess) = c("In Text", "In Code", "Mean", "Min", "2.5%", "10%", "25%", "50%", "75%", "90%", "97.5%", "Max")
 kable(
-  ess, 
-  caption = "Summaries of the MCMC effective sample size diagnostic for key parameters/states across years, where applicable.", escape = F, row.names = F) %>%
-  kable_styling(full_width = F)
+  ess, format = "html", align = "llcccccccccc",
+  caption = "Summaries of the effective MCMC samples for all estimated parameters/states. Larger values represent more independent samples were drawn. Summaries were generated across indices of the parameter; for example the minimum value for $F_{\\text{com},t}$ represents the minimum effective samples value across all years. Parameters that were fixed to have the same value each MCMC iteration have values of 1. All other cells were rounded to the nearest 100 for ease of presentation.", escape = F, row.names = F) %>%
+  kable_styling(full_width = F, bootstrap_options = c("condensed")) %>%
+  add_header_above(c("Quantity" = 2, "Summary Across Indices (where applicable)" = 10))
 ```
 
 `r cntr = up_cntr("Figure", cntr, mcmc_info); create_label("Figure", cntr, T, level = 2, sub = "", subb = "", text = "Diagnostic Plots", tabset = T, mcmc_info)`
