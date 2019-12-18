@@ -863,13 +863,13 @@ lines(pi_f[5,] ~ by, col = "grey")
 lines(pi_f[3,] ~ by, col = "black", lwd = 2)
 ```
 
-# Exploitation Rates {.tabset .tabset-fade .tabset-pills}
+`r cntr = up_cntr("Section", cntr, u_rates); create_label("Section", cntr, T, level = 1, sub = "", subb = "", text = "Exploitation Rates", tabset = T, u_rates)`
 
-_These are total exploitation rates, with fishing mortality resulting from both subsistence and commercial fisheries._
+`r if (u_rates) "_These are total exploitation rates, with fishing mortality resulting from both subsistence and commercial fisheries._"`
 
-## By Year
+`r cntr = up_cntr("Figure", cntr, u_rates); create_label("Figure", cntr, T, level = 2, sub = "a", subb = "", text = "By Year", tabset = F, u_rates)`
 
-```{r}
+```{r u-tot, eval = u_rates}
 U_fit = post_summ(post, "Utot_t[")[3,]
 U_lwr = post_summ(post, "Utot_t[")[4,]
 U_upr = post_summ(post, "Utot_t[")[5,]
@@ -884,9 +884,9 @@ lines(U_upr ~ years, col = "grey")
 lines(U_fit ~ years, lwd = 2)
 ```
 
-## By Age/Year
+`r create_label("Figure", cntr, T, level = 2, sub = "b", subb = "", text = "By Age/Year", tabset = F, u_rates)`
 
-```{r, fig.height = 8, fig.width = 6}
+```{r u-ta, fig.height = 8, fig.width = 6, eval = u_rates}
 U_fit = array_format(post_summ(post, "Utot_ta[")[3,])
 U_lwr = array_format(post_summ(post, "Utot_ta[")[4,])
 U_upr = array_format(post_summ(post, "Utot_ta[")[5,])
@@ -907,9 +907,9 @@ for (a in 1:na) {
 mtext(side = 2, outer = T, "Exploitation Rate", line = 1, cex = 1.2)
 ```
 
-## By Age/Sex/Year
+`r create_label("Figure", cntr, T, level = 2, sub = "c", subb = "", text = "By Age/Sex/Year", tabset = F, u_rates)`
 
-```{r, fig.height = 8, fig.width = 6}
+```{r u-tas, fig.height = 8, fig.width = 6, eval = u_rates}
 U_fit = array_format(post_summ(post, "Utot_tas")[3,])
 U_lwr = array_format(post_summ(post, "Utot_tas")[4,])
 U_upr = array_format(post_summ(post, "Utot_tas")[5,])
