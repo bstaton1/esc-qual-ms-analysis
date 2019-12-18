@@ -1,5 +1,6 @@
 ---
 title: "`r paste('Detailed Output for Model', model, sep = ': ')`"
+title: "`r paste('Detailed Output for Model', model_ids[model], sep = ': ')`"
 subtitle: "Kuskokwim River Age/Sex-Structured BSS-SRA"
 date: "`r format(Sys.Date(), '%m/%d/%Y')`"
 output:
@@ -40,7 +41,7 @@ msy_name = paste("msy-", model, ".rds", sep = "")
 # read in the saved output samples
 post = readRDS(file.path(out_dir, post_name))
 meta = readRDS(file.path(out_dir, meta_name))
-msy = paste(file.path(out_dir, msy_name))
+msy = readRDS(file.path(out_dir, msy_name))
 
 ```
 
@@ -130,9 +131,12 @@ create_label = function(type, cntr, inc_type = T, level, sub = "", subb = "", te
   
   if (eval) paste0(hash, " ", id, " ", text, ifelse(tabset, tabset_text, ""))
 }
+
+model_ids = c("N-0", "N-ASL", "E-0", "E-L", "E-S", "E-A", "E-SL", "E-AL", "E-AS", "E-ASL", "EM-0", "EM-ASL")
+
 ```
 
-`r cntr = up_cntr("Section", cntr, T); create_label("Section", cntr, F, level = 1, sub = "", subb = "", text = "Model Description", tabset = F)`
+`r cntr = up_cntr("Section", cntr, T); create_label("Section", cntr, F, level = 1, sub = "", subb = "", text = paste0("Model Description: ", model_ids[model]), tabset = F)`
 
 ```{r model-description-table}
 pretty_z_unit = paste(capitalize(str_split(z_unit, "_")[[1]]), collapse = " ")

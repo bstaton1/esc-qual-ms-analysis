@@ -6,6 +6,7 @@ html_dir = "os-detailed"
 if (!dir.exists(html_dir)) dir.create(html_dir)
 
 models = c(1,2,3,7,8,9)
+model_ids = c("N-0", "N-ASL", "E-0", "E-L", "E-S", "E-A", "E-SL", "E-AL", "E-AS", "E-ASL", "EM-0", "EM-ASL")
 for (model in models) {
   out_file = paste0("Detailed_Output_", model, ".html", sep = "")
   rmarkdown::render(
