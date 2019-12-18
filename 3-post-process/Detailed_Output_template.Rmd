@@ -1017,3 +1017,231 @@ edit_full_model(
 jags_dat
 ```
 
+`r cntr = up_cntr("Section", cntr, big_tables); create_label("Section", cntr, F, level = 1, sub = "", subb = "", text = "Posterior Summaries", tabset = T, big_tables)`
+
+```{r param-table-prep, eval = big_tables}
+alpha_e3 = post_subset(post, "alpha", T) * 1e3
+colnames(alpha_e3) = "alpha_e3"
+beta_e5 = post_subset(post, "beta$", T) * 1e5
+colnames(beta_e5) = "beta_e5"
+mean_R0 = exp(post_subset(post, "log_mean_R0", T))
+colnames(mean_R0) = "mean_R0"
+
+post = post_bind(post, cbind(alpha_e3, beta_e5, mean_R0))
+
+param_names = list(
+  sra = c(
+    ifelse(meta$z_unit == "fish_count", "alpha$", "alpha_e3"), 
+    ifelse(meta$z_unit == "fish_count","beta_e5", "beta_e10"),
+    "sigma_R", "phi", "mean_R0"
+    ),
+  age_f = c("b._mat[1,"),
+  age_m = c("b._mat[2,"),
+  sex = c("b._sex"),
+  sel = c("^V...$")
+)
+
+# lapply(param_names, function(x) match_p(post, x, ubase = T))
+
+# summarize and format the requested posteriors
+# starttime = Sys.time()
+# cat("  Summarizing Posteriors...")
+est_params = as.data.frame(t(post_summ(post,unname(unlist(param_names)))[c(3,1,2,4,5),]))
+# stoptime = Sys.time()
+# stoptime - starttime
+
+# add a parameter type category
+n_matches = unlist(lapply(param_names, function(x) length(match_p(post, x))))
+est_params = cbind(group = unlist(sapply(1:length(n_matches), function(x) rep(names(n_matches)[x], n_matches[x]))), est_params)
+
+# make the node name a variable
+est_params = cbind(param = rownames(est_params), est_params)
+rownames(est_params) = NULL
+
+est_params$latex = math_key[as.character(est_params$param)]
+est_params$param = paste0("`", est_params$param, "`")
+group = est_params$group
+tab = est_params[,c("latex", "param", "50%", "mean", "sd", "2.5%", "97.5%")]
+colnames(tab) = c("In Text", "In Code", "Median", "Mean", "SD", "2.5%", "97.5%")
+
+make_table = function(grp) {
+  output = tab[group == grp,] %>%
+    kable(format = "html", digits = 2, align = "llccccc", escape = F, row.names = F, big.mark = ",") %>%
+    kable_styling(full_width = F, bootstrap_options = c("condensed")) %>%
+    add_header_above(c("Quantity" = 2, "Posterior Summary" = 5))
+  
+  if (grp %in% c("age_f", "age_m")) {
+    output %<>%
+      group_rows("Intercepts", 1, 4, bold = T) %>%
+      group_rows("Slopes", 5, 8, bold = T)
+  }
+  output
+}
+```
+
+`r cntr = up_cntr("Table", cntr, big_tables); create_label("Table", cntr, T, level = 2, sub = "", subb = "", text = "Model Parameters", tabset = T, big_tables)`
+
+`r create_label("Table", cntr, F, level = 3, sub = "a", subb = "", text = "Spawner-Recruit", tabset = F, big_tables)`
+
+`r if (big_tables) make_table("sra")`
+
+`r create_label("Table", cntr, F, level = 3, sub = "b", subb = "", text = "Selectivity", tabset = F, big_tables)`
+
+`r if (big_tables) make_table("sel")`
+
+`r create_label("Table", cntr, F, level = 3, sub = "b", subb = "", text = "Age-at-Return", tabset = T, big_tables)`
+
+`r create_label("Table", cntr, F, level = 4, sub = "b", subb = "1", text = "Females", tabset = F, big_tables)`
+
+`r if (big_tables) make_table("age_f")`
+
+`r create_label("Table", cntr, F, level = 4, sub = "b", subb = "2", text = "Males", tabset = F, big_tables)`
+
+`r if (big_tables) make_table("age_m")`
+
+`r create_label("Table", cntr, F, level = 3, sub = "c", subb = "", text = "Sex-at-Return", tabset = F, big_tables)`
+
+`r if (big_tables) make_table("sex")`
+
+`r cntr = up_cntr("Table", cntr, big_tables); create_label("Table", cntr, T, level = 2, sub = "", subb = "", text = "Derived Quantities", tabset = T, big_tables)`
+
+```{r derived-table-prep, eval = big_tables}
+early_keep_t = 1:10; early_keep_y = 1:10
+late_keep_t = nt - 9:0; late_keep_y = ny - 9:0
+all_keep_t = 1:nt; all_keep_y = 1:ny
+
+samps_early = prep_samples(post, keep_t = early_keep_t, keep_y = early_keep_y, len_trend = meta$len_trend, silent = T)
+samps_late = prep_samples(post, keep_t = late_keep_t, keep_y = late_keep_y, len_trend = meta$len_trend, silent = T)
+samps_all = prep_samples(post, keep_t = all_keep_t, keep_y = all_keep_y, len_trend = meta$len_trend, silent = T)
+
+samps = list(
+  early = matrix2mcmclist(cbind(postpack:::id_mat(post), samps_early)),
+  all = matrix2mcmclist(cbind(postpack:::id_mat(post), samps_all)),
+  late = matrix2mcmclist(cbind(postpack:::id_mat(post), samps_late))
+)
+
+samps = lapply(samps, function(x) post_subset(x, c("v", "pi", "z")))
+
+f = function(post) {
+  post_summ(post, c("v", "z", "pi"))[3,]
+}
+
+out = as.data.frame(lapply(samps, f))
+
+x = get_p(samps[[1]])
+
+build_name = function(x) {
+  symbol = ifelse(str_detect(x, "pi"), "\\bar{\\pi}", 
+         ifelse(str_detect(x, "z"), "\\bar{z}", 
+                ifelse(str_detect(x, "v"), "\\bar{v}", "")))
+  group = ifelse(str_detect(x, "pi"), "pi", 
+         ifelse(str_detect(x, "z"), "z", 
+                ifelse(str_detect(x, "v"), "v", "")))
+  
+  sex = ifelse(str_detect(x, "^m"), "Male", "Female")
+  age = str_extract(x, "[:digit:]")
+  j_key = c(paste0("f", a_min:a_max), paste0("m", a_min:a_max))
+  j_num = 1:8
+  j = unname(sapply(x, function(j) j_num[str_detect(j_key, str_extract(j, "^[:alnum:]+"))]))
+  m = ifelse(str_detect(x, "v_unr"), ",1", 
+             ifelse(str_detect(x, "v_res"), ",2", ""))
+  group = ifelse(m == ",1", "v_unr", ifelse(m == ",2", "v_res", group))
+  data.frame(
+    group = group,
+    latex = paste0("$", symbol, "_{", "i,", j, m, "}$"),
+    sex = sex,
+    age = age)
+}
+
+out = cbind(build_name(rownames(out)), out)
+rownames(out) = NULL
+
+tab = out[,c("latex", "sex", "age", "early", "all", "late")]
+group = out[,"group"]
+colnames(tab)[1:3] = c("Quantity", "Sex", "Age")
+brood_years = 1969:2013
+early_t = paste(paste0("'", substr(range(years[early_keep_t]), 3, 4)), collapse= "-")
+all_t = paste(paste0("'", substr(range(years[all_keep_t]), 3, 4)), collapse= "-")
+late_t = paste(paste0("'", substr(range(years[late_keep_t]), 3, 4)), collapse= "-")
+t_names = c(early_t, all_t, late_t)
+early_y = paste(paste0("'", substr(range(brood_years[early_keep_y]), 3, 4)), collapse= "-")
+all_y = paste(paste0("'", substr(range(brood_years[all_keep_y]), 3, 4)), collapse= "-")
+late_y = paste(paste0("'", substr(range(brood_years[late_keep_y]), 3, 4)), collapse= "-")
+y_names = c(early_y, all_y, late_y)
+
+grp = "pi"
+make_table = function(grp) {
+  output = tab[group == grp,]
+  if (grp == "pi") {
+    colnames(output)[4:6] = y_names
+  } else {
+    colnames(output)[4:6] = t_names
+  }
+  
+  if (grp == "pi") {
+    output %>%
+      kable(format = "html", digits = 3, align = "lllccc", escape = F, row.names = F) %>%
+      kable_styling(full_width = F, bootstrap_options = c("condensed")) %>%
+      add_header_above(c(" " = 3, "Brood Year Range" = 3))
+  } else {
+    output %>%
+      kable(format = "html", digits = 3, align = "lllccc", escape = F, row.names = F) %>%
+      kable_styling(full_width = F, bootstrap_options = c("condensed")) %>%
+      add_header_above(c(" " = 3, "Calendar Year Range" = 3))
+  }
+}
+```
+
+`r create_label("Table", cntr, F, level = 3, sub = "a", subb = "", text = "$\\bar{\\pi}_{i,j}$", tabset = F, big_tables)`
+
+`r if (big_tables) if (big_tables) make_table("pi")`
+
+`r create_label("Table", cntr, F, level = 3, sub = "b", subb = "", text = "$\\bar{z}_{i,j}$", tabset = F, big_tables)`
+
+`r if (big_tables) make_table("z")`
+
+`r create_label("Table", cntr, F, level = 3, sub = "c", subb = "", text = "$\\bar{v}_{i,j,m}$", tabset = T, big_tables)`
+
+`r create_label("Table", cntr, F, level = 4, sub = "c", subb = "1", text = "8-inch", tabset = F, big_tables)`
+
+`r if (big_tables) make_table("v_unr")`
+
+`r create_label("Table", cntr, F, level = 4, sub = "c", subb = "2", text = "6-inch", tabset = F, big_tables)`
+
+`r if (big_tables) make_table("v_res")`
+
+```{r msc-table-prep, eval = big_tables}
+make_table = function(v) {
+  
+  x_early = t(msy[c("50%", "2.5%", "97.5%"),c("S", "H", "R"),v,"early"])
+  x_all = t(msy[c("50%", "2.5%", "97.5%"),c("S", "H", "R"),v,"all"])
+  x_late = t(msy[c("50%", "2.5%", "97.5%"),c("S", "H", "R"),v,"late"])
+  
+  x = cbind(x_early, x_all, x_late)
+  
+  x = apply(x, 2, round, digits = -3)
+  x = apply(x, 2, prettify)
+  x[,1] = paste0("**", x[,1], "**")
+  x[,4] = paste0("**", x[,4], "**")
+  x[,7] = paste0("**", x[,7], "**")
+  params = c("$S_{\\text{MSC}}$", "$H_{\\text{MSC}}$", "$R_{\\text{MSC}}$")
+  
+  x = cbind(params, x)
+  rownames(x) = NULL
+  colnames(x)[1] = "Quantity"
+  
+  kable(x, "html", escape = F, align = "lccccccccc") %>%
+    kable_styling(full_width = F, bootstrap_options = c("condensed")) %>%
+    add_header_above(c(" " = 1, "First 10 Years" = 3, "All Years" = 3, "Last 10 Years" = 3))
+}
+```
+
+`r create_label("Table", cntr, F, level = 3, sub = "d", subb = "", text = "$\\text{MSC}$", tabset = T, big_tables)`
+
+`r create_label("Table", cntr, F, level = 4, sub = "d", subb = "1", text = "8-inch", tabset = F, big_tables)`
+
+`r if (big_tables) make_table("unr")`
+
+`r create_label("Table", cntr, F, level = 4, sub = "d", subb = "2", text = "6-inch", tabset = F, big_tables)`
+
+`r if (big_tables) make_table("res")`
