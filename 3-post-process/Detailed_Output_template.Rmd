@@ -41,6 +41,51 @@ msy_name = paste("msy-", model, ".rds", sep = "")
 post = readRDS(file.path(out_dir, post_name))
 meta = readRDS(file.path(out_dir, meta_name))
 msy = paste(file.path(out_dir, msy_name))
+
+```
+
+```{r math-key}
+math_key = c(
+  "alpha"          = "$\\alpha$",
+  "alpha_e3"       = "$\\alpha \\times 10^3$",
+  "beta"           = "$\\beta$",
+  "beta_e5"        = "$\\beta \\times 10^{5}$",
+  "beta_e10"       = "$\\beta \\times 10^{10}$",
+  "sigma_R_white"  = "$\\sigma_R$",
+  "sigma_R0"       = "$\\sigma_{R_0}$",
+  "phi"            = "$\\phi$",
+  "mean_R0"        = "$\\dot{R}_0$",
+  "log_mean_R0"    = "$\\log(\\dot{R}_0)$",
+  "b0_mat[1,1]"    = "$\\gamma_{0,1,1}$",
+  "b0_mat[1,2]"    = "$\\gamma_{0,2,1}$",
+  "b0_mat[1,3]"    = "$\\gamma_{0,3,1}$",
+  "b0_mat[1,4]"    = "$\\gamma_{0,4,1}$",
+  "b1_mat[1,1]"    = "$\\gamma_{1,1,1}$",
+  "b1_mat[1,2]"    = "$\\gamma_{1,2,1}$",
+  "b1_mat[1,3]"    = "$\\gamma_{1,3,1}$",
+  "b1_mat[1,4]"    = "$\\gamma_{1,4,1}$",
+  "b0_mat[2,1]"    = "$\\gamma_{0,1,2}$",
+  "b0_mat[2,2]"    = "$\\gamma_{0,2,2}$",
+  "b0_mat[2,3]"    = "$\\gamma_{0,3,2}$",
+  "b0_mat[2,4]"    = "$\\gamma_{0,4,2}$",
+  "b1_mat[2,1]"    = "$\\gamma_{1,1,2}$",
+  "b1_mat[2,2]"    = "$\\gamma_{1,2,2}$",
+  "b1_mat[2,3]"    = "$\\gamma_{1,3,2}$",
+  "b1_mat[2,4]"    = "$\\gamma_{1,4,2}$",
+  "b0_mat"         = "$\\gamma_{0,a,s}$",
+  "b1_mat"         = "$\\gamma_{1,a,s}$",
+  "b0_sex"         = "$\\delta_{0}$",
+  "b1_sex"         = "$\\delta_{1}$",
+  "Vtau"           = "$\\tau$",
+  "Vsig"           = "$\\sigma$",
+  "Vtha"           = "$\\theta$",
+  "Vlam"           = "$\\lambda$",
+  "R"              = "$R_y$",
+  "D_sum"          = "$D$",
+  "Fcom"           = "$F_{\\text{com},t}$",
+  "Fsub"           = "$F_{\\text{sub},t}$",
+  "p"              = "$p$"
+)
 ```
 
 ```{r settings}
