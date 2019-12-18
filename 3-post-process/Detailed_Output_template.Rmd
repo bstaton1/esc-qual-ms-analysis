@@ -938,9 +938,11 @@ for (s in 1:2) {
 mtext(side = 2, outer = T, "Exploitation Rate", line = 1, cex = 1.2)
 ```
 
-# Recruitment Relationship
+`r cntr = up_cntr("Section", cntr, sra); create_label("Section", cntr, T, level = 1, sub = "", subb = "", text = "Recruitment Relationship", tabset = T, sra)`
 
-```{r recruitment plot}
+`r cntr = up_cntr("Figure", cntr, sra); create_label("Figure", cntr, T, level = 2, sub = "a", subb = "", text = "Regular", tabset = F, sra)`
+
+```{r sra-regular, eval = sra}
 Z = post_summ(post, "^Z_t[")
 R = post_summ(post, "R[")
 SRA_post = post_subset(post, c("alpha", "beta$"), T)
@@ -953,7 +955,13 @@ by = 1976 + Z_ind - 1
 Z_pred = seq(0, max(Z[5,Z_ind]), length = 100)
 
 R_div = 1e3
-Z_div = 1e6
+Z_div = ifelse(meta$z_unit == "fish_count", 1e3, 1e6)
+
+xlabs = c(
+  fish_count = "Total Spawners (1000s)",
+  egg_count = "Egg Production of All Spawners (Millions of eggs)",
+  egg_mass = "Egg Mass of All Spawners (Millions of grams)"
+)
 
 R_pred = t(apply(SRA_post, 1, function(x) ricker(Z_pred, x)))
 R_pred = apply(R_pred, 2, summ)
@@ -967,18 +975,124 @@ par(xaxs = "i", yaxs = "i", mar = c(5,5,1,1), cex.axis = 1.4, cex.lab = 1.4)
 plot(R[3,R_ind] ~ Z[3,Z_ind], type = "n", las = 1,
      xlim = c(0, max(Z[5,Z_ind])) * 1.05,
      ylim = c(0, max(R[5,R_ind])) * 1.05,
-     xlab = "Total Reproductive Output (millions)", ylab = "Recruits (1000s)")
+     xlab = xlabs[meta$z_unit], ylab = "Recruits (1000s)")
 polygon(x = c(Z_pred, rev(Z_pred)), y = c(R_pred[4,], rev(R_pred[5,])), 
-        col = "grey90", border = NA)
-lines(R_pred[4,] ~ Z_pred, col = "grey")
-lines(R_pred[5,] ~ Z_pred, col = "grey")
-lines(R_pred[3,] ~ Z_pred, lwd = 2)
+        col = "skyblue", border = NA)
+lines(R_pred[4,] ~ Z_pred, col = "skyblue3")
+lines(R_pred[5,] ~ Z_pred, col = "skyblue3")
+lines(R_pred[3,] ~ Z_pred, lwd = 2, col = "blue")
 # text(R[3,R_ind] ~ Z[3,Z_ind],
 #      labels = paste("'", substr(by, 3, 4), sep = ""),
 #      col = ifelse(by %in% 2011:2013, "red", "black"), font = 2)
-segments(Z[4,Z_ind], R[3,R_ind], Z[5,Z_ind], R[3,R_ind], col = "grey")
-segments(Z[3,Z_ind], R[4,R_ind], Z[3,Z_ind], R[5,R_ind], col = "grey")
-points(R[3,R_ind] ~ Z[3,Z_ind], pch = 16)
+segments(Z[4,Z_ind], R[3,R_ind], Z[5,Z_ind], R[3,R_ind], col = alpha("salmon", 0.5))
+segments(Z[3,Z_ind], R[4,R_ind], Z[3,Z_ind], R[5,R_ind], col = alpha("salmon", 0.5))
+points(R[3,R_ind] ~ Z[3,Z_ind], pch = 21, col = "red", bg = alpha("salmon", 0.5))
+
+```
+
+`r cntr = up_cntr("Figure", cntr, sra); create_label("Figure", cntr, T, level = 2, sub = "b", subb = "", text = "Brood Years", tabset = F, sra)`
+
+```{r sra-by, eval = sra}
+Z = post_summ(post, "^Z_t[")
+R = post_summ(post, "R[")
+SRA_post = post_subset(post, c("alpha", "beta$"), T)
+
+ricker = function(Z, params) params[1] * Z * exp(-params[2] * Z)
+
+Z_ind = 1:(nt - a_min)
+R_ind = (a_max + 1):ny
+by = 1976 + Z_ind - 1
+Z_pred = seq(0, max(Z[5,Z_ind]), length = 100)
+
+R_div = 1e3
+Z_div = ifelse(meta$z_unit == "fish_count", 1e3, 1e6)
+
+xlabs = c(
+  fish_count = "Total Spawners (1000s)",
+  egg_count = "Egg Production of All Spawners (Millions of eggs)",
+  egg_mass = "Egg Mass of All Spawners (Millions of grams)"
+)
+
+R_pred = t(apply(SRA_post, 1, function(x) ricker(Z_pred, x)))
+R_pred = apply(R_pred, 2, summ)
+
+Z = Z/Z_div
+R = R/R_div
+Z_pred = Z_pred/Z_div
+R_pred = R_pred/R_div
+
+par(xaxs = "i", yaxs = "i", mar = c(5,5,1,1), cex.axis = 1.4, cex.lab = 1.4)
+plot(R[3,R_ind] ~ Z[3,Z_ind], type = "n", las = 1,
+     xlim = c(0, max(Z[5,Z_ind])) * 1.05,
+     ylim = c(0, max(R[5,R_ind])) * 1.05,
+     xlab = xlabs[meta$z_unit], ylab = "Recruits (1000s)")
+polygon(x = c(Z_pred, rev(Z_pred)), y = c(R_pred[4,], rev(R_pred[5,])), 
+        col = "skyblue", border = NA)
+lines(R_pred[4,] ~ Z_pred, col = "skyblue3")
+lines(R_pred[5,] ~ Z_pred, col = "skyblue3")
+lines(R_pred[3,] ~ Z_pred, lwd = 2, col = "blue")
+text(R[3,R_ind] ~ Z[3,Z_ind],
+     labels = paste("'", substr(by, 3, 4), sep = ""),
+     col = alpha("red", 0.5), font = 2)
+# segments(Z[4,Z_ind], R[3,R_ind], Z[5,Z_ind], R[3,R_ind], col = alpha("salmon", 0.5))
+# segments(Z[3,Z_ind], R[4,R_ind], Z[3,Z_ind], R[5,R_ind], col = alpha("salmon", 0.5))
+# points(R[3,R_ind] ~ Z[3,Z_ind], pch = 21, col = "red", bg = alpha("salmon", 0.5))
+
+```
+
+`r cntr = up_cntr("Figure", cntr, sra); create_label("Figure", cntr, T, level = 2, sub = "c", subb = "", text = "Z vs. S", tabset = F, sra)`
+
+`r if (sra & meta$z_unit != "fish_count") "This figure is intended to illustrate how the interpretation of spawning stock abundance changes when considering Z (age/sex/year specific reproductive output times total age/sex/year specific spawners) rather than S (total spawners, regardless of age or sex, all fish assumed equal). Points are scaled to the maximum so they may be plotted over one another on a common scale. Note that many of the arrows point to the left, indicating that the spawning stock in many years is smaller relative to the maximum observed spawning stock when using Z units rather than S units."`
+
+`r if (sra & meta$z_unit == "fish_count") "Because this model treats one psawner as the unit of reproductive contribution Z and S are the same."`
+
+```{r sra-z-v-s, eval = sra}
+
+Z = post_summ(post, "^Z_t[")
+S = post_summ(post, "^S_t[")
+R = post_summ(post, "R[")
+SRA_post = post_subset(post, c("alpha", "beta$"), T)
+
+ricker = function(Z, params) params[1] * Z * exp(-params[2] * Z)
+
+Z_ind = 1:(nt - a_min)
+R_ind = (a_max + 1):ny
+by = 1976 + Z_ind - 1
+Z_pred = seq(0, max(Z[5,Z_ind]), length = 100)
+
+R_div = 1e3
+Z_div = ifelse(meta$z_unit == "fish_count", 1e3, 1e6)
+
+xlabs = c(
+  fish_count = "Total Spawners (1000s)",
+  egg_count = "Egg Production of All Spawners (Millions of eggs)",
+  egg_mass = "Egg Mass of All Spawners (Millions of grams)"
+)
+
+R_pred = t(apply(SRA_post, 1, function(x) ricker(Z_pred, x)))
+R_pred = apply(R_pred, 2, summ)
+
+Z_pred = Z_pred/max(Z[3,])
+
+Z = Z[3,]/max(Z[3,])
+S = S[3,]/max(S[3,])
+R = R/R_div
+R_pred = R_pred/R_div
+
+par(xaxs = "i", yaxs = "i", mar = c(5,5,1,1), cex.axis = 1.4, cex.lab = 1.4)
+plot(R[3,R_ind] ~ Z[Z_ind], type = "n", las = 1,
+     xlim = c(0, max(Z_pred)) * 1.05,
+     ylim = c(0, max(R[5,R_ind])) * 1.05,
+     xlab = "Scaled Reproductive Units", ylab = "Recruits (1000s)")
+lines(R_pred[3,] ~ Z_pred, lwd = 2, col = "blue")
+points(R[3,R_ind] ~ Z[Z_ind], pch = 16, col = "skyblue", cex = 1.2)
+points(R[3,R_ind] ~ S[Z_ind], pch = 1, col = "red", cex = 1.2)
+if (meta$z_unit != "fish_count") {
+  arrows(Z[Z_ind], R[3,R_ind], S[Z_ind], R[3,R_ind], code = 1, length = 0.05)
+}
+
+legend("topright", legend = c("Z/max(Z)", "S/max(S)"), 
+       pch = c(16, 1), col = c("skyblue", "red"), pt.cex = 1.5, bty = "n")
 ```
 
 # Per Capita Reproductive Potential {.tabset .tabset-fade .tabset-pills}
