@@ -1,4 +1,4 @@
-#PBS -q fastfat -l nodes=nodeNODE:ppn=5,walltime=60:00:00,flags=ADVRES:liuzhan_ff
+#PBS -q fastfat -l nodes=nodeNODE:ppn=4,walltime=60:00:00,flags=ADVRES:liuzhan_ff
 #PBS -d .
 
 ###email me

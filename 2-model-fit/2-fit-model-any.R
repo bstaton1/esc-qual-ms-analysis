@@ -19,9 +19,9 @@ source("../new-func-source.R")
 starttime_all = Sys.time()
 
 # location of output files
-out_dir = "../model-output-no-rand-age/"
+out_dir = "../model-output/"
 
-nchain =      5  # number of chains
+nchain =      4  # number of chains
 parallel =    T  # run chains in parallel?
 verbose =     T  # print JAGS messages to console?
 silent =      F  # print post processing progress?
@@ -55,8 +55,8 @@ msy_name = paste("msy-", model, ".rds", sep = "")
 # set mcmc per chain dimensions
 if (mcmc_vshort)  {npost = 100; nburn = 500; nthin = 1; nadapt = 50}
 if (mcmc_lshort)  {npost = 5000; nburn = 1000; nthin = 2 * nchain; nadapt = 1000}
-if (mcmc_medium)  {npost = 50000; nburn = 20000; nthin = 10 * nchain; nadapt = 10000}
-if (mcmc_long)    {npost = 1000000; nburn = 100000; nthin = 100 * nchain/1; nadapt = 10000}
+if (mcmc_medium)  {npost = 50000; nburn = 20000; nthin = 40; nadapt = 10000}
+if (mcmc_long)    {npost = 1000000; nburn = 100000; nthin = 200; nadapt = 10000}
 
 # set nodes to monitor
 jags_params = c(
