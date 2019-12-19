@@ -42,29 +42,6 @@ my_device = function(name, file_type, h, w, ppi = 600) {
   eval(parse(text = text))
 }
 
-# assign a model identifier based the saved meta data
-id_model = function(meta, include_rand_age = F) {
-  with(meta, {
-    
-    unit = ifelse(z_unit == "fish_count", "N",
-                  ifelse(z_unit == "egg_count", "E", "EM"))
-    
-    A = ifelse(age_trend, "A", "")
-    S = ifelse(sex_trend, "S", "")
-    L = ifelse(len_trend, "L", "")
-    trends = paste0(A, S, L, collapse = "")
-    trends = ifelse(trends == "", "0", trends)
-    
-    id = paste(unit, trends, sep = "-")
-    
-    if (include_rand_age) {
-      d = ifelse(rand_age, "D", "M")
-      id = paste(id, d, sep = "-")
-    }
-    id
-  })
-}
-
 # create empty objects to store the output from each model
 meta = list()
 post_list = list()
