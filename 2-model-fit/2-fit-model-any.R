@@ -31,14 +31,8 @@ mcmc_lshort = F  # run with less short mcmc settings?
 mcmc_medium = F  # run with medium mcmc settings?
 mcmc_long =   T  # run with long mcmc settings?
 calc_msy =    T  # calculate msy-based quantities?
-calc_PP =     T  # calculate probability profiles?
 save_files =  T  # save output?
 rand_age =    F  # use dirichlet-distributed ages?
-
-# fraction of samples to remove prior to probability profile calculations
-# calculation rate on laptop: 0.01086667 mins per iter; approx 2hrs for 10000 iters
-# but have 6 scenarios to calculate for (2 vuln * 3 time periods)
-thin_percent_for_PP = 0.8
 
 # make sure only one MCMC setting was specified
 if (sum(c(mcmc_vshort, mcmc_lshort, mcmc_medium, mcmc_long)) != 1) {
@@ -57,7 +51,6 @@ if (!dir.exists(out_dir) & save_files) dir.create(out_dir)
 post_name = paste("post-", model, ".rds", sep = "")
 meta_name = paste("meta-", model, ".rds", sep = "")
 msy_name = paste("msy-", model, ".rds", sep = "")
-PP_name = paste("prob-profiles-", model, ".rds", sep = "")
 
 # set mcmc per chain dimensions
 if (mcmc_vshort)  {npost = 100; nburn = 500; nthin = 1; nadapt = 50}
@@ -151,8 +144,8 @@ cat("\n")
 
 starttime_after = Sys.time()
 
-### process output: MSY calculations and EG derivation
-if (calc_PP | calc_msy) {
+### process output: MSY calculations
+if (calc_msy) {
   early_keep_t = 1:10; early_keep_y = 1:10
   late_keep_t = nt - 9:0; late_keep_y = ny - 9:0
   all_keep_t = 1:nt; all_keep_y = 1:ny
@@ -180,40 +173,12 @@ if (calc_msy) {
   cat("    Elapsed time:", format(round(stoptime - starttime, 1)), "\n")
 }
 
-if (calc_PP) {
-  cat("  |--- Calculating Probability Profiles ---|\n")
-  starttime = Sys.time()
-  post_pp = postpack::post_thin(post, thin_percent_for_PP)
-  cat("    Started at:", format(starttime), "\n")
-  samps_early = prep_samples(post_pp, keep_t = early_keep_t, keep_y = early_keep_y, len_trend = len_trend, silent = T)
-  samps_late = prep_samples(post_pp, keep_t = late_keep_t, keep_y = late_keep_y, len_trend = len_trend, silent = T)
-  samps_all = prep_samples(post_pp, keep_t = all_keep_t, keep_y = all_keep_y, len_trend = len_trend, silent = T)
-  
-  PP_unr_early = opt_profile(post.samp = samps_early, vuln = "unr", silent = silent); cat("      Early (UNR) period complete\n")
-  PP_unr_late  = opt_profile(post.samp = samps_late, vuln = "unr", silent = silent); cat("      Late (UNR) period complete\n")
-  PP_unr_all   = opt_profile(post.samp = samps_all, vuln = "unr", silent = silent); cat("      All (UNR) period complete\n")
-  PP_res_early = opt_profile(post.samp = samps_early, vuln = "res", silent = silent); cat("      Early (RES) period complete\n")
-  PP_res_late  = opt_profile(post.samp = samps_late, vuln = "res", silent = silent); cat("      Late (RES) period complete\n")
-  PP_res_all   = opt_profile(post.samp = samps_all, vuln = "res", silent = silent); cat("      All (RES) period complete\n")
-
-  PP_early = abind::abind(PP_unr_early, PP_res_early, along = 4)
-  PP_late = abind::abind(PP_unr_late, PP_res_late, along = 4)
-  PP_all = abind::abind(PP_unr_all, PP_res_all, along = 4)
-  PP = abind::abind(PP_early, PP_all, PP_late, along = 5)
-  dimnames(PP)[[4]] = c("unr", "res")
-  dimnames(PP)[[5]] = c("early", "all", "late")
-
-  stoptime = Sys.time()
-  cat("    Elapsed time:", format(round(stoptime - starttime, 1)), "\n")
-}
-
 stoptime_after = Sys.time()
 
 # save files
 if (save_files) {
   cat("  |--- Saving Output Files ---|\n")
   if (calc_msy) saveRDS(msy, file.path(out_dir, msy_name))
-  if (calc_PP) saveRDS(PP, file.path(out_dir, PP_name))
   saveRDS(post, file.path(out_dir, post_name))
   saveRDS(
     append(
