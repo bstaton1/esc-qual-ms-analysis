@@ -42,16 +42,21 @@ my_device = function(name, file_type, h, w, ppi = 600) {
   eval(parse(text = text))
 }
 
-# create empty objects to store the output from each model
-meta = list()
-post_list = list()
-msy = NULL
+# reduce the set of models to only main-text models
+keep_mods = 1:12
+keep_mods = paste(paste0("-", keep_mods, "\\."), collapse = "|")
+out_files = out_files[str_detect(out_files, keep_mods)]
 
 # the file names of the output files
 postfiles = out_files[str_detect(out_files, "post")]
 mods = str_extract(postfiles, "[0-9]+")
 metafiles = out_files[str_detect(out_files, "meta")]
 msyfiles = out_files[str_detect(out_files, "msy")]
+
+# create empty objects to store the output from each model
+meta = list()
+post_list = list()
+msy = NULL
 
 # read in the posterior samples and meta data
 for (i in 1:length(mods)) {
