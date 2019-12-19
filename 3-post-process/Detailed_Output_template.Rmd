@@ -1089,38 +1089,65 @@ points(R[3,R_ind] ~ Z[Z_ind], pch = 16, col = "skyblue", cex = 1.2)
 points(R[3,R_ind] ~ S[Z_ind], pch = 1, col = "red", cex = 1.2)
 if (meta$z_unit != "fish_count") {
   arrows(Z[Z_ind], R[3,R_ind], S[Z_ind], R[3,R_ind], code = 1, length = 0.05)
+  suppressWarnings(arrows(Z[Z_ind], R[3,R_ind], S[Z_ind], R[3,R_ind], code = 1, length = 0.05))
 }
 
 legend("topright", legend = c("Z/max(Z)", "S/max(S)"), 
        pch = c(16, 1), col = c("skyblue", "red"), pt.cex = 1.5, bty = "n")
 ```
 
-# Per Capita Reproductive Potential {.tabset .tabset-fade .tabset-pills}
+`r cntr = up_cntr("Section", cntr, per_cap); create_label("Section", cntr, T, level = 1, sub = "", subb = "", text = "Per Capita Reproductive Potential", tabset = T, per_cap)`
 
-## Per Spawner
+`r if (per_cap) "Black bars show the mean of the posterior medians for each third of the time series (14 years each). Black dashed line shows the mean of the posterior medians across all years; the secondary _y_-axis shows the percent change from this mean."`
 
-```{r}
+`r cntr = up_cntr("Figure", cntr, per_cap); create_label("Figure", cntr, T, level = 2, sub = ifelse(meta$z_unit == "fish_count", "", "a"), subb = "", text = "Per Spawner", tabset = F, per_cap)`
+
+```{r z-per-s, eval = per_cap}
 Z_per_S = post_summ(post, "Z_per_S_t")
-par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
+par(mar = c(3,3,1,3), mgp = c(2,0.5,0), tcl = -0.25, lend = "square")
 plot(Z_per_S[3,] ~ years, type = "n", ylim = range(Z_per_S[4:5,]),
      main = "", ylab = paste0(pretty_z_unit, "/Spawning Salmon"), xlab = "Calendar Year")
-polygon(x = c(years, rev(years)), y = c(Z_per_S[4,], rev(Z_per_S[5,])), col = "grey80", border = NA)
-lines(Z_per_S[4,] ~ years, col = "grey")
-lines(Z_per_S[5,] ~ years, col = "grey")
-lines(Z_per_S[3,] ~ years, lwd = 2)
+polygon(x = c(years, rev(years)), y = c(Z_per_S[4,], rev(Z_per_S[5,])), col = "skyblue", border = NA)
+lines(Z_per_S[4,] ~ years, col = "skyblue3")
+lines(Z_per_S[5,] ~ years, col = "skyblue3")
+lines(Z_per_S[3,] ~ years, lwd = 2, col = "blue")
+mtext(side = 4, line = 2, "% Change From All Year Average")
+x = rep(1:3, each = 14)
+
+means = tapply(Z_per_S[3,], x, mean)
+segments(min(years[x == 1]), means[1], max(years[x == 1]), means[1], lty = 1, col = "black", lwd = 5)
+segments(min(years[x == 2]), means[2], max(years[x == 2]), means[2], lty = 1, col = "black", lwd = 5)
+segments(min(years[x == 3]), means[3], max(years[x == 3]), means[3], lty = 1, col = "black", lwd = 5)
+
+all_mean = mean(Z_per_S[3,])
+p_change = seq(0, 3, 0.2)
+axis(side = 4, at = all_mean * p_change, labels = paste0((p_change - 1) * 100, "%"))
+abline(h = all_mean, lty = 2, lwd = 3)
 ```
 
-## Per Female Spawner
+`r cntr = up_cntr("Figure", cntr, per_cap); create_label("Figure", cntr, T, level = 2, sub = "b", subb = "", text = "Per Female Spawner", tabset = F, per_cap & meta$z_unit != "fish_count")`
 
-```{r}
-Z_per_fS = post_summ(post, "Z_per_female")
-par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
+```{r z-per-fs, eval = per_cap & meta$z_unit != "fish_count"}
+Z_per_fS = post_summ(post, "Z_per_female_t")
+par(mar = c(3,3,1,3), mgp = c(2,0.5,0), tcl = -0.25, lend = "square")
 plot(Z_per_fS[3,] ~ years, type = "n", ylim = range(Z_per_fS[4:5,]),
-     main = "", ylab = paste0(pretty_z_unit, "/Spawning Female"), xlab = "Calendar Year")
-polygon(x = c(years, rev(years)), y = c(Z_per_fS[4,], rev(Z_per_fS[5,])), col = "grey80", border = NA)
-lines(Z_per_fS[4,] ~ years, col = "grey")
-lines(Z_per_fS[5,] ~ years, col = "grey")
-lines(Z_per_fS[3,] ~ years, lwd = 2)
+     main = "", ylab = paste0(pretty_z_unit, "/Spawning Salmon"), xlab = "Calendar Year")
+polygon(x = c(years, rev(years)), y = c(Z_per_fS[4,], rev(Z_per_fS[5,])), col = "skyblue", border = NA)
+lines(Z_per_fS[4,] ~ years, col = "skyblue3")
+lines(Z_per_fS[5,] ~ years, col = "skyblue3")
+lines(Z_per_fS[3,] ~ years, lwd = 2, col = "blue")
+mtext(side = 4, line = 2, "% Change From All Year Average")
+x = rep(1:3, each = 14)
+
+means = tapply(Z_per_fS[3,], x, mean)
+segments(min(years[x == 1]), means[1], max(years[x == 1]), means[1], lty = 1, col = "black", lwd = 5)
+segments(min(years[x == 2]), means[2], max(years[x == 2]), means[2], lty = 1, col = "black", lwd = 5)
+segments(min(years[x == 3]), means[3], max(years[x == 3]), means[3], lty = 1, col = "black", lwd = 5)
+
+all_mean = mean(Z_per_fS[3,])
+p_change = seq(0, 3, 0.2)
+axis(side = 4, at = all_mean * p_change, labels = paste0((p_change - 1) * 100, "%"))
+abline(h = all_mean, lty = 2, lwd = 3)
 ```
 
 `r if (jags_code | jags_data) "# JAGS Inputs {.tabset .tabset-fade .tabset-pills}"`
