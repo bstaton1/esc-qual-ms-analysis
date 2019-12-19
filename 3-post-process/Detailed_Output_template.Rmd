@@ -45,9 +45,9 @@ msy = readRDS(file.path(out_dir, msy_name))
 ```
 
 ```{r settings}
-mcmc_info   = F  # display MCMC diagnostic info? Takes ~2 minutes
+mcmc_info   = T  # display MCMC diagnostic info? Takes ~2 minutes
 fit         = T  # display model fit figures?
-pp_check    = F  # display posterior predictive checks? Takes ~3 minutes
+pp_check    = T  # display posterior predictive checks? Takes ~3 minutes
 selectivity = T  # display selectivity function plots?
 u_rates     = T  # display exploitation rates?
 return_comp = T  # display return composition?
@@ -56,7 +56,7 @@ per_cap     = T  # display per capita reproductive output?
 big_tables  = T  # display tables for posterior summaries?
 jags_code   = T  # display jags code?
 jags_data   = T  # display jags data?
-thin_post   = F  # use postpack::post_thin to reduce the size of the calculations?
+thin_post   = T  # use postpack::post_thin to reduce the size of the calculations?
 ```
 
 ```{r math-key}
@@ -1158,24 +1158,6 @@ axis(side = 4, at = all_mean * p_change, labels = paste0((p_change - 1) * 100, "
 abline(h = all_mean, lty = 2, lwd = 3)
 ```
 
-`r cntr = up_cntr("Section", cntr, jags_data | jags_code); create_label("Section", cntr, T, level = 1, sub = "", subb = "", text = "JAGS Inputs", tabset = T, jags_data | jags_code)`
-
-`r if (jags_code) "## Model Definition"`
-
-```{r jags-code, eval = jags_code, comment = NA}
-edit_full_model(
-  model_lines = readLines(file.path("../2-model-fit/model-files", "full-model.txt")),
-  outfile = "", len_trend = meta$len_trend, age_trend = meta$age_trend, sex_trend = meta$sex_trend,
-  keep_comments = T, keep_whitespace = T, rand_age = meta$rand_age
-  )
-```
-
-`r if (jags_data) "## Input Data"`
-
-```{r jags-data, eval = jags_data, comment = NA}
-jags_dat
-```
-
 `r cntr = up_cntr("Section", cntr, big_tables); create_label("Section", cntr, F, level = 1, sub = "", subb = "", text = "Posterior Summaries", tabset = T, big_tables)`
 
 ```{r param-table-prep, eval = big_tables}
@@ -1404,3 +1386,21 @@ make_table = function(v) {
 `r create_label("Table", cntr, F, level = 4, sub = "d", subb = "2", text = "6-inch", tabset = F, big_tables)`
 
 `r if (big_tables) make_table("res")`
+
+`r cntr = up_cntr("Section", cntr, jags_data | jags_code); create_label("Section", cntr, T, level = 1, sub = "", subb = "", text = "JAGS Inputs", tabset = T, jags_data | jags_code)`
+
+`r if (jags_code) "## Model Definition"`
+
+```{r jags-code, eval = jags_code, comment = NA}
+edit_full_model(
+  model_lines = readLines(file.path("../2-model-fit/model-files", "full-model.txt")),
+  outfile = "", len_trend = meta$len_trend, age_trend = meta$age_trend, sex_trend = meta$sex_trend,
+  keep_comments = T, keep_whitespace = T, rand_age = meta$rand_age
+  )
+```
+
+`r if (jags_data) "## Input Data"`
+
+```{r jags-data, eval = jags_data, comment = NA}
+jags_dat
+```
