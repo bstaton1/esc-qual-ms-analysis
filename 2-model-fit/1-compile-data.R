@@ -77,25 +77,76 @@ z = abind::abind(
   along = 3)
 dimnames(z) = NULL
 
+### function to prep the age/sex composition data by fate and year
+# n_eff_method are different ways of calculating effective sample size
+create_x_data = function(x_ages, n_eff_method = "scale_100") {
+  p_ages = x_ages[,A]
+  n_samp = x_ages[,"n_aged"]
+  
+  valid_methods = c(
+    "scale_100", "scale_500", "all_100", "all_500", "n_samp", "n_samp_div2", "n_samp_div4"
+  )
+  
+  if (!(n_eff_method %in% valid_methods)) {
+    stop ("method '", n_eff_method, "' is invalid. Accepted options are: \n", StatonMisc::list_out(valid_methods, per_line = 1, indent = "  "))
+  }
+  
+  if (n_eff_method == "scale_100") {
+    n_eff = n_samp/max(n_samp) * 100
+  }
+  
+  if (n_eff_method == "scale_500") {
+    n_eff = n_samp/max(n_samp) * 500
+  }
+  
+  if (n_eff_method == "all_100") {
+    n_eff = n_samp
+    n_eff[n_eff > 0] = 100
+  }
+  
+  if (n_eff_method == "all_500") {
+    n_eff = n_samp
+    n_eff[n_eff > 0] = 100
+  }
+  
+  if (n_eff_method == "n_samp_div2") {
+    n_eff = n_samp/2
+  }
+  
+  if (n_eff_method == "n_samp_div3") {
+    n_eff = n_samp/3
+  }
+  
+  if (n_eff_method == "n_samp_div4") {
+    n_eff = n_samp/4
+  }
+  
+  if (n_eff_method == "n_samp") {
+    n_eff = n_samp
+  }
+  
+  x_dat = apply(p_ages, 2, function(x) round(x * n_eff))
+  x_dat[is.na(x_dat)] = 0
+  x_dat
+}
+
+n_eff_method = mod_info[,"n_eff_method"]
+
 ## escapement age/sex composition
 e_ages = read.csv(file.path(data_dir, "esc-age-sex-comp.csv"))
-e_ages$ess = e_ages$N_aged_tot/max(e_ages$N_aged_tot) * 100
-x_esc_tas = apply(e_ages[,A], 2, function(x) round(x * e_ages$ess))
-x_esc_tas[is.na(x_esc_tas)] = 0
+colnames(e_ages)[colnames(e_ages) == "N_aged_tot"] = "n_aged"
+e_ages = e_ages[,c("year", A, "n_aged")]
+x_esc_tas = create_x_data(e_ages, n_eff_method = n_eff_method)
 n_esc = rowSums(x_esc_tas)
 
 ## commercial age/sex composition
 c_ages = read.csv(file.path(data_dir, "com-age-sex-comp.csv"))
-c_ages$ess = c_ages$n_aged/max(c_ages$n_aged) * 100
-x_com_tas = apply(c_ages[,A], 2, function(x) round(x * c_ages$ess))
-x_com_tas[is.na(x_com_tas)] = 0
+x_com_tas = create_x_data(c_ages, n_eff_method = n_eff_method)
 n_com = rowSums(x_com_tas)
 
-## commercial age/sex composition
+## subsistence age/sex composition
 s_ages = read.csv(file.path(data_dir, "sub-age-sex-comp.csv"))
-s_ages$ess = s_ages$n_aged/max(s_ages$n_aged) * 100
-x_sub_tas = apply(s_ages[,A], 2, function(x) round(x * s_ages$ess))
-x_sub_tas[is.na(x_sub_tas)] = 0
+x_sub_tas = create_x_data(s_ages, n_eff_method = n_eff_method)
 n_sub = rowSums(x_sub_tas)
 
 ## bundle into a list for jags
