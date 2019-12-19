@@ -12,7 +12,7 @@ data_dir = "../2-model-fit/inputs/"
 model = 1  # just needed to build the data
 
 source("../2-model-fit/1-compile-data.R")
-source("../new-func-source.R")
+source("../load-functions.R")
 rm(model) # clear out the model object 
 
 out_dir = "../../model-output-no-rand-age/"

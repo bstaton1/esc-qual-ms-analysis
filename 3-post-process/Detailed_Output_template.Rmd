@@ -28,7 +28,7 @@ data_dir = "../2-model-fit/inputs"
 source("../2-model-fit/1-compile-data.R")
 
 # load in additional functions
-source("../new-func-source.R")
+source("../load-functions.R")
 
 # location of output files
 out_dir = "../../model-output-no-rand-age"

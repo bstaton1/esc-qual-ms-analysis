@@ -13,7 +13,7 @@ data_dir = "inputs"
 source("1-compile-data.R")
 
 # load in additional functions
-source("../new-func-source.R")
+source("../load-functions.R")
 
 # starttime of everything
 starttime_all = Sys.time()
