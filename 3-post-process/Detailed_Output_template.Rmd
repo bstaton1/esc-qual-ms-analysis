@@ -1,7 +1,6 @@
 ---
-title: "`r paste('Detailed Output for Model', model, sep = ': ')`"
 title: "`r paste('Detailed Output for Model', model_ids[model], sep = ': ')`"
-subtitle: "Kuskokwim River Age/Sex-Structured BSS-SRA"
+subtitle: "_Online Supplement to Staton et al._"
 date: "`r format(Sys.Date(), '%m/%d/%Y')`"
 output:
   html_document:
