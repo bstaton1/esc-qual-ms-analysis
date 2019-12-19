@@ -1088,7 +1088,6 @@ lines(R_pred[3,] ~ Z_pred, lwd = 2, col = "blue")
 points(R[3,R_ind] ~ Z[Z_ind], pch = 16, col = "skyblue", cex = 1.2)
 points(R[3,R_ind] ~ S[Z_ind], pch = 1, col = "red", cex = 1.2)
 if (meta$z_unit != "fish_count") {
-  arrows(Z[Z_ind], R[3,R_ind], S[Z_ind], R[3,R_ind], code = 1, length = 0.05)
   suppressWarnings(arrows(Z[Z_ind], R[3,R_ind], S[Z_ind], R[3,R_ind], code = 1, length = 0.05))
 }
 
@@ -1150,9 +1149,9 @@ axis(side = 4, at = all_mean * p_change, labels = paste0((p_change - 1) * 100, "
 abline(h = all_mean, lty = 2, lwd = 3)
 ```
 
-`r if (jags_code | jags_data) "# JAGS Inputs {.tabset .tabset-fade .tabset-pills}"`
+`r cntr = up_cntr("Section", cntr, jags_data | jags_code); create_label("Section", cntr, T, level = 1, sub = "", subb = "", text = "JAGS Inputs", tabset = T, jags_data | jags_code)`
 
-`r if (jags_code) "## JAGS Model"`
+`r if (jags_code) "## Model Definition"`
 
 ```{r jags-code, eval = jags_code, comment = NA}
 edit_full_model(
@@ -1162,9 +1161,9 @@ edit_full_model(
   )
 ```
 
-`r if (jags_data) "## JAGS Data"`
+`r if (jags_data) "## Input Data"`
 
-```{r jags-data, comment = NA, eval = jags_data}
+```{r jags-data, eval = jags_data, comment = NA}
 jags_dat
 ```
 
@@ -1184,7 +1183,7 @@ param_names = list(
   sra = c(
     ifelse(meta$z_unit == "fish_count", "alpha$", "alpha_e3"), 
     ifelse(meta$z_unit == "fish_count","beta_e5", "beta_e10"),
-    "sigma_R", "phi", "mean_R0"
+    "sigma_R", "phi", "^mean_R0"
     ),
   age_f = c("b._mat[1,"),
   age_m = c("b._mat[2,"),
@@ -1217,7 +1216,7 @@ colnames(tab) = c("In Text", "In Code", "Median", "Mean", "SD", "2.5%", "97.5%")
 
 make_table = function(grp) {
   output = tab[group == grp,] %>%
-    kable(format = "html", digits = 2, align = "llccccc", escape = F, row.names = F, big.mark = ",") %>%
+    kable(format = "html", digits = 3, align = "llccccc", escape = F, row.names = F, big.mark = ",") %>%
     kable_styling(full_width = F, bootstrap_options = c("condensed")) %>%
     add_header_above(c("Quantity" = 2, "Posterior Summary" = 5))
   
