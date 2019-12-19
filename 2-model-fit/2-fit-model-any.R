@@ -60,13 +60,26 @@ if (mcmc_long)    {npost = 1000000; nburn = 100000; nthin = 200; nadapt = 10000}
 
 # set nodes to monitor
 jags_params = c(
-  "alpha", "beta", "beta_e10", "N_t", "S_t", "Z_t", "R", "log_mean_R0", "Hcom", "Hsub",
+  # SRA params
+  "alpha", "beta", "beta_e10", "phi", "sigma_R_white", "sigma_R0",
+  
+  # states
+  "N_t", "S_t", "Z_t", "R", "log_mean_R0", "Hcom", "Hsub",
+  
+  # demographic parameters
   "b0_sex", "b1_sex", "b0_mat", "b1_mat", "p", "mu_pi_f",
-  "mu_pi_mat", "q_sub", "q_com", "q_esc", "q_run", "D_sum",
-  "phi", "sigma_R_white", "sigma_R0", "Fcom", "Fsub", "v", "Vtau", "Vsig", "Vtha", "Vlam",
+  "mu_pi_mat", "D_sum",
+  
+  # derived quantities
+  "q_sub", "q_com", "q_esc", "q_run", 
+  "Utot_tas", "Utot_ta", "Utot_ts", "Utot_t",
+  "Z_per_S_t", "Z_per_female_t",
+  
+  # fishery/selectivity parameters
+  "Fcom", "Fsub", "v", "Vtau", "Vsig", "Vtha", "Vlam",
   "Vtau_prior", "Vsig_prior", "Vtha_prior", "Vlam_prior",
   "Vtau_yukon", "Vsig_yukon", "Vtha_yukon", "Vlam_yukon",
-  "Utot_tas", "Utot_ta", "Utot_ts", "Utot_t", "Z_per_S_t", "Z_per_female_t")
+)
 
 # set nodes to monitor diagnostics for
 diag_nodes = c("alpha", "beta", "beta_e10", "R", "b0_sex", 
