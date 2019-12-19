@@ -199,6 +199,7 @@ if (save_files) {
       list(
         model = model,
         z_unit = z_unit,
+        z_src = mod_key[mod_key$model == model,"src_abbrev"],
         len_trend = len_trend,
         sex_trend = sex_trend,
         age_trend = age_trend,
