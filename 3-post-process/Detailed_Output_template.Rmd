@@ -43,7 +43,21 @@ msy_name = paste("msy-", model, ".rds", sep = "")
 post = readRDS(file.path(out_dir, post_name))
 meta = readRDS(file.path(out_dir, meta_name))
 msy = readRDS(file.path(out_dir, msy_name))
+```
 
+```{r settings}
+mcmc_info   = F  # display MCMC diagnostic info? Takes ~2 minutes
+fit         = T  # display model fit figures?
+pp_check    = F  # display posterior predictive checks? Takes ~3 minutes
+selectivity = T  # display selectivity function plots?
+u_rates     = T  # display exploitation rates?
+return_comp = T  # display return composition?
+sra         = T  # display recruitment relationships?
+per_cap     = T  # display per capita reproductive output?
+big_tables  = T  # display tables for posterior summaries?
+jags_code   = T  # display jags code?
+jags_data   = T  # display jags data?
+thin_post   = F  # use postpack::post_thin to reduce the size of the calculations?
 ```
 
 ```{r math-key}
@@ -90,14 +104,10 @@ math_key = c(
 )
 ```
 
-```{r settings}
-mcmc_info = F
-pp_check = F
-jags_code = F
-jags_data = F
-```
-
 ```{r cntr}
+# thin the posterior if requested
+if (thin_post) post = post_thin(post, thin_percent = 0.9)
+
 # set up a counter
 cntr = c(
   Model = model,
