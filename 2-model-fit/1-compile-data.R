@@ -2,6 +2,15 @@
 # THIS SCRIPT REQUIRES OBJECTS CALLED "model" and "data_dir"
 # to be defined prior to sourcing it
 
+### obtain meta info for all models
+mod_key = read.csv(file.path(data_dir, "../model-key.csv"), stringsAsFactors = F)
+
+# stop if model is not found
+if (!(model %in% mod_key$model)) stop("Info for requested model not found.")
+
+# extract the meta info for this model
+mod_info = mod_key[mod_key$model == model,]
+
 ### dimensional variables
 ft = 1976
 lt = 2017
@@ -45,42 +54,28 @@ rlm[,,2,2] = ldat[,m_ind]/res_perim  # males res
 ## gear types
 mesh = read.csv(file.path(data_dir, "mesh-types.csv"))
 
-## eggs per female of each age
-# this is using coefns from Jasper and Evenson (2006)
-# egg_count_f = as.matrix(read.csv(file.path(data_dir, "predicted-fecundity.csv"))[,c(paste("f", ages, sep = ""))])
+## reproductive units per individual each year/age/sex
+z_unit = mod_info$z_unit
 
-# this is with estimates from 2008-2010 from Eagle
-egg_count_f = 2.8e-4 * ldat[,f_ind]^2.54
-egg_count_m = matrix(0, nt, na)
-egg_count = array(c(egg_count_f, egg_count_m), dim = c(nt, na, 2))
-
-# egg mass per female: from Eagle
-egg_mass_f = 8.7e-12 * ldat[,f_ind]^4.83
-egg_mass_m = matrix(0, nt, na)
-egg_mass = array(c(egg_mass_f, egg_mass_m), dim = c(nt, na, 2))
-
-# fish contribution
-fish_f = matrix(1, nt, na)
-fish_m = matrix(1, nt, na)
-fish = array(c(fish_f, fish_m), dim = c(nt, na, 2))
-
-# decide on reproductive unit
-mod_key = read.csv(file.path(data_dir, "../model-key.csv"), stringsAsFactors = F)
-z_unit = mod_key[mod_key$model == model,"z_unit"]
-
+# depending on the unit, create z
 if (z_unit == "fish_count") {
-  z = fish
+  # if fish_count, all elements equal 1
+  z_mat = ldat
+  z_mat[,c(f_ind,m_ind)] = 1
 } else {
-  if (z_unit == "egg_count") {
-    z = egg_count
-  } else {
-    if (z_unit == "egg_mass") {
-      z = egg_mass
-    } else {
-      stop ("z_unit must be one of 'fish_count', 'egg_count', or 'egg_mass'")
-    }
-  }
+  # otherwise, it is a power function of length
+  # unless fish is a male, then it is zero
+  z_mat = ldat
+  z_mat[,m_ind] = 0
+  z_mat = mod_info$a_coef * z_mat ^ mod_info$b_coef
 }
+
+# create the output z object as an array: females are [,,1], males [,,2]
+z = abind::abind(
+  z_mat[,f_ind],
+  z_mat[,m_ind],
+  along = 3)
+dimnames(z) = NULL
 
 ## escapement age/sex composition
 e_ages = read.csv(file.path(data_dir, "esc-age-sex-comp.csv"))
@@ -142,7 +137,7 @@ jags_dat = list(
 )
 
 # clean up workspace
-rm(list = setdiff(ls(), c("jags_dat", "data_dir", "years", "mod_key", "model", "z_unit", "egg_count", "egg_mass", "ages")))
+rm(list = setdiff(ls(), c("jags_dat", "data_dir", "years", "mod_key", "model", "z_unit", "ages")))
 
 # get all elements in as objects in workspace
 for (i in 1:length(jags_dat)) assign(x = names(jags_dat)[i], value = jags_dat[[i]])
