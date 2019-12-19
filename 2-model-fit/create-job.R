@@ -32,4 +32,4 @@ file_name = paste0("0-job-model-", model, ".sh")
 writeLines(code, file_name)
 
 # print a message
-cat("Job file created:", file_name)
+cat("Job file created:", file_name, "\n")
