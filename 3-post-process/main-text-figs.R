@@ -19,28 +19,12 @@ out_dir = "../../model-output-no-rand-age/"
 out_files = dir(out_dir, full.names = T)
 
 # HOW DO YOU WANT TO SAVE THE OUTPUT
-# file_type = "pdf"
-file_type = "jpeg"
+file_type = "pdf"
+# file_type = "jpg"
 fig_dir = "ms-figs"
 
 # create directory to store output figures if it doesn't exist
 if (!dir.exists(fig_dir)) dir.create(fig_dir)
-
-# device-general function
-my_device = function(name, file_type, h, w, ppi = 600) {
-  file.type = tolower(file_type)
-  
-  # build the code to call the appropriate device
-  file = paste(name, ifelse(file_type == "jpeg", "jpg", file_type), sep = ".")
-  if (file_type != "pdf") {
-    text = paste0(file_type, "('", file, "', h = ", ppi, " * ", h, ", w = ", ppi, " * ", w, ", res = ", ppi, ")")
-  } else {
-    text = paste0(file_type, "('", file, "', h = ", h, ", w = ", w, ")")
-  }
-  
-  # call the function to generate the text
-  eval(parse(text = text))
-}
 
 # reduce the set of models to only main-text models
 keep_mods = 1:12
@@ -66,13 +50,14 @@ for (i in 1:length(mods)) {
 }
 
 # create the ids for each model
-ids = unlist(lapply(meta, id_model, include_rand_age = F))
+ids = unlist(lapply(meta, id_model, include_rand_age = F, include_src = F))
 
 # read in the msy equilibrium quantities
 msy = readRDS(msyfiles[1])
 for (i in 2:length(mods)) {
   msy = abind(msy, readRDS(msyfiles[i]), along = 5)
 }
+
 
 # give the objects model identifiers
 names(meta) = ids
@@ -115,7 +100,7 @@ x_t = seq(0.3, 0.1, -0.1)
 xf = a_min:a_max - 0.075
 xm = a_min:a_max + 0.075
 
-my_device(file.path(fig_dir, "v-age"), file_type, h = 6, w = 3.4)
+file_device(file.path(fig_dir, paste0("v-age.", file_type)), h = 6, w = 3.4)
 par(mfrow = c(2,1), mar = c(1,2,0.5,0.5),  oma = c(1.5,1,0,0), tcl = -0.25, mgp = c(2,0.4,0))
 plot(1,1, ylim = c(0,1), xlim = range(min(xf) - max(x_t), max(xm) + max(x_t)),
      col = "red", pch = 16, type = "o",xaxt = "n", las = 2)
@@ -192,7 +177,7 @@ v_kusko = apply(out, 2, summ)
 out = t(sapply(1:post_dim(post_list[["E-ASL"]], "saved"), function(i) yukon_pearson(rlm_seq, i)))
 v_yukon = apply(out, 2, summ)
 
-my_device(file.path(fig_dir, "v-length"), file_type, h = 3.4, w = 3.4)
+file_device(file.path(fig_dir, paste0("v-length.", file_type)), h = 3.4, w = 3.4)
 par(mar = c(2,2.25,2,0.5), mgp = c(1.25,0.2,0), tcl = -0.15, cex.axis = 0.75, lend = "square", cex.lab = 0.8)
 plot(1,1, xlim = range(rlm_seq), ylim = c(min(v_kusko[4,]), 1), type = "n", ylab = "Selectivity", las = 2, xaxt = "n", xlab = "", lwd = 2, lty = 1)
 polygon(x = c(rlm_seq, rev(rlm_seq)), y = c(v_kusko[4,], rev(v_kusko[5,])),
@@ -236,7 +221,7 @@ q_esc = array_format(post_summ(post_list[["E-ASL"]], "q_esc")["50%",])
 q_com = array_format(post_summ(post_list[["E-ASL"]], "q_com")["50%",])
 q_sub = array_format(post_summ(post_list[["E-ASL"]], "q_sub")["50%",])
 
-my_device(file.path(fig_dir, "age-comp"), file_type, h = 5.75, w = 3.4)
+file_device(file.path(fig_dir, paste0("age-comp.", file_type)), h = 5.75, w = 3.4)
 par(mfcol = c(4,2), mar = c(0.25,0.25,0.25,0.25), oma = c(3,4.5,1.5,2),
     tcl = -0.20, mgp = c(2,0.25,0), lend = "square", ljoin = "mitre")
 yaxis_side = rep(c(2,4), each = 4)
@@ -289,7 +274,7 @@ dev.off()
 pi = array_format(post_summ(post_list[["E-ASL"]], "mu_pi_mat")[3,])
 
 ppi = 600
-my_device(file.path(fig_dir, "pi-trends"), file_type, h = 4, w = 7.2)
+file_device(file.path(fig_dir, paste0("pi-trends.", file_type)), h = 4, w = 7.2)
 par(mfrow = c(1,2), mar = c(1, 0.25, 0.25, 0.25), oma = c(1.5,3,1.5,2), xaxs = "i", yaxs = "i",
     cex.axis = 1, cex.main = 1, tcl = -0.25, mgp = c(2,0.4,0), lend = "square")
 fill_col = c("grey35", "grey55", "grey80", "white")
@@ -359,7 +344,7 @@ med = rbind(
   (mass_fun(colMeans(ldat[l10,])) - mass_fun(colMeans(ldat[f10,])))/mass_fun(colMeans(ldat[f10,]))
 )
 
-my_device(file.path(fig_dir, "z-figure"), file_type, h = 6, w = 3.4)
+file_device(file.path(fig_dir, paste0("z-figure.", file_type)), h = 6, w = 3.4)
 
 par(mfrow = c(2,1), mar = c(2.5,3.75,0.5,0.5), mgp = c(1.5,0.35,0), tcl = -0.25, lend = "square")
 
@@ -438,7 +423,7 @@ lwrs2 = sapply(out, function(x) x["25%",])
 uprs1 = sapply(out, function(x) x["97.5%",])
 uprs2 = sapply(out, function(x) x["75%",])
 
-my_device(file.path(fig_dir, "z-percapita"), file_type, h = 3.75, w = 3.4)
+file_device(file.path(fig_dir, paste0("z-percapita.", file_type)), h = 3.75, w = 3.4)
 par(xaxs = "i", yaxs = "i", mar = c(4,3,0.5,0.5), tcl = -0.25, mgp = c(2,0.35,0))
 mp = barplot(meds, las = 2,
              # ylim = 1 + (max(abs(rbind(lwrs1, uprs1))) - 1) * c(-1,1),
@@ -545,7 +530,7 @@ keep_mods = c(
   "E-ASL", "EM-ASL")
 
 
-my_device(file.path(fig_dir, "msc"), file_type, h = 5.5, w = 7.2)
+file_device(file.path(fig_dir, paste0("msc.", file_type)), h = 5.5, w = 7.2)
 par(mfcol = c(2,2), xaxs = "i", yaxs = "i", cex = 1, lend = "square", mar = c(0.5,1.75,1,2.25),
     oma = c(3,0.75,0.75,2), tcl = -0.25, mgp = c(2,0.35,0), cex.axis = 0.9)
 msy_plot("S", "unr", keep_mods, legend = T, letter = "a")
