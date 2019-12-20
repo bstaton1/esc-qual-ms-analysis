@@ -57,6 +57,13 @@ edit_full_model = function(model_lines, outfile, len_trend, sex_trend, age_trend
     white_space = unlist(stringr::str_extract_all(match, "  +"))
     replace = "p[y,a,s] <- mu_pi_mat[y,a,s]"
     model_lines[which(model_lines == match)] = paste(white_space, replace, sep = "")
+    
+    # remove D_scale, D_sum, gamma, and g
+    D_scale_line = stringr::str_which(model_lines, "D_scale ~ ")
+    D_sum_line = stringr::str_which(model_lines, "D_sum <- ")
+    gamma_line = stringr::str_which(model_lines, "gamma\\[y,a,s\\] <- ")
+    g_line = stringr::str_which(model_lines, "g\\[y,a,s\\] ~ ")
+    model_lines = model_lines[-c(D_scale_line, D_sum_line, gamma_line, g_line)]
   }
   
   cat(paste0(model_lines, collapse = "\n"), file = outfile)

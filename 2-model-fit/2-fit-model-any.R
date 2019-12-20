@@ -68,7 +68,7 @@ jags_params = c(
   
   # demographic parameters
   "b0_sex", "b1_sex", "b0_mat", "b1_mat", "p", "mu_pi_f",
-  "mu_pi_mat", "D_sum",
+  "mu_pi_mat",
   
   # derived quantities
   "q_sub", "q_com", "q_esc", "q_run", 
@@ -78,15 +78,17 @@ jags_params = c(
   # fishery/selectivity parameters
   "Fcom", "Fsub", "v", "Vtau", "Vsig", "Vtha", "Vlam",
   "Vtau_prior", "Vsig_prior", "Vtha_prior", "Vlam_prior",
-  "Vtau_yukon", "Vsig_yukon", "Vtha_yukon", "Vlam_yukon",
+  "Vtau_yukon", "Vsig_yukon", "Vtha_yukon", "Vlam_yukon"
 )
+if (rand_age) jags_params = c(jags_params, "D_sum")
 
 # set nodes to monitor diagnostics for
 diag_nodes = c("alpha", "beta", "beta_e10", "R", "b0_sex", 
                "b1_sex", "b0_mat", "b1_mat", "p",
-               "D_sum", "phi", "sigma_R_white", "sigma_R0", 
+               "phi", "sigma_R_white", "sigma_R0", 
                "Fcom", "Fsub", "Vtau", "Vsig", "Vtha", "Vlam", "log_mean_R0"
 )
+if (rand_age) diag_nodes = c(jags_params, "D_sum")
 
 ## write the model file
 # the full model - this one gets simplified based on the specific trend assumptions
@@ -108,10 +110,9 @@ edit_full_model(
 
 # create initial values
 set.seed(seed)
-jags_inits = lapply(1:nchain, function(i) gen_inits(z_unit = z_unit, sex_trend = sex_trend, age_trend = age_trend))
+jags_inits = lapply(1:nchain, function(i) gen_inits(z_unit = z_unit, sex_trend = sex_trend, age_trend = age_trend, rand_age = rand_age))
 
 ## run the sampler
-# read gelman et al. 2004 for more information about DIC
 starttime_mcmc = Sys.time()
 
 print_start_mcmc_message()

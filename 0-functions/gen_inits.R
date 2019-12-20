@@ -1,7 +1,6 @@
-gen_inits = function(z_unit, sex_trend, age_trend) {
+gen_inits = function(z_unit, sex_trend, age_trend, rand_age) {
   
   inits_list = list(
-    D_scale = runif(1, 0.1, 0.2),
     beta = 1/runif(1, 180000, 250000),
     log_resid_0 = runif(1, -0.1, 0.1),
     log_mean_R0 = log(200000) + rnorm(1, 0, 0.2),
@@ -15,6 +14,10 @@ gen_inits = function(z_unit, sex_trend, age_trend) {
     b0_mat = matrix(c(runif(3, c(-1.5, 1.5, 1.5), c(-0.5, 2.5, 2.5)), NA), 2, na, byrow = T),
     b0_sex = runif(1, -0.1, 0.1)
   )
+  
+  if (rand_age) {
+    inits_list = append(inits_list, list(D_scale = runif(1, 0.1, 0.2)))
+  }
   
   if (z_unit %in% c("egg_count", "egg_mass")) {
     log_alpha = list(log_alpha = log(0.002) + rnorm(1, 0, 0.001))
