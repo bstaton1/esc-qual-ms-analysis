@@ -24,7 +24,7 @@ id_model = function(meta, include_rand_age = F, include_src = F) {
     }
     
     # (if requested) include an identifier for the source of the coefficients to inform length-based z
-    if (include_source & unit != "N") {
+    if (include_src & unit != "N") {
       src = meta$z_src
       id = paste(id, src, sep = "-")
     }
