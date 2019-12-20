@@ -25,11 +25,10 @@ model,z_unit,age_trend,sex_trend,length_trend,a_coef,b_coef,source,src_abbrev,su
 24,egg_count,1,1,1,3.5042,1.165,Kuskokwim Tuluksak_diff_inits (Harris and Harper 2008-2009),KK_tul_diff,1,scale_100,scale_100,scale_100
 25,egg_count,0,0,0,0.003067,2.21,Kuskokwim Tuluksak (Harris and Harper 2008-2009),KK_tul,1,scale_100,scale_100,scale_100
 26,egg_count,1,1,1,0.003067,2.21,Kuskokwim Tuluksak (Harris and Harper 2008-2009),KK_tul,1,scale_100,scale_100,scale_100
-27,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,scale_100,scale_100,scale_100
-28,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,scale_200,scale_100,scale_100
-29,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,scale_100,scale_200,scale_100
-30,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,scale_100,scale_100,scale_200
-31,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,scale_200,scale_200,scale_100
-32,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,scale_200,scale_100,scale_200
-33,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,scale_100,scale_200,scale_200
-34,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,scale_200,scale_200,scale_200
+27,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,scale_200,scale_100,scale_100
+28,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,scale_100,scale_200,scale_100
+29,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,scale_100,scale_100,scale_200
+30,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,min_100,min_100,min_100
+31,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,min_200,min_100,min_100
+32,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,min_100,min_200,min_100
+33,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,min_100,min_100,min_200

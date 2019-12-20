@@ -84,7 +84,7 @@ create_x_data = function(x_ages, n_eff_method = "scale_100") {
   n_samp = x_ages[,"n_aged"]
   
   valid_methods = c(
-    "scale_50", "scale_100", "scale_200", "all_100", "all_200", "n_samp", "n_samp_div2", "n_samp_div4", "sqrt"
+    "scale_50", "scale_100", "scale_200", "min_100", "min_200", "n_samp", "n_samp_div2", "n_samp_div4", "sqrt"
   )
   
   if (!(n_eff_method %in% valid_methods)) {
@@ -103,14 +103,12 @@ create_x_data = function(x_ages, n_eff_method = "scale_100") {
     n_eff = n_samp/max(n_samp) * 200
   }
   
-  if (n_eff_method == "all_100") {
-    n_eff = n_samp
-    n_eff[n_eff > 0] = 100
+  if (n_eff_method == "min_100") {
+    n_eff = ifelse(n_samp > 100, 100, n_samp)
   }
   
-  if (n_eff_method == "all_200") {
-    n_eff = n_samp
-    n_eff[n_eff > 0] = 200
+  if (n_eff_method == "min_200") {
+    n_eff = ifelse(n_samp > 200, 200, n_samp)
   }
   
   if (n_eff_method == "n_samp_div2") {
