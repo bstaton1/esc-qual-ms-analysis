@@ -2,15 +2,15 @@ jags_model_code = function() {
   
   # Priors for SR portion
   log_alpha ~ dnorm(0,0.01) %_% I(,3.5)
+  alpha <- exp(log_alpha)
   beta ~ dunif(0,0.5)
   beta_e10 <- beta * 1e10
   phi ~ dunif(-1, 0.99)
   tau_R_white ~ dgamma(0.01, 0.01)
   tau_R_red <- tau_R_white * (1 - phi * phi)
-  log_resid_0 ~ dnorm(0, tau_R_red)
   sigma_R_white <- 1 / sqrt(tau_R_white)
   sigma_R_red <- 1 / sqrt(tau_R_red)
-  alpha <- exp(log_alpha)
+  log_resid_0 ~ dnorm(0, tau_R_red)
   
   ### PART 1: BIOLOGICAL PROCESS SUBMODEL: BROOD YEAR RECRUITMENT PROCESS #####
   
@@ -38,22 +38,15 @@ jags_model_code = function() {
   
   ### PART 2: MATURITY PROCESS SUBMODEL ###
   # 2a) brood-year specific sex ratio
-  # sex_scale ~ dunif(0.01,1)
-  # sex_sum <- 1/sex_scale^2
   b0_sex ~ dnorm(0,1e-6)
   b1_sex ~ dnorm(0,1e-6)
   for (y in 1:ny) {
     logit(mu_pi_f[y]) <- b0_sex + b1_sex * y
-    # B1[y] <- mu_pi_f[y] * sex_sum
-    # B2[y] <- (1 - mu_pi_f[y]) * sex_sum
-    # p_f[y] ~ dbeta(B1[y], B2[y])
-    # R_sex[y,1] <- R[y] * p_f[y]
-    # R_sex[y,2] <- R[y] * (1 - p_f[y])
     R_sex[y,1] <- R[y] * mu_pi_f[y]
     R_sex[y,2] <- R[y] * (1 - mu_pi_f[y])
   }
   
-  # 2b) brood year-specific maturity schedules by sex, with separate estimated time trends for each sex
+  # 2b) brood year-specific return-at-age schedules by sex, with separate estimated time trends for each sex
   D_scale ~ dunif(0.01,1)
   D_sum <- 1/D_scale^2
   for (s in 1:2) {
@@ -68,7 +61,7 @@ jags_model_code = function() {
       b1_mat[s,a] ~ dnorm(0,1e-6)
     }
     
-    # draw dirichlet random variables around the expectation
+    # create brood year-specific return-at-age/sex vectors
     for (y in 1:ny) {
       for (a in 1:na) {
         eta_mat[y,a,s] <- exp(b0_mat[s,a] + b1_mat[s,a] * y)
@@ -92,15 +85,18 @@ jags_model_code = function() {
     N_t[t] <- sum(N_ta[t,1:na])
   }
   
-  # 3b) Create age/sex/year/mesh-specific vulnerability/selectivity schedule
+  # 3b) Create age/sex/year/mesh-specific selectivity schedule
+  # these are the parameters used in the model
   Vtau ~ dnorm(1.920, 1/(0.012 * 10)^2)
   Vsig ~ dnorm(0.204, 1/(0.021 * 10)^2) %_% I(0,)
   Vtha ~ dnorm(0.622, 1/(0.033 * 10)^2) %_% I(0,)
   Vlam ~ dnorm(-0.547, 1/(0.075 * 10)^2)
+  # these are the prior values - not updated: for comparison to posteriors
   Vtau_prior ~ dnorm(1.920, 1/(0.012 * 10)^2)
   Vsig_prior ~ dnorm(0.204, 1/(0.021 * 10)^2) %_% I(0,)
   Vtha_prior ~ dnorm(0.622, 1/(0.033 * 10)^2) %_% I(0,)
   Vlam_prior ~ dnorm(-0.547, 1/(0.075 * 10)^2)
+  # these are the values for the yukon (bromaghin paper) - not updated: for comparison to kusko posteriors
   Vtau_yukon ~ dnorm(1.920, 1/(0.012)^2)
   Vsig_yukon ~ dnorm(0.204, 1/(0.021)^2) %_% I(0,)
   Vtha_yukon ~ dnorm(0.622, 1/(0.033)^2) %_% I(0,)
@@ -117,7 +113,7 @@ jags_model_code = function() {
           v_term_4[t,a,s,m] <- exp(-Vlam * (atan(v_term_2[t,a,s,m]/Vsig) + atan(Vlam/(2 * Vtha))))
           v_raw[t,a,s,m] <- v_term_1[t,a,s,m] * v_term_3[t,a,s,m] * v_term_4[t,a,s,m]
           
-          # standardize within year and mesh so one age/sex combo is fully vuln
+          # standardize within year and mesh so one age/sex combo is fully selected
           v[t,a,s,m] <- v_raw[t,a,s,m]/max(v_raw[t,1:na,1:2,m])
         }
       }
@@ -158,13 +154,14 @@ jags_model_code = function() {
   
   ### PART 4: OBSERVATION SUB MODEL ###
   for (t in 1:nt) {
+    # observe aggregate abundance fates
     S_obs[t] ~ dlnorm(log(S_t[t]), 1/S_obs_sig[t]^2)
     Hcom_obs[t] ~ dlnorm(log(Hcom[t]), 1/Hcom_obs_sig[t]^2)
     Hsub_obs[t] ~ dlnorm(log(Hsub[t]), 1/Hsub_obs_sig[t]^2)
     
     # turn age/sex/year structured 3-d arrays into 2-d
-    # [1:na] is females (s == 1); [(na+1):(2*na)] is males
-    # allows fitting multinomial more easily
+    # [,1:na] is females (s == 1); [,(na+1):(2*na)] is males
+    # allows fitting multinomial where each age/sex is a category
     
     N_tas_2d[t,1:na] <- N_tas[t,1:na,1]
     N_tas_2d[t,(na+1):(2*na)] <- N_tas[t,1:na,2]
@@ -185,6 +182,7 @@ jags_model_code = function() {
       q_run[t,as] <- N_tas_2d[t,as]/N_t[t]
     }
     
+    # observe composition vectors by fate
     x_esc[t,1:(2*na)] ~ dmulti(q_esc[t,1:(2*na)], n_esc[t])
     x_com[t,1:(2*na)] ~ dmulti(q_com[t,1:(2*na)], n_com[t])
     x_sub[t,1:(2*na)] ~ dmulti(q_sub[t,1:(2*na)], n_sub[t])
