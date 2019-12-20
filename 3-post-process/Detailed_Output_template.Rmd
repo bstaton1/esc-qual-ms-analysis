@@ -31,7 +31,8 @@ source("../2-model-fit/1-compile-data.R")
 source("../load-functions.R")
 
 # location of output files
-out_dir = "../../model-output-no-rand-age"
+# out_dir = "../../model-output-no-rand-age"
+out_dir = "../model-output/"
 
 # names of output files
 post_name = paste("post-", model, ".rds", sep = "")
@@ -56,7 +57,7 @@ per_cap     = T  # display per capita reproductive output?
 big_tables  = T  # display tables for posterior summaries?
 jags_code   = T  # display jags code?
 jags_data   = T  # display jags data?
-thin_post   = T  # use postpack::post_thin to reduce the size of the calculations?
+thin_post   = F  # use postpack::post_thin to reduce the size of the calculations?
 ```
 
 ```{r math-key}
@@ -670,7 +671,7 @@ V_med = apply(V_out, 1, median)
 par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
 plot(1,1, type = "n", xlim = range(rlm_seq), ylim = c(min(V_out),1),
      ylab = "Selectivity", xlab = "MEFL:Mesh Perimeter (RLM)", las = 1)
-junk = sapply(sample(1:nrow(V_post), 100), function(i) {
+junk = sapply(sample(1:nrow(V_post), min(nrow(V_post), 100)), function(i) {
   lines(V_out[,i] ~ rlm_seq, col = scales::alpha("grey20", 0.2))
 })
 lines(V_med ~ rlm_seq, col = "blue", lwd = 4)
