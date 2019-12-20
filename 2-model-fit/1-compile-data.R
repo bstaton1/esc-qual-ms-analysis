@@ -84,19 +84,23 @@ create_x_data = function(x_ages, n_eff_method = "scale_100") {
   n_samp = x_ages[,"n_aged"]
   
   valid_methods = c(
-    "scale_100", "scale_500", "all_100", "all_500", "n_samp", "n_samp_div2", "n_samp_div4"
+    "scale_50", "scale_100", "scale_200", "all_100", "all_200", "n_samp", "n_samp_div2", "n_samp_div4", "sqrt"
   )
   
   if (!(n_eff_method %in% valid_methods)) {
     stop ("method '", n_eff_method, "' is invalid. Accepted options are: \n", StatonMisc::list_out(valid_methods, per_line = 1, indent = "  "))
   }
   
+  if (n_eff_method == "scale_50") {
+    n_eff = n_samp/max(n_samp) * 50
+  }
+  
   if (n_eff_method == "scale_100") {
     n_eff = n_samp/max(n_samp) * 100
   }
   
-  if (n_eff_method == "scale_500") {
-    n_eff = n_samp/max(n_samp) * 500
+  if (n_eff_method == "scale_200") {
+    n_eff = n_samp/max(n_samp) * 200
   }
   
   if (n_eff_method == "all_100") {
@@ -104,17 +108,13 @@ create_x_data = function(x_ages, n_eff_method = "scale_100") {
     n_eff[n_eff > 0] = 100
   }
   
-  if (n_eff_method == "all_500") {
+  if (n_eff_method == "all_200") {
     n_eff = n_samp
-    n_eff[n_eff > 0] = 100
+    n_eff[n_eff > 0] = 200
   }
   
   if (n_eff_method == "n_samp_div2") {
     n_eff = n_samp/2
-  }
-  
-  if (n_eff_method == "n_samp_div3") {
-    n_eff = n_samp/3
   }
   
   if (n_eff_method == "n_samp_div4") {
@@ -125,28 +125,32 @@ create_x_data = function(x_ages, n_eff_method = "scale_100") {
     n_eff = n_samp
   }
   
+  if (n_eff_method == "sqrt") {
+    n_eff = sqrt(n_samp)
+  }
+  
   x_dat = apply(p_ages, 2, function(x) round(x * n_eff))
   x_dat[is.na(x_dat)] = 0
   x_dat
 }
 
-n_eff_method = mod_info[,"n_eff_method"]
+n_eff_method = 
 
 ## escapement age/sex composition
 e_ages = read.csv(file.path(data_dir, "esc-age-sex-comp.csv"))
 colnames(e_ages)[colnames(e_ages) == "N_aged_tot"] = "n_aged"
 e_ages = e_ages[,c("year", A, "n_aged")]
-x_esc_tas = create_x_data(e_ages, n_eff_method = n_eff_method)
+x_esc_tas = create_x_data(e_ages, n_eff_method = mod_info[,"esc_n_eff"])
 n_esc = rowSums(x_esc_tas)
 
 ## commercial age/sex composition
 c_ages = read.csv(file.path(data_dir, "com-age-sex-comp.csv"))
-x_com_tas = create_x_data(c_ages, n_eff_method = n_eff_method)
+x_com_tas = create_x_data(c_ages, n_eff_method = mod_info[,"com_n_eff"])
 n_com = rowSums(x_com_tas)
 
 ## subsistence age/sex composition
 s_ages = read.csv(file.path(data_dir, "sub-age-sex-comp.csv"))
-x_sub_tas = create_x_data(s_ages, n_eff_method = n_eff_method)
+x_sub_tas = create_x_data(s_ages, n_eff_method = mod_info[,"sub_n_eff"])
 n_sub = rowSums(x_sub_tas)
 
 ## bundle into a list for jags
