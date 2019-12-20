@@ -16,7 +16,7 @@ function() {
   
   #1a) Brood year returns without SR link; drawn from a common lognormal dist
   log_mean_R0 ~ dnorm(0,0.0001)#%_%I(0,)        
-  tau_R0 ~ dgamma(0.1,0.1)      
+  tau_R0 ~ dgamma(0.01,0.01)      
   sigma_R0 <- 1 / sqrt(tau_R0)
   for(y in 1:a_max){ 
     log_R[y] ~ dnorm(log_mean_R0, tau_R0)   
@@ -52,7 +52,7 @@ function() {
   for (s in 1:2) {
     
     # set coefs for last age
-    b0_mat[s,na] <- 1
+    b0_mat[s,na] <- 0
     b1_mat[s,na] <- 0
     
     # estimate coefficients for the rest of the ages
