@@ -44,3 +44,8 @@ rsconnect/
 
 # output figures
 3-post-process/ms-figs/*
+
+# sensitivity analysis rmd junk
+3-post-process/os-sensitivity/sensitivity-analyses_cache/*
+3-post-process/os-sensitivity/sensitivity-analyses_files/*
+
