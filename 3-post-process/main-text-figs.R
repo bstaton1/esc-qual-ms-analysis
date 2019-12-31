@@ -15,12 +15,12 @@ source("../2-model-fit/1-compile-data.R")
 source("../load-functions.R")
 rm(model) # clear out the model object 
 
-out_dir = "../../model-output-no-rand-age/"
+out_dir = "../../model-output/"
 out_files = dir(out_dir, full.names = T)
 
 # HOW DO YOU WANT TO SAVE THE OUTPUT
-file_type = "pdf"
-# file_type = "jpg"
+# file_type = "pdf"
+file_type = "jpg"
 fig_dir = "ms-figs"
 
 # create directory to store output figures if it doesn't exist
@@ -50,7 +50,7 @@ for (i in 1:length(mods)) {
 }
 
 # create the ids for each model
-ids = unlist(lapply(meta, id_model, include_rand_age = F, include_src = F))
+ids = unlist(lapply(meta, id_model))
 
 # read in the msy equilibrium quantities
 msy = readRDS(msyfiles[1])
