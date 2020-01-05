@@ -15,8 +15,8 @@ for (model in models) {
   
   # if you want to open each file when complete
   # environment is cleared when running each document, so you have to specify the file location again
-  # html_dir = "os-detailed"
-  # out_file = file.path(html_dir, paste0("Detailed_Output_", model, ".html", sep = ""))
-  # browseURL(out_file)
+  html_dir = "os-detailed"
+  out_file = file.path(html_dir, paste0("Detailed_Output_", model, ".html", sep = ""))
+  browseURL(out_file)
 }
 
