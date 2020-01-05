@@ -132,8 +132,6 @@ create_x_data = function(x_ages, n_eff_method = "scale_100") {
   x_dat
 }
 
-n_eff_method = 
-
 ## escapement age/sex composition
 e_ages = read.csv(file.path(data_dir, "esc-age-sex-comp.csv"))
 colnames(e_ages)[colnames(e_ages) == "N_aged_tot"] = "n_aged"
