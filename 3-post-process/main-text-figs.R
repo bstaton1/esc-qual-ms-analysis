@@ -96,9 +96,9 @@ v_m_unr = abind(early = summ_v(early_t, 2, 1), all =  summ_v(all_t, 2, 1), late 
 v_f_res = abind(early = summ_v(early_t, 1, 2), all =  summ_v(all_t, 1, 2), late = summ_v(late_t, 1, 2), along = 3)
 v_m_res = abind(early = summ_v(early_t, 2, 2), all =  summ_v(all_t, 2, 2), late = summ_v(late_t, 2, 2), along = 3)
 
-x_t = seq(0.3, 0.1, -0.1)
-xf = a_min:a_max - 0.075
-xm = a_min:a_max + 0.075
+x_t = seq(0.15,0.05, -0.05)
+xf = a_min:a_max - 0.01
+xm = a_min:a_max + 0.01
 
 file_device(file.path(fig_dir, paste0("v-age.", file_type)), h = 6, w = 3.4)
 par(mfrow = c(2,1), mar = c(1,2,0.5,0.5),  oma = c(1.5,1,0,0), tcl = -0.25, mgp = c(2,0.4,0))
@@ -111,7 +111,7 @@ for (t in (1:3)) {
   lines(xm + rev(x_t)[t], v_m_unr[,"mean",t], type = "o", pch = 23, bg = col[t], lty = 2, cex = 1.4)
 }
 
-legend("bottomright", c("Female", "Male", "First 10 Yrs", "All Yrs", "Last 10 Yrs"), box.col = "white", bg = "grey90", x.intersp = 0.5, seg.len = 3,
+legend("bottomright", c("Female", "Male", "First 10 Yrs", "All Yrs", "Last 10 Yrs"), bty = "n", x.intersp = 0.5, seg.len = 3,
        lty = c(1, 2, NA, NA, NA), pch = c(21, 23, 22, 22, 22), pt.bg = c("white", "white", col), pt.cex = 1.4, cex = 0.7)
 box()
 axis(side = 1, at = 4:7, labels = 4:7)
