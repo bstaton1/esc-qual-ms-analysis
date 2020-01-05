@@ -1,7 +1,7 @@
 jags_model_code = function() {
   
   # Priors for SR portion
-  log_alpha ~ dnorm(0,0.01) %_% I(,3.5)
+  log_alpha ~ dunif(-10, 3)
   alpha <- exp(log_alpha)
   beta ~ dunif(0,0.5)
   beta_e10 <- beta * 1e10

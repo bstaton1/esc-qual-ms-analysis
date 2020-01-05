@@ -102,6 +102,7 @@ if (rand_age) diag_nodes = c(jags_params, "D_sum")
 edit_full_model(
   model_lines = readLines(file.path("model-files", "full-model.txt")),
   outfile = model_file,
+  z_unit = z_unit,
   age_trend = age_trend, 
   sex_trend = sex_trend,
   len_trend = len_trend,

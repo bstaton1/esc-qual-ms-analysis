@@ -1,5 +1,5 @@
 
-edit_full_model = function(model_lines, outfile, len_trend, sex_trend, age_trend, rand_age, keep_whitespace = F, keep_comments = F) {
+edit_full_model = function(model_lines, outfile, z_unit, len_trend, sex_trend, age_trend, rand_age, keep_whitespace = F, keep_comments = F) {
   
   # 1.) replace function() with model {
   model_lines[model_lines == "function() {"] = "model {"
@@ -18,6 +18,15 @@ edit_full_model = function(model_lines, outfile, len_trend, sex_trend, age_trend
   model_lines = stringr::str_remove(model_lines, " %_%")
   
   ### ALTERATIONS TO CODE BASED ON MODEL VERSION ###
+  
+  # handle reproductive unit
+    # z_unit == "fish_count":  log(alpha) ~ U(-10, 3)
+    # z_unit != "fish_count":  log(alpha) ~ U(-10, -4.5)
+  if (z_unit != "fish_count") {
+    match = model_lines[stringr::str_detect(model_lines, "log_alpha ~ ")]
+    replacement = stringr::str_replace(match, pattern = "dunif\\(-10, 3\\)", replacement = "dunif\\(-10, -4.5\\)")
+    model_lines[which(model_lines == match)] = replacement
+  }
   
   # handle len_trend: 
     # len_trend == T: annual z uses year-specific length data
