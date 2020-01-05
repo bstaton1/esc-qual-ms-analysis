@@ -20,7 +20,7 @@ out_files = dir(out_dir, full.names = T)
 
 # HOW DO YOU WANT TO SAVE THE OUTPUT
 # file_type = "pdf"
-file_type = "jpg"
+file_type = "pdf"
 fig_dir = "ms-figs"
 
 # create directory to store output figures if it doesn't exist
@@ -210,9 +210,9 @@ axis_i = seq(1, length(rlm_seq), 150)
 
 axis(side = 1, at = rlm_seq[axis_i], labels = round(rlm_seq[axis_i] * unr_perim, -1))
 axis(side = 3, at = rlm_seq[axis_i], labels = round(rlm_seq[axis_i] * res_perim, -1), col.axis = "grey60", col.ticks = "grey60")
-mtext(side = 3, "MEFL (mm) w/6 in. Mesh", line = 1, col = "grey60", font = 2, cex = 0.8)
+mtext(side = 3, "METF (mm) w/6 in. Mesh", line = 1, col = "grey60", font = 2, cex = 0.8)
 segments(par("usr")[1], par("usr")[4], par("usr")[2], par("usr")[4],col = "grey60", xpd = T)
-mtext(side = 1, "MEFL (mm) w/8 in. Mesh", line = 1, font = 2, cex = 0.8)
+mtext(side = 1, "METF (mm) w/8 in. Mesh", line = 1, font = 2, cex = 0.8)
 dev.off()
 
 
@@ -353,7 +353,7 @@ pred_egg = egg_fun(pred_x)/egg_fun(mean(ldat[f10,4]))
 pred_mass = mass_fun(pred_x)/mass_fun(mean(ldat[f10,4]))
 
 plot(pred_egg ~ pred_x, type = "l", ylim = range(0, pred_egg, pred_mass),
-     xlab = "MEFL (mm)", ylab = "", yaxt = "n", lwd = 2)
+     xlab = "METF (mm)", ylab = "", yaxt = "n", lwd = 2)
 lines(pred_mass ~ pred_x, type = "l", lty = 2, lwd = 2)
 axis(side = 2, at = seq(0, 1.2, 0.2), labels = paste0(seq(0, 1.2, 0.2) * 100, "%"), las = 2)
 mtext(side = 2, "Relative Reproductive Output", line = 2.5)
@@ -385,7 +385,7 @@ axis(side = 1, at = mp[2,], labels = 4:7)
 axis(side = 2, at = seq(-0.4, 1, by = 0.2),
      paste0(labels = seq(-0.4, 1, 0.2) * 100, "%"), las = 2)
 mtext(side = 2, "% Change", line = 2.5)
-legend("topright", legend = c("MEFL", "Egg #", "Egg Mass"), pt.cex = 1.1,
+legend("topright", legend = c("METF", "Egg #", "Egg Mass"), pt.cex = 1.1,
        pch = c(21,22,24), pt.bg = "grey60", bty = "n", cex = 0.8)
 usr = par("usr"); xdiff = diff(usr[1:2]); ydiff = diff(usr[3:4])
 text(usr[1] - 0.025 * xdiff, usr[4] - ydiff * 0.05, pos = 4, labels = "(b)", font = 2)
