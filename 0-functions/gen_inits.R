@@ -20,16 +20,16 @@ gen_inits = function(z_unit, sex_trend, age_trend, rand_age) {
   }
   
   if (z_unit %in% c("egg_count", "egg_mass")) {
-    log_alpha = list(log_alpha = log(0.002) + rnorm(1, 0, 0.001))
+    alpha = list(alpha = exp(log(0.002) + rnorm(1, 0, 0.001)))
   } else {
     if (z_unit == "fish_count") {
-      log_alpha = list(log_alpha = log(6) + rnorm(1, 0, 0.1))
+      alpha = list(alpha = exp(log(6) + rnorm(1, 0, 0.1)))
     } else {
       stop ("z_unit must be one of 'fish_count', 'egg_count', or 'egg_mass'")
     }
   }
   
-  inits_list = append(inits_list, log_alpha)
+  inits_list = append(inits_list, alpha)
   
   if (age_trend) {
     b1_mat = list(b1_mat = matrix(c(runif(3, c(0, 0, 0.05), c(0.1, 0.1, 0.15)), NA), 2, na, byrow = T))

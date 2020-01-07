@@ -20,11 +20,11 @@ edit_full_model = function(model_lines, outfile, z_unit, len_trend, sex_trend, a
   ### ALTERATIONS TO CODE BASED ON MODEL VERSION ###
   
   # handle reproductive unit
-    # z_unit == "fish_count":  log(alpha) ~ U(-10, 3)
-    # z_unit != "fish_count":  log(alpha) ~ U(-10, -4.5)
+    # z_unit == "fish_count":  alpha ~ U(0, 20)
+    # z_unit != "fish_count":  alpha ~ U(0, 0.1)
   if (z_unit != "fish_count") {
-    match = model_lines[stringr::str_detect(model_lines, "log_alpha ~ ")]
-    replacement = stringr::str_replace(match, pattern = "dunif\\(-10, 3\\)", replacement = "dunif\\(-10, -4.5\\)")
+    match = model_lines[stringr::str_detect(model_lines, "alpha ~ ")]
+    replacement = stringr::str_replace(match, pattern = "dunif\\(0, 20\\)", replacement = "dunif\\(0, 0.1\\)")
     model_lines[which(model_lines == match)] = replacement
   }
   
