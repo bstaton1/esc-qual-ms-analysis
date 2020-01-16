@@ -15,12 +15,12 @@ source("../2-model-fit/1-compile-data.R")
 source("../load-functions.R")
 rm(model) # clear out the model object 
 
-out_dir = "../../model-output/"
+out_dir = "../../model-output-new-prior/"
 out_files = dir(out_dir, full.names = T)
 
 # HOW DO YOU WANT TO SAVE THE OUTPUT
 # file_type = "pdf"
-file_type = "pdf"
+file_type = "jpg"
 fig_dir = "ms-figs"
 
 # create directory to store output figures if it doesn't exist
