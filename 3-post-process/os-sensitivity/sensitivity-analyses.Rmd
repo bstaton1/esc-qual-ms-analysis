@@ -1,19 +1,22 @@
 ---
 title: "Sensitivity Analyses"
-subtitle: "_Online Supplement to Staton et al._"
+subtitle: "_Online Supplement S1 to Staton et al._"
 date: "`r format(Sys.Date(), '%m/%d/%Y')`"
 output:
-  html_document:
+  bookdown::html_document2:
     theme: cerulean
     toc: true
     toc_float: true
     toc_depth: 2
+    number_sections: false
 bibliography: cites.bib
 link-citations: yes
 csl: citation-style.csl
 editor_options: 
   chunk_output_type: console
 ---
+
+**NOTE:** All figure and table references apply only to this supplement, not to the the main text or other supplements.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F, fig.align = "center")
@@ -40,11 +43,11 @@ source("../../2-model-fit/1-compile-data.R")
 source("../../0-functions/id_model.R")
 rm(model) # clear out the model object 
 
-out_dir = "../../../model-output/"
+out_dir = "../../../model-output-new-prior/"
 out_files = dir(out_dir, full.names = T)
 
 # reduce the set of models to only main-text models
-keep_mods = c(10, 27:33)
+keep_mods = c(10, 23:29)
 keep_mods = paste(paste0("-", keep_mods, "\\."), collapse = "|")
 out_files = out_files[str_detect(out_files, keep_mods)]
 
@@ -100,7 +103,7 @@ We wished to evaluate whether the method we used to assign weight to these data 
 
 $$ESS_{i,t} = \text{min}(n_{i,t}, X)$$
 
-where $X$ took on the value of 100 or 200 depending on the scenario. We refer to this scheme as the "min" method, and it assumes that any additional fish beyond $X$ does not contribute any additional information to the multinomial sample. However, because the vast majority of years had greater than 200 fish for a given fate sampled, it has the tendency to weight all years equally. The table below summarizes the data weighting scenarios invesigated in this sensitivity analysis:
+where $X$ took on the value of 100 or 200 depending on the scenario. We refer to this scheme as the "min" method, and it assumes that any additional fish beyond $X$ does not contribute any additional information to the multinomial sample. However, because the vast majority of years had greater than 200 fish for a given fate sampled, it has the tendency to weight all years equally. Table \@ref(tab:table) below summarizes the data weighting scenarios invesigated in this sensitivity analysis:
 
 ```{r table}
 tab = data.frame(
@@ -118,7 +121,7 @@ colnames(tab) = c("Scenario", "Method", "Escapement", "Commercial", "Subsistence
 
 tab$Scenario[1] = "1<sup>a</sup>"
 tab %>%
-  kable(align = "c", escape = F) %>%
+  kable(align = "c", escape = F, caption = "Data weighting scenarios and their notation in the figures that follow.") %>%
   kable_styling(full_width = F, bootstrap_options = c("condensed")) %>%
   add_header_above(c(" " = 2, "Fate Data Set Scaler" = 3, "Symbology in Figures" = 3)) %>%
   footnote(alphabet = c(
@@ -479,6 +482,334 @@ legend("topleft", legend = c("First 10", "All", "Last 10"),
        pt.cex = 1.5)
 ```
 
+
 # Analysis #2: Alternative Length-Fecundity Relationships
+
+```{r workspace2, cache = T, cache.lazy = F}
+data_dir = "../../2-model-fit/inputs/"
+model = 1  # just needed to build the data
+
+source("../../2-model-fit/1-compile-data.R")
+source("../../0-functions/id_model.R")
+rm(model) # clear out the model object 
+
+out_dir = "../../../model-output-new-prior/"
+out_files = dir(out_dir, full.names = T)
+
+# reduce the set of models to only main-text models
+keep_mods = c(3, 10, 13:22)
+keep_mods = paste(paste0("-", keep_mods, "\\."), collapse = "|")
+out_files = out_files[str_detect(out_files, keep_mods)]
+
+# the file names of the output files
+postfiles = out_files[str_detect(out_files, "post")]
+mods = str_extract(postfiles, "[0-9]+")
+metafiles = out_files[str_detect(out_files, "meta")]
+msyfiles = out_files[str_detect(out_files, "msy")]
+
+# create empty objects to store the output from each model
+meta = list()
+post_list = list()
+msy = NULL
+
+# read in the posterior samples and meta data
+for (i in 1:length(mods)) {
+  post_list[[i]] = readRDS(postfiles[i])
+  meta[[i]] = readRDS(metafiles[i])
+}
+
+# create the ids for each model
+ids = unlist(lapply(meta, id_model, unit = F, trends = T, src = T, rand_age = F, ess = F))
+
+# read in the msy equilibrium quantities
+msy = readRDS(msyfiles[1])
+for (i in 2:length(mods)) {
+  msy = abind(msy, readRDS(msyfiles[i]), along = 5)
+}
+
+# give the objects model identifiers
+names(meta) = ids
+names(post_list) = ids
+dimnames(msy)[[5]] = ids
+```
+
+```{r model-identifers2}
+
+# reorder the models
+ordered = c(
+  "0-YK_eagle",
+  "0-Kenai",
+  "0-Ukleet",
+  "0-YK_tan",     
+  "0-YK_taktat",
+  "0-YK_56",
+  
+  "ASL-YK_eagle",
+  "ASL-Kenai",
+  "ASL-Ukleet",
+  "ASL-YK_tan",
+  "ASL-YK_taktat",
+  "ASL-YK_56"
+)
+msy = msy[,,,,ordered]
+post_list = post_list[ordered]
+meta = meta[ordered]
+ids = ordered
+
+col = character(length(ids))
+col[str_detect(ids, "0")] = "blue"
+col[str_detect(ids, "ASL")] = "red"
+lty = rep(1:4, 2)
+lwd = c(3, rep(1, length(ids) - 1))
+```
+
+## Motivation and Methods
+
+The conclusions from our analysis may depend on the shape of the assumed relationship between female spawner size (METF) and reproductive contribution (e.g., fecundity). As described in the main-text, no length-fecundity data sets were available for the Kuskokwim River Chinook salmon population, so we used a relationship obtained from the Yukon River Chinook salmon population, sampled at Eagle, AK in the years 2008 -- 2010 (L. Horstmann, unpublished data). However, we wished to evaluate whether our conclusions would have changed had we used other assumed relationships. Table \@ref(tab:table2) below shows the sources of 6 length-fecundity data sets we found for Chinook salmon populations in Alaska:
+
+```{r table2}
+
+mods = unlist(lapply(meta[1:6], function(m) m$model))
+
+coefs = mod_key[mod_key$model %in% mods,c("a_coef", "b_coef")]
+
+srcs = c(
+  "YK_eagle" = "Lara Horstmann, unpublished data",
+   "Kenai" = "@fleischman-reimer-2017",
+   "Ukleet" = "@bell-kent-2012",
+   "YK_tan" = "@skaugstad-mccracken-1991",
+   "YK_taktat" = "Joel Harding, unpublished data",
+   "YK_56" = "@jasper-evenson-2006"
+)
+systems = c(
+  "YK_eagle" = "Yukon River (Eagle; CAN Origin)",
+   "Kenai" = "Kenai River",
+   "Ukleet" = "Unalakleet",
+   "YK_tan" = "Yukon River (Tanana)",
+   "YK_taktat" = "Yukon River (Takhini/Tatchun; CAN Origin)",
+   "YK_56" = "Yukon River Districts Y5/Y6"
+)
+years = c(
+  "YK_eagle" = "2008 -- 2010",
+   "Kenai" = "1989",
+   "Ukleet" = "2008 -- 2010",
+   "YK_tan" = "1989",
+   "YK_taktat" = "1990 -- 2017",
+   "YK_56" = "2005"
+)
+
+tab = data.frame(
+  dataset = letters[1:6],
+  system = systems,
+  years = years,
+  a = coefs$a_coef,
+  b = coefs$b_coef,
+  source = srcs,
+  stringsAsFactors = F
+)
+
+colnames(tab) = c("Data Set", "System", "Years Sampled", "a<sup>&dagger;</sup>", "b<sup>&dagger;</sup>", "Source")
+rownames(tab) = NULL
+tab$`Data Set`[1] = "a<sup>*</sup>"
+tab %>%
+  kable(align = "l", escape = F, caption = "Chinook salmon length-fecundity data sets used in this sensitivity analysis.") %>%
+  kable_styling(full_width = F, bootstrap_options = c("condensed")) %>%
+  # add_header_above(c(" " = 2, "Fate Data Set Scaler" = 3, "Symbology in Figures" = 3)) %>%
+  footnote(symbol = c(
+    "This is the data set used for all analyses in the main text.",
+    "Coefficients of the power function: $a \\cdot \\text{METF}^b$"), escape = F)
+```
+
+For this sensitivity analysis, we recalculated $z_{t,a,s}$ (mean reproductive contribution per spawner of age $a$ and sex $s$ in calendar year $t$) using the power function coefficients shown in Table \@ref(tab:table2). For each of the 6 data sets (5 additional to the main text analysis), we fitted model E-0 (no trends allowed for age-, sex-, or length-at-return) and model E-ASL (all trends allowed). We then compared the output to that obtained when using data set **a**.
+
+### Results
+
+There was some variability in the expected fecundity at size between the different data sets we used, but primarily in an absolute sense (Figure 2.1a). When standardized to the maximum point for each curve, the relative contribution of different sized females was highly similar between data sources (Figure 2.1b). This is a result of the similar values of the $b$ coefficient as shown in Table \@ref(tab:table2). However, because of the vertical difference in the absolute relationships, the expected fecundity per female spawner varied between model fits, requiring that the $\alpha$ parameter to scale accordingly to maintain similar recruitment time series (Figure 2.2a). We found that the value of th $\alpha$ parameter (representing maximum adults produced per egg) was inversely related to the scale of fecundity (Figure 2.2b). Because the spawner-recruit parameters could scale to fecundity, the estimated values and temporal trends of $S_{\text{MSC}}$ were essentially identical between the model fits using different assumed fecundity relationships (Figure 2.3a,b).
+
+#### Fecundity Relationships {.tabset .tabset-pills .tabset-fade}
+
+**Figure 2.1:** Relationship between female length (METF in mm) and fecundity, obtained using the coefficients presented in Table \@ref(tab:table2). (a) raw fecundity values, (b) fecundity scaled to that produced by the largest mean length-at-age value in the Kuskokwim River data set.
+
+##### (a) Raw
+
+```{r}
+keep_mods = c(3, 10, 13:22)
+x = mod_key[mod_key$model %in% keep_mods & mod_key$age_trend == 0, c("source", "src_abbrev", "a_coef", "b_coef")]
+unr_perim = 8 * 2* 25.4  
+f_len = rlm[,,1,1] * unr_perim
+l_pred = seq(min(f_len), max(f_len), length = 30)
+out = apply(x[,3:4], 1, function(i) i["a_coef"] * l_pred ^i["b_coef"])
+
+srcs = letters[1:6]
+
+par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25, xaxs = "i")
+matplot(x = l_pred, y = out, type = "l", lwd = c(3,1,1,1,1,1), lty = 1, col = "black",
+        xlim = c(500, 1010), xaxt = "n", xlab = "METF (mm)", ylab = "Predicted Fecundity")
+text(x = 980, y = out[30,], labels = srcs, cex = 0.9, font = c(2,1,1,1,1,1),
+     pos = 4)
+axis(side = 1, at = seq(500, 1000, 100))
+```
+
+##### (b) Standardized
+
+```{r}
+out2 = apply(out, 2, function(x) x/max(x))
+par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25, xaxs = "i")
+matplot(x = l_pred, y = out2, type = "l", lwd = c(3,1,1,1,1,1), lty = 1,
+        col = c("black"),
+        xlim = c(500, 1000), xaxt = "n", xlab = "METF (mm)",
+        ylab = "Predicted Fecundity (Scaled to max. METF)")
+text(x = 520, y = out2[1,], labels = srcs, cex = 0.9, font = c(2,1,1,1,1,1),
+     pos = 2)
+axis(side = 1, at = seq(500, 1000, 100))
+```
+
+#### Estimates of $\alpha$ {.tabset .tabset-pills .tabset-fade}
+
+**Figure 2.2:** (a) The posterior distribution of the $\alpha$ parameter estimated from model E-0 under each fecundity data set (median with thick and thin error bars representing the 50% and 95% credible regions, respectively), in arbitrary order (that presented in Table \@ref(tab:table2). (b) Same as (a), but with $\alpha$ plotted against the the expected fecundity of a female with METF of 800 mm from each data set.
+
+##### (a)
+
+```{r}
+power_f = function(x, a, b) {
+  unname(a * x ^ b)
+}
+mod_nums = lapply(meta[1:6], function(m) m$model)
+
+mod_coefs = lapply(mod_nums, function(m) unlist(mod_key[mod_key$model == m,c("a_coef", "b_coef")]))
+
+f800 = unlist(lapply(mod_coefs, function(m) power_f(800, m["a_coef"], m["b_coef"])))
+
+alpha_m = unlist(lapply(post_list[1:6], function(m) post_summ(m, "alpha")[3,]))
+alpha_l1 = unlist(lapply(post_list[1:6], function(m) post_summ(m, "alpha", p_summ = 0.025)[3,]))
+alpha_l2 = unlist(lapply(post_list[1:6], function(m) post_summ(m, "alpha", p_summ = 0.1)[3,]))
+alpha_u1 = unlist(lapply(post_list[1:6], function(m) post_summ(m, "alpha", p_summ = 0.975)[3,]))
+alpha_u2 = unlist(lapply(post_list[1:6], function(m) post_summ(m, "alpha", p_summ = 0.75)[3,]))
+
+par(mar = c(3,3,1,1), tcl = -0.25, mgp = c(2,0.5,0))
+plot(alpha_m ~ seq(1,6), xaxt = "n", xlab = "Fecundity Data set", type = "n", ylim = range(alpha_l1, alpha_u1), ylab = "alpha")
+segments(1:6, alpha_l1, 1:6, alpha_u1, lwd = c(2,1,1,1,1,1))
+segments(1:6, alpha_l2, 1:6, alpha_u2, lwd = c(4,3,3,3,3,3))
+points(alpha_m ~ seq(1,6), pch = 22, bg = "white", cex = 3, lwd = c(2,1,1,1,1,1))
+text(alpha_m ~ seq(1,6), labels = letters[1:6], font = c(2,1,1,1,1,1))
+
+```
+
+##### (b)
+
+```{r}
+par(mar = c(3,3,1,1), tcl = -0.25, mgp = c(2,0.5,0))
+plot(alpha_m ~ f800, type = "n", ylim = range(alpha_l1, alpha_u1), ylab = "alpha", xlab = "Expected Fecundity of 800 mm METF Female")
+segments(f800, alpha_l1, f800, alpha_u1, lwd = c(2,1,1,1,1,1))
+segments(f800, alpha_l2, f800, alpha_u2, lwd = c(4,3,3,3,3,3))
+points(alpha_m ~ f800, pch = 22, bg = "white", cex = 3, lwd = c(2,1,1,1,1,1))
+text(alpha_m ~ f800, labels = letters[1:6], font = c(2,1,1,1,1,1))
+```
+
+#### $S_{\text{MSC}}$ {.tabset .tabset-pills .tabset-fade}
+
+**Figure 2.3:** Consistency in the estimated value of $S_{\text{MSC}}$ across assumed fecundity data sources and models for (a) 8-inch mesh and (b) 6-inch mesh. Points represent posterior medians and error bars represent the central 50% (thick lines) and 80% (thin lines) posterior credible regions.
+
+##### (a) 8-inch
+
+```{r S-msy-8-2, fig.width = 7, fig.height = 4}
+x = msy["50%","S","unr",,]
+upr1 = msy["90%","S","unr",,]
+lwr1 = msy["10%","S","unr",,]
+upr2 = msy["75%","S","unr",,]
+lwr2 = msy["25%","S","unr",,]
+
+col_mat = cbind(
+  matrix(unique(col)[1], 3,4),
+  matrix(unique(col)[2], 3,4)
+)
+
+zero_mods = str_detect(ids, "0")
+ASL_mods = str_detect(ids, "ASL")
+
+### 0-*
+par(mfrow = c(1,2), oma = c(2,2,1,2), mar = c(1,1,1,1), mgp = c(2,0.5,0), tcl = -0.25)
+mp = barplot(x[,zero_mods], beside = T, names.arg = LETTERS[1:6],
+             yaxt = "n",
+             ylim = range(msy[c("10%", "90%"),"S",,,]) * c(0.95,1.05), col = "white", border = "white", xlab = "Fecundity Dataset", ylab = "SMSC")
+segments(mp, lwr1, mp, upr1, col = col[zero_mods])
+segments(mp, lwr2, mp, upr2, col = col[zero_mods], lwd = 3)
+points(mp, x[,zero_mods], col = "white", bg = col[zero_mods], pch = c(21, 22, 24), cex = 2)
+box()
+axis(side = 1, at = mp[2,], labels = F)
+axis(side = 2, at = seq(0, 200000, 20000), labels = seq(0, 200, 20), las = 2)
+legend("bottom", legend = c("First 10", "All", "Last 10"), 
+       title = "Time Period", horiz = T, bty = "n", pch = c(21, 22, 24), col = "black", pt.bg = "grey80",
+       pt.cex = 1.5)
+
+mtext(side = 1, "Fecundity Data Set", line = 1.75)
+mtext(side = 3, "No Trends (Model E-0)", line = 0.25, font = 2)
+
+
+### ASL-
+mp = barplot(x[,ASL_mods], beside = T, names.arg = LETTERS[1:6],
+             yaxt = "n",
+             ylim = range(msy[c("10%", "90%"),"S",,,]) * c(0.95,1.05), col = "white", border = "white", xlab = "Fecundity Dataset", ylab = "SMSC")
+segments(mp, lwr1, mp, upr1, col = col[ASL_mods])
+segments(mp, lwr2, mp, upr2, col = col[ASL_mods], lwd = 3)
+points(mp, x[,ASL_mods], col = "white", bg = col[ASL_mods], pch = c(21, 22, 24), cex = 2)
+box()
+axis(side = 1, at = mp[2,], labels = F)
+axis(side = 4, at = seq(0, 200000, 20000), labels = seq(0, 200, 20), las = 2)
+mtext(side = 1, "Fecundity Data Set", line = 1.75)
+mtext(side = 3, "All Trends (Model E-ASL)", line = 0.25, font = 2)
+
+
+```
+
+##### (b) 6-inch
+
+```{r S-msy-6-2, fig.width = 7, fig.height = 4}
+x = msy["50%","S","res",,]
+upr1 = msy["90%","S","res",,]
+lwr1 = msy["10%","S","res",,]
+upr2 = msy["75%","S","res",,]
+lwr2 = msy["25%","S","res",,]
+
+col_mat = cbind(
+  matrix(unique(col)[1], 3,4),
+  matrix(unique(col)[2], 3,4)
+)
+
+zero_mods = str_detect(ids, "0")
+ASL_mods = str_detect(ids, "ASL")
+
+### 0-*
+par(mfrow = c(1,2), oma = c(2,2,1,2), mar = c(1,1,1,1), mgp = c(2,0.5,0), tcl = -0.25)
+mp = barplot(x[,zero_mods], beside = T, names.arg = LETTERS[1:6],
+             yaxt = "n",
+             ylim = range(msy[c("10%", "90%"),"S",,,]) * c(0.95,1.05), col = "white", border = "white", xlab = "Fecundity Dataset", ylab = "SMSC")
+segments(mp, lwr1, mp, upr1, col = col[zero_mods])
+segments(mp, lwr2, mp, upr2, col = col[zero_mods], lwd = 3)
+points(mp, x[,zero_mods], col = "white", bg = col[zero_mods], pch = c(21, 22, 24), cex = 2)
+box()
+axis(side = 1, at = mp[2,], labels = F)
+axis(side = 2, at = seq(0, 200000, 20000), labels = seq(0, 200, 20), las = 2)
+legend("top", legend = c("First 10", "All", "Last 10"), 
+       title = "Time Period", horiz = T, bty = "n", pch = c(21, 22, 24), col = "black", pt.bg = "grey80",
+       pt.cex = 1.5)
+
+mtext(side = 1, "Fecundity Data Set", line = 1.75)
+mtext(side = 3, "No Trends (Model E-0)", line = 0.25, font = 2)
+
+
+### ASL-
+mp = barplot(x[,ASL_mods], beside = T, names.arg = LETTERS[1:6],
+             yaxt = "n",
+             ylim = range(msy[c("10%", "90%"),"S",,,]) * c(0.95,1.05), col = "white", border = "white", xlab = "Fecundity Dataset", ylab = "SMSC")
+segments(mp, lwr1, mp, upr1, col = col[ASL_mods])
+segments(mp, lwr2, mp, upr2, col = col[ASL_mods], lwd = 3)
+points(mp, x[,ASL_mods], col = "white", bg = col[ASL_mods], pch = c(21, 22, 24), cex = 2)
+box()
+axis(side = 1, at = mp[2,], labels = F)
+axis(side = 4, at = seq(0, 200000, 20000), labels = seq(0, 200, 20), las = 2)
+mtext(side = 1, "Fecundity Data Set", line = 1.75)
+mtext(side = 3, "All Trends (Model E-ASL)", line = 0.25, font = 2)
+```
 
 # References
