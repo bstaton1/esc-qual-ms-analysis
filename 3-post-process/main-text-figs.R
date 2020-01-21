@@ -461,6 +461,12 @@ box(lwd = 2)
 
 dev.off()
 
+## % declines in per capita output (for main-text results):
+round((meds[3,"EM-ASL"] - meds[1,"EM-ASL"])/meds[1,"EM-ASL"], 2)
+round((meds[3,"E-ASL"] - meds[1,"E-ASL"])/meds[1,"E-ASL"], 2)
+round((meds[3,"E-S"] - meds[1,"E-S"])/meds[1,"E-S"], 2)
+round((meds[3,"E-L"] - meds[1,"E-L"])/meds[1,"E-L"], 2)
+round((meds[3,"E-A"] - meds[1,"E-A"])/meds[1,"E-A"], 2)
 
 ##### MSY FIGURE #####
 
@@ -553,13 +559,13 @@ range(p[-1])
 
 ##### CONVERGENCE SUMMARIES #####
 
-# diag_nodes = c("alpha", "beta_e10", "^R[", "b0_sex", 
+# diag_nodes = c("alpha", "beta_e10", "^R[", "b0_sex",
 #                "b1_sex", "b0_mat", "b1_mat",
-#                "phi", "sigma_R_white", "sigma_R0", 
+#                "phi", "sigma_R_white", "sigma_R0",
 #                "Fcom", "Fsub", "^Vtau$", "^Vsig$", "^Vtha$", "^Vlam$", "log_mean_R0"
 # )
 # 
-# match_p(post, diag_nodes)
+# match_p(post_list[["E-ASL"]], diag_nodes)
 # 
 # f = function(post) {
 #   out = t(post_summ(post, diag_nodes, ess = T, Rhat = T)[c("Rhat", "ess"),])
@@ -569,30 +575,178 @@ range(p[-1])
 #   out
 # }
 # 
-# out = lapply(post_list, f)
+# # out = lapply(post_list, f)
+# min_bound = 5000
+# max_bound = 20000
 # f = function(z) {
 #   z$base_name = stringr::str_remove(z$param, "\\[.+\\]")
 #   z$ess[is.na(z$Rhat)] = NA
-#   tapply(z$ess, z$base_name, min, na.rm = T)
+#   tapply(z$ess, z$base_name, function(x) sum(x < max_bound & x > min_bound, na.rm = T))
+# }
+# 
+# z = sapply(out, f)
+# z[z %in% c("-Inf", "Inf")] = NA
+# z
+# 
+# 
+# above_min = z > 0
+# below_max = z < 10
+# 
+# bad_ess = apply(above_min & below_max, 2, function(x) names(which(x)))
+# bad_ess = unique(unlist(bad_ess)); bad_ess
+# 
+# apply(z[bad_ess,], 2, max, na.rm = T)
+# 
+# f = function(z) {
+#   z$base_name = stringr::str_remove(z$param, "\\[.+\\]")
+#   # z$Rhat[is.na(z$Rhat)] = NA
+#   tapply(z$Rhat, z$base_name, max, na.rm = T)
 # }
 # z = sapply(out, f)
-# z[z == "Inf"] = NA
-# z > 4000
-# z = lapply(out, function(x) x[x$Rhat > 1.1 & !is.na(x$Rhat),])
+# z[z %in% c("-Inf", "Inf")] = NA
+# z < 2000
 # 
-# mean(unlist(sapply(z, function(i) i$Rhat)))
+# bad_alpha = z["alpha",] > 1.1
+# sort(colnames(z)[bad_alpha])
+# mean(z["alpha",bad_alpha])
 # 
-# out1 = sapply(post_list, function(post) post_summ(post, "^v[", ess = T)["ess",])
-# out2 = sapply(post_list, function(post) post_summ(post, "pi_mat", ess = T)["ess",])
+# mean(apply(z[-1,], 2, max, na.rm = T))
 # 
-# diag_plots(post_list[["EM-ASL"]], c("alpha"), T, show_diags = "always")
-# class(post_list[["EM-ASL"]])
+# z
+
+##### POSTERIOR PREDICTIVE CHECKS #####
+
+# THIS TAKES A COUPLE MINUTES TO RUN
+# ESPECIALLY FOR THE COMPOSITION SECTION 
+
+## ABUNDANCE 
+
+# f = function(post) {
+#   pp = lnorm_pp_check(post_subset(post, "^S_t[", T), S_obs_sig, S_obs)
+#   with(pp, mean(fit_obs > fit_new))
+# }
+# ESC_out = sapply(post_list, f)
 # 
-# post_summ(post_list[["EM-ASL"]], "alpha", Rhat = T)
+# f = function(post) {
+#   pp = lnorm_pp_check(post_subset(post, "^Hcom[", T), Hcom_obs_sig, Hcom_obs)
+#   with(pp, mean(fit_obs > fit_new))
+# }
+# COM_out = sapply(post_list, f)
 # 
-# x = post_subset(post_list[["EM-ASL"]], "alpha")
+# f = function(post) {
+#   pp = lnorm_pp_check(post_subset(post, "^Hsub[", T), Hsub_obs_sig, Hsub_obs)
+#   with(pp, mean(fit_obs > fit_new))
+# }
+# SUB_out = sapply(post_list, f)
 # 
-# sapply(post_list, function(x) post_summ(x, "alpha")[3,])
+# range(round(ESC_out, 2))
+# range(round(SUB_out, 2))
+# range(round(COM_out, 2))
+
+# COMPOSIITON
+# # discard half the samples before calculating predictive checks
+# thin = 0.5
 # 
+# f = function(post) {
+#   pp = mult_pp_check(post_subset(post_thin(post, thin), "^q_esc[", T), x_esc, progress = T)
+#   with(pp, mean(fit_obs > fit_new))
+# }
+# esc_out = sapply(post_list, f)
+# 
+# f = function(post) {
+#   pp = mult_pp_check(post_subset(post_thin(post, thin), "^q_com[", T), x_com, progress = T)
+#   with(pp, mean(fit_obs > fit_new))
+# }
+# com_out = sapply(post_list, f)
+# 
+# f = function(post) {
+#   pp = mult_pp_check(post_subset(post_thin(post, thin), "^q_sub[", T), x_sub, progress = T)
+#   with(pp, mean(fit_obs > fit_new))
+# }
+# sub_out = sapply(post_list, f)
+# 
+# range(round(esc_out, 2))
+# range(round(com_out, 2))
+# range(round(sub_out, 2))
+# range(round(esc_out[a_mods], 2))
+# range(round(com_out[a_mods], 2))
+# range(round(sub_out[a_mods], 2))
+
+##### NUMBERS FOR IN-TEXT #####
+
+# extract tau: RLM of fully selected fish
+tau_est = mean(sapply(post_list, function(post) post_summ(post, "^Vtau$", rnd = 2)["mean",]))
+
+unr_perim = 8 * 2 * 25.4  
+res_perim = 6 * 2 * 25.4
+
+tau_est * unr_perim
+tau_est * res_perim
+
+keep_mod = "E-ASL"
+
+# probability of returning as female in all years under no-sex trend models
+sapply(post_list["E-0"], function(post) {
+  post_samps = post_subset(post, "b0_sex", T)
+  summ(expit(post_samps), rnd = 2)
+})
+
+# probability of returning as female in first year under sex trend models
+sapply(post_list[keep_mod], function(post) {
+  post_samps = post_summ(post, "mu_pi_f[1]", rnd = 2)
+})
+
+# probability of returning as female in last year under sex trend models
+sapply(post_list[keep_mod], function(post) {
+  post_samps = post_summ(post, "mu_pi_f[45]", rnd = 2)
+})
+
+# median coefficient of b1_sex
+sapply(post_list[keep_mod], function(post) {
+  post_samps = post_summ(post, "b1_sex", rnd = 3)
+})
+
+# odds ratio of female
+sapply(post_list[keep_mod], function(post) {
+  post_samps = post_subset(post, "b1_sex", T)
+  summ(exp(post_samps), rnd = 3)
+})
+
+
+sapply(post_list[keep_mod], function(post) {
+  
+})
+
+# female return probability at age 6 in first and last brood years
+post_summ(post_list[[keep_mod]], c("mu_pi_mat[1,3,1]", "mu_pi_mat[45,3,1]"), rnd = 2)
+
+# female return probability at age 5 in first and last brood years
+post_summ(post_list[[keep_mod]], c("mu_pi_mat[1,2,1]", "mu_pi_mat[45,2,1]"), rnd = 2)
+
+# male return probability at age 4 in first and last brood years
+post_summ(post_list[[keep_mod]], c("mu_pi_mat[1,1,2]", "mu_pi_mat[45,1,2]"), rnd = 2)
+
+# male return probability at age 6 in first and last brood years
+post_summ(post_list[[keep_mod]], c("mu_pi_mat[1,3,2]", "mu_pi_mat[45,3,2]"), rnd = 2)
+
+b1_mat = post_summ(post_list[[keep_mod]], "b1_mat", rnd = 3)
+array_format(b1_mat[4,])
+array_format(b1_mat[5,])
+
+med_msy_all = msy["50%", "S", "unr", "all",]
+range(round((med_msy_all[E_mods | EM_mods] - med_msy_all["N-0"])/med_msy_all["N-0"], 2))
+
+med_msy_all = msy["50%", "H", "unr", "all",]
+range(round((med_msy_all[E_mods | EM_mods] - med_msy_all["N-0"])/med_msy_all["N-0"], 2))
+
+med_msy = msy["50%", "H", "unr", "late",]
+range(round((med_msy[E_mods | EM_mods] - med_msy["N-0"])/med_msy["N-0"], 2))
+
+med_msy = msy["50%", "S", "res", "all",]
+range(round((med_msy[E_mods | EM_mods] - med_msy["N-0"])/med_msy["N-0"], 2))
+
+med_msy = msy["50%", "H", "res", "all",]
+range(round((med_msy[E_mods | EM_mods] - med_msy["N-0"])/med_msy["N-0"], 2))
+
 
 
