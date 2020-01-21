@@ -1,6 +1,6 @@
 ---
-title: "`r paste('Detailed Output for Model', model_ids[model], sep = ': ')`"
-subtitle: "_Online Supplement to Staton et al._"
+title: "`r paste0('Online Supplement S', m + 1, ' to Staton et al.')`"
+subtitle: "`r paste0('_Detailed Output for Model: ', model_ids[model], '_')`"
 date: "`r format(Sys.Date(), '%m/%d/%Y')`"
 output:
   html_document:
@@ -58,7 +58,7 @@ big_tables  = T  # display tables for posterior summaries?
 jags_code   = T  # display jags code?
 jags_data   = T  # display jags data?
 thin_post   = F  # use postpack::post_thin to reduce the size of the calculations?
-diag_plot_thin = 0.5
+diag_plot_thin = 0.5  # proportion of samples to thin before traceplotting
 ```
 
 ```{r math-key}
@@ -284,6 +284,8 @@ kable(
 ```
 
 `r cntr = up_cntr("Figure", cntr, mcmc_info); create_label("Figure", cntr, T, level = 2, sub = "", subb = "", text = "Diagnostic Plots", tabset = T, mcmc_info)`
+
+`r if (mcmc_info & diag_plot_thin > 0) paste0("**NOTE:** The posterior samples were thinned by an additional S", diag_plot_thin * 100, "% for traceplotting (but not for any other content).")`
 
 `r create_label("Figure", cntr, F, level = 3, sub = "a", subb = "", text = "$\\alpha$", tabset = F, mcmc_info)`
 
@@ -1055,7 +1057,7 @@ text(R[3,R_ind] ~ Z[3,Z_ind],
 
 `r if (sra & meta$z_unit != "fish_count") "This figure is intended to illustrate how the interpretation of spawning stock abundance changes when considering Z (age/sex/year specific reproductive output times total age/sex/year specific spawners) rather than S (total spawners, regardless of age or sex, all fish assumed equal). Points are scaled to the maximum so they may be plotted over one another on a common scale. Note that many of the arrows point to the left, indicating that the spawning stock in many years is smaller relative to the maximum observed spawning stock when using Z units rather than S units."`
 
-`r if (sra & meta$z_unit == "fish_count") "Because this model treats one psawner as the unit of reproductive contribution Z and S are the same."`
+`r if (sra & meta$z_unit == "fish_count") "Because this model treats one spawner as the unit of reproductive contribution, Z and S are the same."`
 
 ```{r sra-z-v-s, eval = sra}
 
@@ -1396,7 +1398,7 @@ make_table = function(v) {
 ```{r jags-code, eval = jags_code, comment = NA}
 edit_full_model(
   model_lines = readLines(file.path("../2-model-fit/model-files", "full-model.txt")),
-  outfile = "", len_trend = meta$len_trend, age_trend = meta$age_trend, sex_trend = meta$sex_trend,
+  outfile = "", len_trend = meta$len_trend, age_trend = meta$age_trend, sex_trend = meta$sex_trend, z_unit = meta$z_unit,
   keep_comments = T, keep_whitespace = T, rand_age = meta$rand_age
   )
 ```
