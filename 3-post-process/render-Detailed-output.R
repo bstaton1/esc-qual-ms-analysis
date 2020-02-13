@@ -13,6 +13,7 @@ model_ids = c("N-0", "N-ASL", "E-0", "E-L", "E-S", "E-A", "E-SL", "E-AL", "E-AS"
 for (m in 1:n_models) {
   models = c(1,3,6,5,4,10,12)
   model = models[m]
+  html_dir = "os-detailed"
   
   out_file = paste0("S", m+1, "_", model_ids[model], ".html", sep = "")
   rmarkdown::render(

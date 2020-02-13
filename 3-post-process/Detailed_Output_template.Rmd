@@ -32,7 +32,7 @@ source("../load-functions.R")
 
 # location of output files
 # out_dir = "../../model-output-no-rand-age"
-out_dir = "../../model-output/"
+out_dir = "../../model-output-new-prior/"
 
 # names of output files
 post_name = paste("post-", model, ".rds", sep = "")
@@ -285,7 +285,7 @@ kable(
 
 `r cntr = up_cntr("Figure", cntr, mcmc_info); create_label("Figure", cntr, T, level = 2, sub = "", subb = "", text = "Diagnostic Plots", tabset = T, mcmc_info)`
 
-`r if (mcmc_info & diag_plot_thin > 0) paste0("**NOTE:** The posterior samples were thinned by an additional S", diag_plot_thin * 100, "% for traceplotting (but not for any other content).")`
+`r if (mcmc_info & diag_plot_thin > 0) paste0("**NOTE:** The posterior samples were thinned by an additional", diag_plot_thin * 100, "% for traceplotting (but not for any other content).")`
 
 `r create_label("Figure", cntr, F, level = 3, sub = "a", subb = "", text = "$\\alpha$", tabset = F, mcmc_info)`
 
