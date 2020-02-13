@@ -470,82 +470,113 @@ round((meds[3,"E-A"] - meds[1,"E-A"])/meds[1,"E-A"], 2)
 
 ##### MSY FIGURE #####
 
+# function to create the plot comparing time periods and models for a given eq. quantity and vuln type
 msy_plot = function(keep_val = "S", keep_vuln = "unr", keep_mods, xticklabs = F, legend = F, letter) {
+  # extract the equilibrium info requested
   keep = msy[,keep_val,keep_vuln,,keep_mods]
+  ylwr = ifelse(keep_val == "S", 40000, 75000)
+  yupr = ifelse(keep_val == "S", 180000, 325000)
   
+  # create the basic plot: dimensions and spacing
   mp = barplot(keep["50%",,keep_mods], yaxt = "n", xaxt = "n", col = "white", border = "white", las = 2,
-               beside = T, ylim = range(msy[c("10%", "90%"),keep_val,,,keep_mods]) * c(0.95, 1.15),
-               xlim = c(0.5, 32.5))
+               beside = T, 
+               ylim = range(msy[c("10%", "90%"),keep_val,,,keep_mods]) * c(0.85, 1.2),
+               xlim = c(0.5, 20.5) 
+               # , ylim = c(ylwr, yupr)
+  )
+  
+  # extract user coordinates
   usr = par("usr"); xdiff = diff(usr[1:2]); ydiff = diff(usr[3:4])
+  
+  # locations to draw vertical lines separating models
   at_v = (mp[1,1:(length(keep_mods) - 1)] + mp[3,2:length(keep_mods)])/2
-  zero_break = 3; one_break = 6; two_break = 9
   abline(v = at_v, col = "grey60")
-  at_y1 = axisTicks(usr[3:4], log = F, nint = 6)
+  
+  # locations of breaks: zero trends vs. one vs. two trends
+  zero_break = 3; one_break = 6; two_break = 9
+  
+  # determine locations and labels of tick marks for y-axes
+  at_y1 = axisTicks(usr[3:4], log = F, nint = 4)
+  at_y1_2 = seq(0, 500000, 10000)
   lab_y1 = at_y1/1000
   
-  lab_y2 = seq(40, 250, 20)
+  lab_y2 = seq(50, 250, 50)
   at_y2 = keep["50%","all","N-0"] * (lab_y2/100)
+  
+  # draw horizontal line at no change from N-0 model
   abline(h = at_y2[lab_y2 == 100], lty = 2)
-  # segments(mp[2,2], keep["50%","all","E-0"], usr[2], keep["50%","all","E-0"], lty = 2)
+  
+  # draw y-axes
   axis(side = 2, at = at_y1, labels = lab_y1, las = 2)
+  axis(side = 2, at = at_y1_2, labels = F, tcl = -0.125)
   axis(side = 4, at = at_y2, labels = paste0(lab_y2 - 100, "%"), las = 2)
-  # rect(xleft = usr[1], ybottom = usr[4] - ydiff * 0.1, xright = usr[2], ytop = usr[4], border = "white", col = "white")
-  rect(xleft = usr[1], ybottom = usr[3], xright = at_v[zero_break], ytop = usr[4], lwd = 3, xpd = T, border = "grey60")
-  rect(xleft = at_v[zero_break], ybottom = usr[3], xright = at_v[one_break], ytop = usr[4], lwd = 3, xpd = T, border = "grey60")
-  rect(xleft = at_v[one_break], ybottom = usr[3], xright = at_v[two_break], ytop = usr[4], lwd = 3, xpd = T, border = "grey60")
-  rect(xleft = at_v[two_break], ybottom = usr[3], xright = usr[2], ytop = usr[4], lwd = 3, xpd = T, border = "grey60")
-  axis(side = 1, at = mp[2,], labels = F)
+  
+  # draw thick line to separate zero vs. three trend models
+  abline(v = at_v[zero_break], lwd = 4, xpd = F, col = "grey60")
+  
+  # draw credible intervals: central 80%
   segments(mp[1,], keep["10%","early",keep_mods], mp[1,], keep["90%","early",keep_mods])
   segments(mp[2,], keep["10%","all",keep_mods], mp[2,], keep["90%","all",keep_mods])
   segments(mp[3,], keep["10%","late",keep_mods], mp[3,], keep["90%","late",keep_mods])
+  
+  # draw credible intervals: central 50%
   segments(mp[1,], keep["25%","early",keep_mods], mp[1,], keep["75%","early",keep_mods], lwd = 4)
   segments(mp[2,], keep["25%","all",keep_mods], mp[2,], keep["75%","all",keep_mods], lwd = 4)
   segments(mp[3,], keep["25%","late",keep_mods], mp[3,], keep["75%","late",keep_mods], lwd = 4)
   
-  points(keep["50%","early",keep_mods] ~ mp[1,], pch = 21, bg = "grey60", cex = 1)
-  points(keep["50%","all",keep_mods] ~ mp[2,], pch = 22, bg = "grey60", cex = 1)
-  points(keep["50%","late",keep_mods] ~ mp[3,], pch = 24, bg = "grey60", cex = 1)
+  # draw medians
+  points(keep["50%","early",keep_mods] ~ mp[1,], pch = 21, bg = "grey60", cex = 1.2)
+  points(keep["50%","all",keep_mods] ~ mp[2,], pch = 22, bg = "grey60", cex = 1.2)
+  points(keep["50%","late",keep_mods] ~ mp[3,], pch = 24, bg = "grey60", cex = 1.2)
   
+  # add a legend if requested
   if (legend) {
-    legend("topleft", y.intersp = 0.75, legend = c("First 10", "All", "Last 10"), title = "Years", pch = c(21,22,24), pt.bg = "grey60", pt.cex = 1, cex = 0.75, bg = "white", box.col = "black")
+    legend("topleft", y.intersp = 0.75, legend = c("First 10", "All", "Last 10"), title = "Years",
+           pch = c(21,22,24), pt.bg = "grey60", pt.cex = 1, cex = 0.75, bg = "white", box.col = "black")
   }
   
+  # draw x-axis
   if (xticklabs) {
     axis(side = 1, at = mp[2,], labels = keep_mods, las = 2)
   } else {
     axis(side = 1, at = mp[2,], labels = F, las = 2)
   }
   
-  # if (letter) {
-  rect(usr[2] - xdiff * 0.3, usr[4] - ydiff * 0.15, usr[2], usr[4], border = "white", col = "white")
-  text(x = usr[2] + xdiff * 0.025, y = usr[4] - ydiff * 0.1,
-       labels = ifelse(keep_vuln == "unr", paste0("(", letter, ")\n8 in. mesh"), paste0("(", letter, ")\n6 in. mesh")), pos = 2, cex = 0.8, font = 2)
-  # }
+  # draw the label identifying each plot
+  rect(usr[2] - xdiff * 0.23, usr[4] - ydiff * 0.22, usr[2] - xdiff * 0.17, usr[4], border = "white", col = "white")
+  text(x = usr[2] + xdiff * 0.025, y = usr[4] - ydiff * 0.12,
+       labels = ifelse(keep_vuln == "unr", paste0("(", letter, ")\n8 in. mesh"),
+                       ifelse(keep_vuln == "flat", paste0("(", letter, ")\nNo Selectivity"), paste0("(", letter, ")\n6 in. mesh"))), pos = 2, cex = 0.7, font = 2)
   
+  # add a main title over top panel
+  mtext(side = 3, ifelse(keep_vuln == "unr", latex2exp::TeX(paste0(keep_val, "_{MSC}")), ""), line = 0, font = 2)
   
-  mtext(side = 3, ifelse(keep_vuln == "unr", latex2exp::TeX(paste0(keep_val, "_{MSC}")), ""), line = 0.25, font = 2)
-  
-  box(lwd = 2)
+  # draw a border
+  box()
 }
 
+# which models to keep for plot
 keep_mods = c(
   "N-0",
   "E-0", "EM-0",
-  "E-L", "E-A", "E-S",
+  # "E-L", "E-A", "E-S",
   # "E-AL", "E-AS", "E-SL",
   "E-ASL", "EM-ASL")
 
-
+# make the plot itself
 file_device(file.path(fig_dir, paste0("msc.", file_type)), h = 5.5, w = 7.2)
-par(mfcol = c(2,2), xaxs = "i", yaxs = "i", cex = 1, lend = "square", mar = c(0.5,1.75,1,2.25),
-    oma = c(3,0.75,0.75,2), tcl = -0.25, mgp = c(2,0.35,0), cex.axis = 0.9)
+par(mfcol = c(3,2), xaxs = "i", yaxs = "i", cex = 1, lend = "square", mar = c(0,1.75,0.75,2.25),
+    oma = c(3.5,0.75,0.5,2), tcl = -0.25, mgp = c(2,0.35,0), cex.axis = 0.9)
 msy_plot("S", "unr", keep_mods, legend = T, letter = "a")
-msy_plot("S", "res", keep_mods, xticklabs = T, letter = "c"); par(mar = c(0.5,2.25,1,1.75))
+msy_plot("S", "flat", keep_mods, legend = F, letter = "c")
+msy_plot("S", "res", keep_mods, xticklabs = T, letter = "e"); par(mar = c(0,2.25,0.75,1.75))
 msy_plot("H", "unr", keep_mods, legend = F, letter = "b")
-msy_plot("H", "res", keep_mods, xticklabs = T, letter = "d")
+msy_plot("H", "flat", keep_mods, legend = F, letter = "d")
+msy_plot("H", "res", keep_mods, xticklabs = T, letter = "f")
 mtext(side = 2, outer = T, "Escapement or Harvest (1000s)", line = -0.2)
 mtext(side = 4, outer = T, "% Change from Model N-0", line = 0.75)
 dev.off()
+
 
 keep_val = "H"
 keep_vuln = "unr"
