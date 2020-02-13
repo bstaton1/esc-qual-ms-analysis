@@ -1391,6 +1391,10 @@ make_table = function(v) {
 
 `r if (big_tables) make_table("res")`
 
+`r create_label("Table", cntr, F, level = 4, sub = "d", subb = "3", text = "Flat", tabset = F, big_tables)`
+
+`r if (big_tables) make_table("flat")`
+
 `r cntr = up_cntr("Section", cntr, jags_data | jags_code); create_label("Section", cntr, T, level = 1, sub = "", subb = "", text = "JAGS Inputs", tabset = T, jags_data | jags_code)`
 
 `r if (jags_code) "## Model Definition"`
