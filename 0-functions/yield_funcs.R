@@ -13,8 +13,12 @@ yield = function(log_F_max, i, post.samp, vuln, include_sex_ratio = F) {
   
   # extract and name the relevant age/sex-structured quantities
   pi_as = unname(post.samp[i,stringr::str_detect(cn, "pi")])
-  vuln_as = unname(post.samp[i,stringr::str_detect(cn, vuln)])
   z_as = unname(post.samp[i,stringr::str_detect(cn, "z")])
+  if (vuln %in% c("unr", "res")) {
+    vuln_as = unname(post.samp[i,stringr::str_detect(cn, vuln)])
+  } else {
+    vuln_as = rep(1, 8)
+  }
   
   # get unfished z per recruit (zPR0 - average reproductive units per spawner in unfished condition, z_as weighted by maturity)
   zPR0_as = z_as * pi_as
@@ -72,9 +76,9 @@ msy_search = function(post.samp, sex_penalty = F, silent = F) {
     i = 1, post.samp = post.samp,
     vuln = "unr", include_sex_ratio = sex_penalty
   ))
-  out = array(NA, dim = c(n_samp, length(nms), 2))
-  v_scenarios = c("unr", "res")
-  for (v in 1:2) {
+  out = array(NA, dim = c(n_samp, length(nms), 3))
+  v_scenarios = c("unr", "res", "flat")
+  for (v in 1:length(v_scenarios)) {
     for (i in 1:n_samp) {
       if (!silent) cat("\r", " ", floor(i/n_samp * 100), "% (", v_scenarios[v], ")", sep = "")
       fit_log_F_max = 
@@ -99,9 +103,10 @@ msy_search = function(post.samp, sex_penalty = F, silent = F) {
   out = array(
     c(
       apply(out[,,1], 2, StatonMisc::summ, p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975), na.rm = T)[3:9,],
-      apply(out[,,2], 2, StatonMisc::summ, p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975), na.rm = T)[3:9,]
+      apply(out[,,2], 2, StatonMisc::summ, p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975), na.rm = T)[3:9,],
+      apply(out[,,3], 2, StatonMisc::summ, p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975), na.rm = T)[3:9,]
     ),
-    dim = c(7, length(nms), 2)
+    dim = c(7, length(nms), 3)
   )
   
   dimnames(out) = list(
