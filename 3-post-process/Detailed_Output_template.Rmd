@@ -1,5 +1,5 @@
 ---
-title: "`r paste0('Online Supplement S', m + 1, ' to Staton et al.')`"
+title: "`r paste0('Online Supplement ', LETTERS[m + 1], ' to Staton et al.')`"
 subtitle: "`r paste0('_Detailed Output for Model: ', model_ids[model], '_')`"
 date: "`r format(Sys.Date(), '%m/%d/%Y')`"
 output:

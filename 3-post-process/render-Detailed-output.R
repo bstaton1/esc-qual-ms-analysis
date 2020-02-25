@@ -15,7 +15,7 @@ for (m in 1:n_models) {
   model = models[m]
   html_dir = "os-detailed"
   
-  out_file = paste0("S", m+1, "_", model_ids[model], ".html", sep = "")
+  out_file = paste0("Supp-", LETTERS[m+1], "_", model_ids[model], ".html", sep = "")
   rmarkdown::render(
     input = "Detailed_Output_template.Rmd",
     output_file = file.path(html_dir, out_file))
