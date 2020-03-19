@@ -1,30 +1,32 @@
 model,z_unit,age_trend,sex_trend,length_trend,a_coef,b_coef,source,src_abbrev,supplementary,esc_n_eff,com_n_eff,sub_n_eff
 1,fish_count,0,0,0,NA,NA,NA,NA,0,scale_100,scale_100,scale_100
 2,fish_count,1,1,1,NA,NA,NA,NA,0,scale_100,scale_100,scale_100
-3,egg_count,0,0,0,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
-4,egg_count,0,0,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
-5,egg_count,0,1,0,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
-6,egg_count,1,0,0,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
-7,egg_count,0,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
-8,egg_count,1,0,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
-9,egg_count,1,1,0,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
-10,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
-11,egg_mass,0,0,0,8.70E-12,4.83,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
-12,egg_mass,1,1,1,8.70E-12,4.83,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
-13,egg_count,0,0,0,0.0007112,2.373,Kenai 1989 (Fleischman and Reimer 2017),Kenai,1,scale_100,scale_100,scale_100
-14,egg_count,1,1,1,0.0007112,2.373,Kenai 1989 (Fleischman and Reimer 2017),Kenai,1,scale_100,scale_100,scale_100
-15,egg_count,0,0,0,0.002103,2.271,Unalakleet 2008-2010 (Bell and Kent 2012),Ukleet,1,scale_100,scale_100,scale_100
-16,egg_count,1,1,1,0.002103,2.271,Unalakleet 2008-2010 (Bell and Kent 2012),Ukleet,1,scale_100,scale_100,scale_100
-17,egg_count,0,0,0,0.003002,2.205,Yukon Tanana 1989 (Skaugstad and McCracken 1991),YK_tan,1,scale_100,scale_100,scale_100
-18,egg_count,1,1,1,0.003002,2.205,Yukon Tanana 1989 (Skaugstad and McCracken 1991),YK_tan,1,scale_100,scale_100,scale_100
-19,egg_count,0,0,0,0.0008762,2.328,Yukon Takhini/Tatchun (CAN) 1990-2017 (data: Joel Harding),YK_taktat,1,scale_100,scale_100,scale_100
-20,egg_count,1,1,1,0.0008762,2.328,Yukon Takhini/Tatchun (CAN) 1990-2017 (data: Joel Harding),YK_taktat,1,scale_100,scale_100,scale_100
-21,egg_count,0,0,0,0.0007597,2.359,Yukon Y5/Y6 2005 (Jasper and Evenson 2006),YK_56,1,scale_100,scale_100,scale_100
-22,egg_count,1,1,1,0.0007597,2.359,Yukon Y5/Y6 2005 (Jasper and Evenson 2006),YK_56,1,scale_100,scale_100,scale_100
-23,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,scale_200,scale_100,scale_100
-24,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,scale_100,scale_200,scale_100
-25,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,scale_100,scale_100,scale_200
-26,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,min_100,min_100,min_100
-27,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,min_200,min_100,min_100
-28,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,min_100,min_200,min_100
-29,egg_count,1,1,1,0.0002753,2.544,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,2,min_100,min_100,min_200
+3,egg_count,0,0,0,0.0009345,2.363,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
+4,egg_count,0,0,1,0.0009345,2.363,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
+5,egg_count,0,1,0,0.0009345,2.363,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
+6,egg_count,1,0,0,0.0009345,2.363,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
+7,egg_count,0,1,1,0.0009345,2.363,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
+8,egg_count,1,0,1,0.0009345,2.363,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
+9,egg_count,1,1,0,0.0009345,2.363,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
+10,egg_count,1,1,1,0.0009345,2.363,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
+11,egg_mass,0,0,0,8.71E-12,4.829,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
+12,egg_mass,1,1,1,8.71E-12,4.829,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,0,scale_100,scale_100,scale_100
+13,egg_count,1,1,1,0.0009345,2.363,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,1,scale_200,scale_100,scale_100
+14,egg_count,1,1,1,0.0009345,2.363,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,1,scale_100,scale_200,scale_100
+15,egg_count,1,1,1,0.0009345,2.363,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,1,scale_100,scale_100,scale_200
+16,egg_count,1,1,1,0.0009345,2.363,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,1,min_100,min_100,min_100
+17,egg_count,1,1,1,0.0009345,2.363,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,1,min_200,min_100,min_100
+18,egg_count,1,1,1,0.0009345,2.363,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,1,min_100,min_200,min_100
+19,egg_count,1,1,1,0.0009345,2.363,Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,1,min_100,min_100,min_200
+20,egg_count,0,0,0,0.1633613,1.624,Kuskokwim 2009-2018 (data: Jim Boersma),Kusko,2,scale_100,scale_100,scale_100
+21,egg_count,1,1,1,0.1633613,1.624,Kuskokwim 2009-2018 (data: Jim Boersma),Kusko,2,scale_100,scale_100,scale_100
+22,egg_count,0,0,0,0.01111,1.981,Kenai 1989 (Fleischman and Reimer 2017),Kenai,2,scale_100,scale_100,scale_100
+23,egg_count,1,1,1,0.01111,1.981,Kenai 1989 (Fleischman and Reimer 2017),Kenai,2,scale_100,scale_100,scale_100
+24,egg_count,0,0,0,0.5472,1.447,Unalakleet 2008-2010 (Bell and Kent 2012),Ukleet,2,scale_100,scale_100,scale_100
+25,egg_count,1,1,1,0.5472,1.447,Unalakleet 2008-2010 (Bell and Kent 2012),Ukleet,2,scale_100,scale_100,scale_100
+26,egg_count,0,0,0,0.05268,1.786,Yukon Tanana 1989 (Skaugstad and McCracken 1991),YK_tan,2,scale_100,scale_100,scale_100
+27,egg_count,1,1,1,0.05268,1.786,Yukon Tanana 1989 (Skaugstad and McCracken 1991),YK_tan,2,scale_100,scale_100,scale_100
+28,egg_count,0,0,0,0.0207,1.87,Yukon Y5/Y6 2005 (Jasper and Evenson 2006),YK_56,2,scale_100,scale_100,scale_100
+29,egg_count,1,1,1,0.0207,1.87,Yukon Y5/Y6 2005 (Jasper and Evenson 2006),YK_56,2,scale_100,scale_100,scale_100
+30,egg_count,0,0,0,0.06142,1.701,Yukon Takhini/Tatchun (CAN) 1990-2017 (data: Joel Harding),YK_taktat,2,scale_100,scale_100,scale_100
+31,egg_count,1,1,1,0.06142,1.701,Yukon Takhini/Tatchun (CAN) 1990-2017 (data: Joel Harding),YK_taktat,2,scale_100,scale_100,scale_100
