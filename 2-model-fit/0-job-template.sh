@@ -1,8 +1,8 @@
-#PBS -q fastfat -l nodes=nodeNODE:ppn=4,walltime=60:00:00,flags=ADVRES:liuzhan_ff
+#NODE-SETTINGS-HERE
 #PBS -d .
 
 ###email me
-#PBS -M bas0041@auburn.edu
+#PBS -M bstaton@critfc.org
 #PBS -m abe
 
 ###files to write out

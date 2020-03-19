@@ -2,7 +2,7 @@
 ##### THIS SCRIPT'S PURPOSE IS TO CREATE A TEMPORARY JOB FILE TO PASS TO QSUB #####
 # it accepts two command line arguments:
   # $1: model
-  # $2: node (144 or 145)
+  # $2: node (055, 144, or 145)
 
 # read in the command line arguments
 args = commandArgs(trailingOnly = T)
@@ -10,7 +10,7 @@ model = args[1]
 node = args[2]
 
 # stop if node incorrect
-if (!(node %in% c("144", "145"))) stop("The node must be one of: '144' or '145'")
+if (!(node %in% c("055", "144", "145"))) stop("The node must be one of: '055', '144', or '145'")
 
 # stop if model incorrect
 if (!(model %in% read.csv("model-key.csv")$model)) stop("The requested model was not found in 'model-key.csv'")
@@ -19,7 +19,13 @@ if (!(model %in% read.csv("model-key.csv")$model)) stop("The requested model was
 code = readLines("0-job-template.sh")
 
 # replace which node to use: this is one "computer" on the super computer. It has ram, processors, etc.
-code = unlist(lapply(code, function(x) stringr::str_replace(x, "NODE", as.character(node))))
+if (node == "055") {
+  node_settings = "#PBS -l nodes=node055:ppn=4,walltime=60:00:00,flags=ADVRES:liuzhan_lab"
+} else {
+  node_settings = "#PBS -q fastfat -l nodes=nodeNODE:ppn=4,walltime=60:00:00,flags=ADVRES:liuzhan_ff"
+  node_settings = stringr::str_replace(node_settings, "NODE", as.character(node))
+}
+code = unlist(lapply(code, function(x) stringr::str_replace(x, "#NODE-SETTINGS-HERE", node_settings)))
 
 # replace which model to run: this is a number; models defined in model-key.csv
 code = unlist(lapply(code, function(x) stringr::str_replace(x, "MODEL", as.character(model))))
