@@ -11,6 +11,8 @@ echo "Which models do you want to bundle?"
 echo "  (separated by spaces):"
 read models
 echo "---------------------------------------"
+echo "Name of tar.gz file?"
+read filename
 
 echo "Making Copies"
 for model in ${models[@]}
@@ -22,6 +24,6 @@ done
 cd ../
 
 echo "Creating Tarball:"
-tar -cvzf esc-qual-bundle.tar.gz esc-qual-bundle
+tar -cvzf $filename esc-qual-bundle
 
 rm -r esc-qual-bundle
