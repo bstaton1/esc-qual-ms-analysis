@@ -97,11 +97,19 @@ source("../../2-model-fit/1-compile-data.R")
 source("../../0-functions/id_model.R")
 rm(model) # clear out the model object 
 
-out_dir = "../../../model-output-new-prior/"
+out_dir = "../../../model-output-new-a-b/"
 out_files = dir(out_dir, full.names = T)
 
-# reduce the set of models to only main-text models
-keep_mods = c(10, 23:29)
+# select the models to read in models
+
+# main text E-ASL model
+keep_mods = 10
+
+# altered age comp data weighting model
+altered_ess_mods = mod_key$model[mod_key$supplementary == 1]
+
+keep_mods = c(keep_mods, altered_ess_mods)
+
 keep_mods = paste(paste0("-", keep_mods, "\\."), collapse = "|")
 out_files = out_files[str_detect(out_files, keep_mods)]
 
@@ -574,11 +582,19 @@ source("../../2-model-fit/1-compile-data.R")
 source("../../0-functions/id_model.R")
 rm(model) # clear out the model object 
 
-out_dir = "../../../model-output-new-prior/"
+out_dir = "../../../model-output-new-a-b/"
 out_files = dir(out_dir, full.names = T)
 
-# reduce the set of models to only main-text models
-keep_mods = c(3, 10, 13:22)
+# select the models to read in models
+
+# main text E-0 and E-ASL models
+keep_mods = c(3, 10)
+
+# models E-0 and E-ASL for different fecundity vs. length data sets
+altered_egg_mods = mod_key$model[mod_key$supplementary == 2]
+
+keep_mods = c(keep_mods, altered_egg_mods)
+
 keep_mods = paste(paste0("-", keep_mods, "\\."), collapse = "|")
 out_files = out_files[str_detect(out_files, keep_mods)]
 
@@ -619,6 +635,7 @@ dimnames(msy)[[5]] = ids
 # reorder the models
 ordered = c(
   "0-YK_eagle",
+  "0-Kusko",
   "0-Kenai",
   "0-Ukleet",
   "0-YK_tan",     
@@ -626,6 +643,7 @@ ordered = c(
   "0-YK_56",
   
   "ASL-YK_eagle",
+  "ASL-Kusko",
   "ASL-Kenai",
   "ASL-Ukleet",
   "ASL-YK_tan",
@@ -650,12 +668,13 @@ The conclusions from our analysis may depend on the shape of the assumed relatio
 
 ```{r table2}
 
-mods = unlist(lapply(meta[1:6], function(m) m$model))
+mods = unlist(lapply(meta[1:7], function(m) m$model))
 
 coefs = mod_key[mod_key$model %in% mods,c("a_coef", "b_coef")]
 
 srcs = c(
   "YK_eagle" = "Lara Horstmann, unpublished data",
+  "Kusko" = "Jim Boersma, unpublished data",
    "Kenai" = "@fleischman-reimer-2017",
    "Ukleet" = "@bell-kent-2012",
    "YK_tan" = "@skaugstad-mccracken-1991",
@@ -664,6 +683,7 @@ srcs = c(
 )
 systems = c(
   "YK_eagle" = "Yukon River (Eagle; CAN Origin)",
+  "Kusko" = "Kuskokwim",
    "Kenai" = "Kenai River",
    "Ukleet" = "Unalakleet",
    "YK_tan" = "Yukon River (Tanana)",
@@ -672,6 +692,7 @@ systems = c(
 )
 years = c(
   "YK_eagle" = "2008 -- 2010",
+  "Kusko" = "2009 -- 2018",
    "Kenai" = "1989",
    "Ukleet" = "2008 -- 2010",
    "YK_tan" = "1989",
@@ -680,7 +701,7 @@ years = c(
 )
 
 tab = data.frame(
-  dataset = letters[1:6],
+  dataset = letters[1:7],
   system = systems,
   years = years,
   a = coefs$a_coef,
@@ -701,11 +722,11 @@ tab %>%
     "Coefficients of the power function: $a \\cdot \\text{METF}^b$"), escape = F)
 ```
 
-For this sensitivity analysis, we recalculated $z_{t,a,s}$ (mean reproductive contribution per spawner of age $a$ and sex $s$ in calendar year $t$) using the power function coefficients shown in Table \@ref(tab:table2). For each of the 6 data sets (5 additional to the main text analysis), we fitted model E-0 (no trends allowed for age-, sex-, or length-at-return) and model E-ASL (all trends allowed). We then compared the output to that obtained when using data set **a**.
+For this sensitivity analysis, we recalculated $z_{t,a,s}$ (mean reproductive contribution per spawner of age $a$ and sex $s$ in calendar year $t$) using the power function coefficients shown in Table \@ref(tab:table2). For each of the 7 data sets (6 additional to the main text analysis), we fitted model E-0 (no trends allowed for age-, sex-, or length-at-return) and model E-ASL (all trends allowed). We then compared the output to that obtained when using data set **a**.
 
 ### Results
 
-There was some variability in the expected fecundity at size between the different data sets we used, but primarily in an absolute sense (Figure 3.1a). When standardized to the maximum point for each curve, the relative contribution of different sized females was highly similar between data sources (Figure 3.1b). This is a result of the similar values of the $b$ coefficient as shown in Table \@ref(tab:table2). However, because of the vertical difference in the absolute relationships, the expected fecundity per female spawner varied between model fits, requiring that the $\alpha$ parameter to scale accordingly to maintain similar recruitment time series (Figure 3.2a). We found that the value of th $\alpha$ parameter (representing maximum adults produced per egg) was inversely related to the scale of fecundity (Figure 3.2b). Because the spawner-recruit parameters could scale to fecundity, the estimated values and temporal trends of $S_{\text{MSC}}$ were essentially identical between the model fits using different assumed fecundity relationships (Figure 3.3a,b).
+There was some variability in the expected fecundity at size between the different data sets we used, both in a absolute sense (Figure 3.1a) and a relative sense (Figure 3.1b). When standardized to the maximum point for each curve, the relative contribution of different sized females showed variable increases with fish size between data sources (Figure 3.1b). This is a result of the different values of the $b$ coefficient as shown in Table \@ref(tab:table2): steeper increases are associated with higher $b$ coefficients. Because of the vertical difference in the absolute relationships (Figure 3.1a), the expected fecundity per female spawner varied between model fits, requiring that the $\alpha$ parameter to scale accordingly to maintain similar recruitment time series (Figure 3.2a). We found that the value of the $\alpha$ parameter (representing maximum adults produced per egg) was inversely related to the scale of fecundity (Figure 3.2b). Because the spawner-recruit parameters could scale to fecundity, the estimated values and temporal trends of $S_{\text{MSC}}$ were essentially identical between the model fits using different assumed fecundity relationships (Figure 3.3a,b).
 
 #### Fecundity Relationships {.tabset .tabset-pills .tabset-fade}
 
@@ -714,19 +735,19 @@ There was some variability in the expected fecundity at size between the differe
 ##### (a) Raw
 
 ```{r}
-keep_mods = c(3, 10, 13:22)
-x = mod_key[mod_key$model %in% keep_mods & mod_key$age_trend == 0, c("source", "src_abbrev", "a_coef", "b_coef")]
+
+x = mod_key[mod_key$model %in% mods & mod_key$age_trend == 0, c("source", "src_abbrev", "a_coef", "b_coef")]
 unr_perim = 8 * 2* 25.4  
 f_len = rlm[,,1,1] * unr_perim
 l_pred = seq(min(f_len), max(f_len), length = 30)
 out = apply(x[,3:4], 1, function(i) i["a_coef"] * l_pred ^i["b_coef"])
 
-srcs = letters[1:6]
+srcs = letters[1:7]
 
 par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25, xaxs = "i")
-matplot(x = l_pred, y = out, type = "l", lwd = c(3,1,1,1,1,1), lty = 1, col = "black",
+matplot(x = l_pred, y = out, type = "l", lwd = c(3,1,1,1,1,1,1), lty = 1, col = "black",
         xlim = c(500, 1010), xaxt = "n", xlab = "METF (mm)", ylab = "Predicted Fecundity")
-text(x = 980, y = out[30,], labels = srcs, cex = 0.9, font = c(2,1,1,1,1,1),
+text(x = 980, y = out[30,], labels = srcs, cex = 0.9, font = c(2,1,1,1,1,1,1),
      pos = 4)
 axis(side = 1, at = seq(500, 1000, 100))
 ```
@@ -736,11 +757,11 @@ axis(side = 1, at = seq(500, 1000, 100))
 ```{r}
 out2 = apply(out, 2, function(x) x/max(x))
 par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25, xaxs = "i")
-matplot(x = l_pred, y = out2, type = "l", lwd = c(3,1,1,1,1,1), lty = 1,
+matplot(x = l_pred, y = out2, type = "l", lwd = c(3,1,1,1,1,1,1), lty = 1,
         col = c("black"),
         xlim = c(500, 1000), xaxt = "n", xlab = "METF (mm)",
         ylab = "Predicted Fecundity (Scaled to max. METF)")
-text(x = 520, y = out2[1,], labels = srcs, cex = 0.9, font = c(2,1,1,1,1,1),
+text(x = 520, y = out2[1,], labels = srcs, cex = 0.9, font = c(2,1,1,1,1,1,1),
      pos = 2)
 axis(side = 1, at = seq(500, 1000, 100))
 ```
@@ -755,24 +776,24 @@ axis(side = 1, at = seq(500, 1000, 100))
 power_f = function(x, a, b) {
   unname(a * x ^ b)
 }
-mod_nums = lapply(meta[1:6], function(m) m$model)
+mod_nums = lapply(meta[1:7], function(m) m$model)
 
 mod_coefs = lapply(mod_nums, function(m) unlist(mod_key[mod_key$model == m,c("a_coef", "b_coef")]))
 
 f800 = unlist(lapply(mod_coefs, function(m) power_f(800, m["a_coef"], m["b_coef"])))
 
-alpha_m = unlist(lapply(post_list[1:6], function(m) post_summ(m, "alpha")[3,]))
-alpha_l1 = unlist(lapply(post_list[1:6], function(m) post_summ(m, "alpha", p_summ = 0.025)[3,]))
-alpha_l2 = unlist(lapply(post_list[1:6], function(m) post_summ(m, "alpha", p_summ = 0.1)[3,]))
-alpha_u1 = unlist(lapply(post_list[1:6], function(m) post_summ(m, "alpha", p_summ = 0.975)[3,]))
-alpha_u2 = unlist(lapply(post_list[1:6], function(m) post_summ(m, "alpha", p_summ = 0.75)[3,]))
+alpha_m = unlist(lapply(post_list[1:7], function(m) post_summ(m, "alpha")[3,]))
+alpha_l1 = unlist(lapply(post_list[1:7], function(m) post_summ(m, "alpha", p_summ = 0.025)[3,]))
+alpha_l2 = unlist(lapply(post_list[1:7], function(m) post_summ(m, "alpha", p_summ = 0.1)[3,]))
+alpha_u1 = unlist(lapply(post_list[1:7], function(m) post_summ(m, "alpha", p_summ = 0.975)[3,]))
+alpha_u2 = unlist(lapply(post_list[1:7], function(m) post_summ(m, "alpha", p_summ = 0.75)[3,]))
 
 par(mar = c(3,3,1,1), tcl = -0.25, mgp = c(2,0.5,0))
-plot(alpha_m ~ seq(1,6), xaxt = "n", xlab = "Fecundity Data set", type = "n", ylim = range(alpha_l1, alpha_u1), ylab = "alpha")
-segments(1:6, alpha_l1, 1:6, alpha_u1, lwd = c(2,1,1,1,1,1))
-segments(1:6, alpha_l2, 1:6, alpha_u2, lwd = c(4,3,3,3,3,3))
-points(alpha_m ~ seq(1,6), pch = 22, bg = "white", cex = 3, lwd = c(2,1,1,1,1,1))
-text(alpha_m ~ seq(1,6), labels = letters[1:6], font = c(2,1,1,1,1,1))
+plot(alpha_m ~ seq(1,7), xaxt = "n", xlab = "Fecundity Data set", type = "n", ylim = range(alpha_l1, alpha_u1), ylab = "alpha")
+segments(1:7, alpha_l1, 1:7, alpha_u1, lwd = c(2,1,1,1,1,1,1))
+segments(1:7, alpha_l2, 1:7, alpha_u2, lwd = c(4,3,3,3,3,3,3))
+points(alpha_m ~ seq(1,7), pch = 22, bg = "white", cex = 3, lwd = c(2,1,1,1,1,1,1))
+text(alpha_m ~ seq(1,7), labels = letters[1:7], font = c(2,1,1,1,1,1,1))
 
 ```
 
@@ -781,10 +802,10 @@ text(alpha_m ~ seq(1,6), labels = letters[1:6], font = c(2,1,1,1,1,1))
 ```{r}
 par(mar = c(3,3,1,1), tcl = -0.25, mgp = c(2,0.5,0))
 plot(alpha_m ~ f800, type = "n", ylim = range(alpha_l1, alpha_u1), ylab = "alpha", xlab = "Expected Fecundity of 800 mm METF Female")
-segments(f800, alpha_l1, f800, alpha_u1, lwd = c(2,1,1,1,1,1))
-segments(f800, alpha_l2, f800, alpha_u2, lwd = c(4,3,3,3,3,3))
-points(alpha_m ~ f800, pch = 22, bg = "white", cex = 3, lwd = c(2,1,1,1,1,1))
-text(alpha_m ~ f800, labels = letters[1:6], font = c(2,1,1,1,1,1))
+segments(f800, alpha_l1, f800, alpha_u1, lwd = c(2,1,1,1,1,1,1))
+segments(f800, alpha_l2, f800, alpha_u2, lwd = c(4,3,3,3,3,3,3))
+points(alpha_m ~ f800, pch = 22, bg = "white", cex = 3, lwd = c(2,1,1,1,1,1,1))
+text(alpha_m ~ f800, labels = letters[1:7], font = c(2,1,1,1,1,1,1))
 ```
 
 #### $S_{\text{MSC}}$ {.tabset .tabset-pills .tabset-fade}
@@ -810,7 +831,7 @@ ASL_mods = str_detect(ids, "ASL")
 
 ### 0-*
 par(mfrow = c(1,2), oma = c(2,2,1,2), mar = c(1,1,1,1), mgp = c(2,0.5,0), tcl = -0.25)
-mp = barplot(x[,zero_mods], beside = T, names.arg = LETTERS[1:6],
+mp = barplot(x[,zero_mods], beside = T, names.arg = letters[1:7],
              yaxt = "n",
              ylim = range(msy[c("10%", "90%"),"S",,,]) * c(0.95,1.05), col = "white", border = "white", xlab = "Fecundity Data set", ylab = "SMSC")
 segments(mp, lwr1[,zero_mods], mp, upr1[,zero_mods], col = col[zero_mods])
@@ -828,7 +849,7 @@ mtext(side = 3, "No Trends (Model E-0)", line = 0.25, font = 2)
 
 
 ### ASL-
-mp = barplot(x[,ASL_mods], beside = T, names.arg = LETTERS[1:6],
+mp = barplot(x[,ASL_mods], beside = T, names.arg = letters[1:7],
              yaxt = "n",
              ylim = range(msy[c("10%", "90%"),"S",,,]) * c(0.95,1.05), col = "white", border = "white", xlab = "Fecundity Data set", ylab = "SMSC")
 segments(mp, lwr1[,ASL_mods], mp, upr1[,ASL_mods], col = col[ASL_mods])
@@ -862,7 +883,7 @@ ASL_mods = str_detect(ids, "ASL")
 
 ### 0-*
 par(mfrow = c(1,2), oma = c(2,2,1,2), mar = c(1,1,1,1), mgp = c(2,0.5,0), tcl = -0.25)
-mp = barplot(x[,zero_mods], beside = T, names.arg = LETTERS[1:6],
+mp = barplot(x[,zero_mods], beside = T, names.arg = letters[1:7],
              yaxt = "n",
              ylim = range(msy[c("10%", "90%"),"S",,,]) * c(0.95,1.05), col = "white", border = "white", xlab = "Fecundity Data set", ylab = "SMSC")
 segments(mp, lwr1[,zero_mods], mp, upr1[,zero_mods], col = col[zero_mods])
@@ -880,7 +901,7 @@ mtext(side = 3, "No Trends (Model E-0)", line = 0.25, font = 2)
 
 
 ### ASL-
-mp = barplot(x[,ASL_mods], beside = T, names.arg = LETTERS[1:6],
+mp = barplot(x[,ASL_mods], beside = T, names.arg = letters[1:7],
              yaxt = "n",
              ylim = range(msy[c("10%", "90%"),"S",,,]) * c(0.95,1.05), col = "white", border = "white", xlab = "Fecundity Data set", ylab = "SMSC")
 segments(mp, lwr1[,ASL_mods], mp, upr1[,ASL_mods], col = col[ASL_mods])
@@ -912,7 +933,7 @@ ASL_mods = str_detect(ids, "ASL")
 
 ### 0-*
 par(mfrow = c(1,2), oma = c(2,2,1,2), mar = c(1,1,1,1), mgp = c(2,0.5,0), tcl = -0.25)
-mp = barplot(x[,zero_mods], beside = T, names.arg = LETTERS[1:6],
+mp = barplot(x[,zero_mods], beside = T, names.arg = letters[1:7],
              yaxt = "n",
              ylim = range(msy[c("10%", "90%"),"S",,,]) * c(0.95,1.05), col = "white", border = "white", xlab = "Fecundity Data set", ylab = "SMSC")
 segments(mp, lwr1[,zero_mods], mp, upr1[,zero_mods], col = col[zero_mods])
@@ -930,7 +951,7 @@ mtext(side = 3, "No Trends (Model E-0)", line = 0.25, font = 2)
 
 
 ### ASL-
-mp = barplot(x[,ASL_mods], beside = T, names.arg = LETTERS[1:6],
+mp = barplot(x[,ASL_mods], beside = T, names.arg = letters[1:7],
              yaxt = "n",
              ylim = range(msy[c("10%", "90%"),"S",,,]) * c(0.95,1.05), col = "white", border = "white", xlab = "Fecundity Data set", ylab = "SMSC")
 segments(mp, lwr1[,ASL_mods], mp, upr1[,ASL_mods], col = col[ASL_mods])
