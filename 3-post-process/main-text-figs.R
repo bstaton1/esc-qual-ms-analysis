@@ -15,12 +15,12 @@ source("../2-model-fit/1-compile-data.R")
 source("../load-functions.R")
 rm(model) # clear out the model object 
 
-out_dir = "../../model-output-new-prior/"
+out_dir = "../../model-output/"
 out_files = dir(out_dir, full.names = T)
 
 # HOW DO YOU WANT TO SAVE THE OUTPUT
-# file_type = "pdf"
-file_type = "jpg"
+file_type = "pdf"
+# file_type = "jpg"
 fig_dir = "ms-figs"
 
 # create directory to store output figures if it doesn't exist
@@ -311,8 +311,8 @@ mtext(side = 1, outer = T, line = 0.5, "Brood Year")
 dev.off()
 
 ##### EGG NUMBER AND MASS RELATIONSHIPS AND CHANGES #####
-egg_fun = function(x) {2.8e-4 * x^2.54}
-mass_fun = function(x) {8.7e-12 * x^4.83}
+egg_fun = function(x) {0.0009345 * x^2.363}
+mass_fun = function(x) {8.71e-12 * x^4.829}
 
 ldat = rlm[,,1,1] * 8 * 2* 25.4 
 
@@ -351,6 +351,19 @@ par(mfrow = c(2,1), mar = c(2.5,3.75,0.5,0.5), mgp = c(1.5,0.35,0), tcl = -0.25,
 pred_x = seq(500, mean(ldat[f10,4]), length = 100)
 pred_egg = egg_fun(pred_x)/egg_fun(mean(ldat[f10,4]))
 pred_mass = mass_fun(pred_x)/mass_fun(mean(ldat[f10,4]))
+
+ff = egg_fun(colMeans(ldat[f10,]))
+lf = egg_fun(colMeans(ldat[l10,]))
+fm = mass_fun(colMeans(ldat[f10,]))
+lm = mass_fun(colMeans(ldat[l10,]))
+
+(colMeans(ldat[l10,]) - colMeans(ldat[f10,]))/colMeans(ldat[f10,])
+(lf - ff)/ff
+(lm - fm)/fm
+
+(ff[1:3])/ff[4]
+(fm[1:3])/fm[4]
+
 
 plot(pred_egg ~ pred_x, type = "l", ylim = range(0, pred_egg, pred_mass),
      xlab = "METF (mm)", ylab = "", yaxt = "n", lwd = 2)
@@ -417,11 +430,15 @@ keep_mods = c("E-0", "EM-0",
 
 out = lapply(post_list[keep_mods], f)
 
+
 meds = sapply(out, function(x) x["50%",])
 lwrs1 = sapply(out, function(x) x["2.5%",])
 lwrs2 = sapply(out, function(x) x["25%",])
 uprs1 = sapply(out, function(x) x["97.5%",])
 uprs2 = sapply(out, function(x) x["75%",])
+
+round((meds[3,] - meds[1,])/meds[1,], 2)
+
 
 file_device(file.path(fig_dir, paste0("z-percapita.", file_type)), h = 3.75, w = 3.4)
 par(xaxs = "i", yaxs = "i", mar = c(4,3,0.5,0.5), tcl = -0.25, mgp = c(2,0.35,0))
@@ -531,7 +548,7 @@ msy_plot = function(keep_val = "S", keep_vuln = "unr", keep_mods, xticklabs = F,
   
   # add a legend if requested
   if (legend) {
-    legend("topleft", y.intersp = 0.75, legend = c("First 10", "All", "Last 10"), title = "Years",
+    legend("topleft", y.intersp = 0.75, legend = c("First 10 years", "All years", "Last 10 years"), title = "Demography",
            pch = c(21,22,24), pt.bg = "grey60", pt.cex = 1, cex = 0.75, bg = "white", box.col = "black")
   }
   
@@ -707,12 +724,18 @@ range(p[-1])
 
 # extract tau: RLM of fully selected fish
 tau_est = mean(sapply(post_list, function(post) post_summ(post, "^Vtau$", rnd = 2)["mean",]))
+Ytau_est = mean(sapply(post_list, function(post) post_summ(post, "^Vtau_yukon$", rnd = 2)["mean",]))
 
 unr_perim = 8 * 2 * 25.4  
 res_perim = 6 * 2 * 25.4
 
-tau_est * unr_perim
-tau_est * res_perim
+kusko_unr = tau_est * unr_perim
+kusko_res = tau_est * res_perim
+yukon_unr = Ytau_est * unr_perim
+yukon_res = Ytau_est * res_perim
+
+kusko_unr - yukon_unr
+kusko_res - yukon_res
 
 keep_mod = "E-ASL"
 
@@ -741,11 +764,6 @@ sapply(post_list[keep_mod], function(post) {
 sapply(post_list[keep_mod], function(post) {
   post_samps = post_subset(post, "b1_sex", T)
   summ(exp(post_samps), rnd = 3)
-})
-
-
-sapply(post_list[keep_mod], function(post) {
-  
 })
 
 # female return probability at age 6 in first and last brood years
@@ -780,4 +798,7 @@ med_msy = msy["50%", "H", "res", "all",]
 range(round((med_msy[E_mods | EM_mods] - med_msy["N-0"])/med_msy["N-0"], 2))
 
 
+med_msy_early = msy["50%", "H", "res", "early",]
+med_msy_late = msy["50%", "H", "res", "late",]
 
+round(((med_msy_late - med_msy_early)/med_msy_early) * 100)
