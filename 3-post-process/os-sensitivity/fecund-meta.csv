@@ -1,0 +1,8 @@
+ID,abbrev,nobs,mean,sd,min,max
+Kenai 1989 (Fleischman and Reimer 2017),Kenai,61,1055.1,90.5,860,1215
+Unalakleet 2008-2010 (Bell and Kent 2012),Ukleet,109,830.7,59.4,655,950
+Yukon at Eagle 2008-2010 (data: Lara Horstmann),YK_eagle,140,829.9,62.6,706,988
+Yukon Takhini/Tatchun (CAN) 1990-2017 (data: Joel Harding),YK_taktat,154,862.4,57.1,703,1015
+Yukon Tanana 1989 (Skaugstad and McCracken 1991),YK_tan,49,902,81.2,775,1065
+Yukon Y5/Y6 2005 (Jasper and Evenson 2006),YK_56,188,835,59.3,650,995
+Kuskokwim 2009-2018 (data: Jim Boersma),Kusko,126,799.3,72.9,604,945

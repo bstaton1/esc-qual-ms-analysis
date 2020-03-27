@@ -97,7 +97,7 @@ source("../../2-model-fit/1-compile-data.R")
 source("../../0-functions/id_model.R")
 rm(model) # clear out the model object 
 
-out_dir = "../../../model-output-new-a-b/"
+out_dir = "../../../model-output/"
 out_files = dir(out_dir, full.names = T)
 
 # select the models to read in models
@@ -582,7 +582,7 @@ source("../../2-model-fit/1-compile-data.R")
 source("../../0-functions/id_model.R")
 rm(model) # clear out the model object 
 
-out_dir = "../../../model-output-new-a-b/"
+out_dir = "../../../model-output/"
 out_files = dir(out_dir, full.names = T)
 
 # select the models to read in models
@@ -700,7 +700,9 @@ years = c(
    "YK_56" = "2005"
 )
 
+meta_tab = read.csv("fecund-meta.csv", stringsAsFactors = F)
 tab = data.frame(
+  abbrev = names(systems),
   dataset = letters[1:7],
   system = systems,
   years = years,
@@ -710,16 +712,27 @@ tab = data.frame(
   stringsAsFactors = F
 )
 
-colnames(tab) = c("Data Set", "System", "Years Sampled", "a<sup>&dagger;</sup>", "b<sup>&dagger;</sup>", "Source")
+tab = merge(tab, meta_tab, by = "abbrev", sort = F)
+tab$cv = paste0(round(tab$sd/tab$mean * 100), "%")
+
+tab$mean_cv = paste0(round(tab$mean), " (", tab$cv, ")")
+tab$range = paste0(tab$min, " -- ", tab$max)
+
+tab = tab[,c("dataset", "system", "a", "b", "years", "nobs", "mean_cv", "range", "source")]
+
+colnames(tab) = c("Data Set", "System", "a<sup>&dagger;</sup>", "b<sup>&dagger;</sup>", "Range of Years<sup>&Dagger;</sup>", "# Sampled", "Mean METF mm (%CV)", "METF mm Range", "Source")
 rownames(tab) = NULL
 tab$`Data Set`[1] = "a<sup>*</sup>"
 tab %>%
   kable(align = "l", escape = F, caption = "Chinook salmon length-fecundity data sets used in this sensitivity analysis.") %>%
   kable_styling(full_width = F, bootstrap_options = c("condensed")) %>%
-  # add_header_above(c(" " = 2, "Fate Data Set Scaler" = 3, "Symbology in Figures" = 3)) %>%
+  add_header_above(c(" " = 2, "Power Function" = 2, "Sample Summary" = 4, " " = 1)) %>%
   footnote(symbol = c(
     "This is the data set used for all analyses in the main text.",
-    "Coefficients of the power function: $a \\cdot \\text{METF}^b$"), escape = F)
+    "Coefficients of the power function: $a \\cdot \\text{METF}^b$",
+    "Not necessarily every year in range was sampled."),
+    escape = F)
+
 ```
 
 For this sensitivity analysis, we recalculated $z_{t,a,s}$ (mean reproductive contribution per spawner of age $a$ and sex $s$ in calendar year $t$) using the power function coefficients shown in Table \@ref(tab:table2). For each of the 7 data sets (6 additional to the main text analysis), we fitted model E-0 (no trends allowed for age-, sex-, or length-at-return) and model E-ASL (all trends allowed). We then compared the output to that obtained when using data set **a**.
