@@ -89,7 +89,7 @@ mtext(side = 2, outer = T, line = 2.5, "Average Escapement METF (mm)")
 
 # Analysis #2: Alternative Composition Data Weighting
 
-```{r workspace1, cache = T, cache.lazy = F}
+```{r workspace1}
 data_dir = "../../2-model-fit/inputs/"
 model = 1  # just needed to build the data
 
@@ -155,7 +155,7 @@ lwd = c(3, rep(1, length(ids) - 1))
 
 ## Motivation and Methods
 
-The use of multinomial likelihoods as a description of the observation process of age/sex composition by year and fate (escapement and fishery harvests) inserts a difficult problem related to the weight each data set receives. It is well-documented that the actual sample size (i.e., number of fish sampled) is not an appropriate measure of the amount of information contained in the sample because sampled fish are often not independent [@maunder-2011; @mcallister-ianelli-1997; @hulson-etal-2011]. This requires the use of an "effective multinomial sample size" (ESS), which is generally lower than the observed sample size. To address this issue for the analysis presented in the main text, we used a method where the effective sample size for each data set each year was re-scaled such that the year with the maximum number of fish sampled for a data set received a ESS value of 100, and the rest of the years were scaled proportionately, i.e.:
+The use of multinomial likelihoods as a description of the observation process of age/sex composition by year and fate (escapement and fishery harvests) inserts a difficult problem related to the weight each data set receives. It is well-documented that the actual sample size (i.e., number of fish sampled) is not an appropriate measure of the amount of information contained in the sample because sampled fish are often not independent [@maunder-2011; @mcallister-ianelli-1997; @hulson-etal-2011]. This requires the use of an "effective multinomial sample size" (ESS), which is generally lower than the observed sample size. To address this issue for the analysis presented in the main text, we used a method where the effective sample size for each data set each year was rescaled such that the year with the maximum number of fish sampled for a data set received a ESS value of 100, and the rest of the years were scaled proportionately, i.e.:
 
 $$ESS_{i,t} = \frac{n_{i,t}}{\text{max}(n_{i})} \times 100$$  
 
@@ -165,7 +165,7 @@ We wished to evaluate whether the method we used to assign weight to these data 
 
 $$ESS_{i,t} = \text{min}(n_{i,t}, X)$$
 
-where $X$ took on the value of 100 or 200 depending on the scenario. We refer to this scheme as the "min" method, and it assumes that any additional fish beyond $X$ does not contribute any additional information to the multinomial sample. However, because the vast majority of years had greater than 200 fish for a given fate sampled, it has the tendency to weight all years equally. Table \@ref(tab:table) below summarizes the data weighting scenarios investigated in this sensitivity analysis:
+where $X$ took on the value of 100 or 200 depending on the scenario. We refer to this scheme as the "min" method, and it assumes that any additional fish beyond $X$ does not contribute any additional information to the multinomial sample. However, because the vast majority of years had greater than 200 fish for a given sampled fate, it has the tendency to weight all years equally. Table \@ref(tab:table) below summarizes the data weighting scenarios investigated in this sensitivity analysis:
 
 ```{r table}
 tab = data.frame(
@@ -174,7 +174,7 @@ tab = data.frame(
   esc = c(100, 200, 100, 100, 100, 200, 100, 100),
   com = c(100, 100, 200, 100, 100, 100, 200, 100),
   sub = c(100, 100, 100, 200, 100, 100, 100, 200),
-  color = rep(c("skyblue", "tomato"), each = 4),
+  color = rep(c("blue", "red"), each = 4),
   lty = rep(c("solid", "dashed", "dotted", "dotdash"), 2),
   thick = c("thick", rep("thin", 7))
 )
@@ -574,7 +574,7 @@ legend("topleft", legend = c("First 10", "All", "Last 10"),
 
 # Analysis #3: Alternative Length-Fecundity Relationships
 
-```{r workspace2, cache = T, cache.lazy = F}
+```{r workspace2}
 data_dir = "../../2-model-fit/inputs/"
 model = 1  # just needed to build the data
 
@@ -664,7 +664,7 @@ lwd = c(3, rep(1, length(ids) - 1))
 
 ## Motivation and Methods
 
-The conclusions from our analysis may depend on the shape of the assumed relationship between female spawner size (METF) and reproductive contribution (e.g., fecundity). As described in the main-text, no length-fecundity data sets were available for the Kuskokwim River Chinook salmon population, so we used a relationship obtained from the Yukon River Chinook salmon population, sampled at Eagle, AK in the years 2008 -- 2010 (L. Horstmann, unpublished data). However, we wished to evaluate whether our conclusions would have changed had we used other assumed relationships. Table \@ref(tab:table2) below shows the sources of 6 length-fecundity data sets we found for Chinook salmon populations in Alaska:
+The conclusions from our analysis may depend on the shape of the assumed relationship between female spawner size (METF) and reproductive contribution (e.g., fecundity). As described in the main-text, no length-fecundity data sets were available for the Kuskokwim River Chinook salmon population, so we used a relationship obtained from the Yukon River Chinook salmon population, sampled at Eagle, AK in the years 2008 -- 2010. However, we wished to evaluate whether our conclusions would have changed had we used other assumed relationships. Table \@ref(tab:table2) below shows the sources of 6 additional length-fecundity data sets we found for Chinook salmon populations in Alaska:
 
 ```{r table2}
 
@@ -673,7 +673,7 @@ mods = unlist(lapply(meta[1:7], function(m) m$model))
 coefs = mod_key[mod_key$model %in% mods,c("a_coef", "b_coef")]
 
 srcs = c(
-  "YK_eagle" = "Lara Horstmann, unpublished data",
+  "YK_eagle" = "@ohlberger-etal-nd",
   "Kusko" = "Jim Boersma, unpublished data",
    "Kenai" = "@fleischman-reimer-2017",
    "Ukleet" = "@bell-kent-2012",
