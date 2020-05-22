@@ -1414,7 +1414,7 @@ make_table = function(v) {
 ```{r jags-code, eval = jags_code, comment = NA}
 edit_full_model(
   model_lines = readLines(file.path("../2-model-fit/model-files", "full-model.txt")),
-  outfile = "", len_trend = meta$len_trend, age_trend = meta$age_trend, sex_trend = meta$sex_trend, z_unit = meta$z_unit,
+  outfile = "", age_trend = meta$age_trend, sex_trend = meta$sex_trend, z_unit = meta$z_unit,
   keep_comments = T, keep_whitespace = T, rand_age = meta$rand_age
   )
 ```

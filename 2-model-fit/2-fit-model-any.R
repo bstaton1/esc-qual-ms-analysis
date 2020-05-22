@@ -106,7 +106,6 @@ edit_full_model(
   z_unit = z_unit,
   age_trend = age_trend, 
   sex_trend = sex_trend,
-  len_trend = len_trend,
   rand_age = rand_age
   )
 
@@ -133,8 +132,7 @@ post_info = jagsUI::jags(
   n.thin = nthin,
   parallel = parallel,
   verbose = verbose,
-  DIC = TRUE,
-  seed = seed
+  DIC = TRUE
 )
 post = post_info$samples
 stoptime_mcmc = Sys.time()
@@ -169,9 +167,9 @@ if (calc_eq) {
   cat("  |--- Extracting Samples for Equilibrium Calculations ---|\n")
   starttime = Sys.time()
   cat("    Started at:", format(starttime), "\n")
-  samps_early = prep_samples(post, keep_t = early_keep_t, keep_y = early_keep_y, len_trend = len_trend, silent = silent); cat("    Early period complete\n")
-  samps_late = prep_samples(post, keep_t = late_keep_t, keep_y = late_keep_y, len_trend = len_trend, silent = silent); cat("    Late period complete\n")
-  samps_all = prep_samples(post, keep_t = all_keep_t, keep_y = all_keep_y, len_trend = len_trend, silent = silent); cat("    All period complete\n")
+  samps_early = prep_samples(post, keep_t = early_keep_t, keep_y = early_keep_y, silent = silent); cat("    Early period complete\n")
+  samps_late = prep_samples(post, keep_t = late_keep_t, keep_y = late_keep_y, silent = silent); cat("    Late period complete\n")
+  samps_all = prep_samples(post, keep_t = all_keep_t, keep_y = all_keep_y, silent = silent); cat("    All period complete\n")
   stoptime = Sys.time()
   cat("    Elapsed time:", format(round(stoptime - starttime, 1)), "\n")
 }
