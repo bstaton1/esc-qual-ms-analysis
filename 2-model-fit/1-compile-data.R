@@ -41,7 +41,7 @@ ldat = read.csv(file.path(data_dir, "esc-mean-length.csv"))
 ldat = as.matrix(round(ldat[,-1]))
 
 # calculate perimeter of net types
-unr_perim = 8 * 2* 25.4  
+unr_perim = 8 * 2 * 25.4  
 res_perim = 6 * 2 * 25.4
 
 # calculate rlm (ratio of length to net perimeter)
@@ -68,6 +68,11 @@ if (z_unit == "fish_count") {
   z_mat = ldat
   z_mat[,m_ind] = 0
   z_mat = mod_info$a_coef * z_mat ^ mod_info$b_coef
+  
+  # if not including a length trend, replace z value each year with the mean across all years
+  if (mod_info$length_trend == 0) {
+    z_mat = matrix(colMeans(z_mat), nt, na * 2, byrow = T)
+  }
 }
 
 # create the output z object as an array: females are [,,1], males [,,2]
