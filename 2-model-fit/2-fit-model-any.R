@@ -30,7 +30,7 @@ mcmc_vshort = F  # run with very short mcmc settings?
 mcmc_lshort = F  # run with less short mcmc settings?
 mcmc_medium = F  # run with medium mcmc settings?
 mcmc_long =   T  # run with long mcmc settings?
-calc_msy =    T  # calculate msy-based quantities?
+calc_eq =     T  # calculate equilibrium quantities (based on fishing mortialities that provide msy and Rmax)?
 save_files =  T  # save output?
 rand_age =    F  # use dirichlet-distributed ages?
 
@@ -51,6 +51,7 @@ if (!dir.exists(out_dir) & save_files) dir.create(out_dir)
 post_name = paste("post-", model, ".rds", sep = "")
 meta_name = paste("meta-", model, ".rds", sep = "")
 msy_name = paste("msy-", model, ".rds", sep = "")
+Rmax_name = paste("Rmax-", model, ".rds", sep = "")
 
 # set mcmc per chain dimensions
 if (mcmc_vshort)  {npost = 100; nburn = 500; nthin = 1; nadapt = 50}
@@ -159,13 +160,13 @@ cat("\n")
 
 starttime_after = Sys.time()
 
-### process output: MSY calculations
-if (calc_msy) {
+### process output: equilibrium calculations
+if (calc_eq) {
   early_keep_t = 1:10; early_keep_y = 1:10
   late_keep_t = nt - 9:0; late_keep_y = ny - 9:0
   all_keep_t = 1:nt; all_keep_y = 1:ny
 
-  cat("  |--- Extracting Samples for MSY Calculations ---|\n")
+  cat("  |--- Extracting Samples for Equilibrium Calculations ---|\n")
   starttime = Sys.time()
   cat("    Started at:", format(starttime), "\n")
   samps_early = prep_samples(post, keep_t = early_keep_t, keep_y = early_keep_y, len_trend = len_trend, silent = silent); cat("    Early period complete\n")
@@ -175,17 +176,29 @@ if (calc_msy) {
   cat("    Elapsed time:", format(round(stoptime - starttime, 1)), "\n")
 }
 
-if (calc_msy) {
+if (calc_eq) {
   cat("  |--- Performing MSY Calculations ---|\n")
   starttime = Sys.time()
   cat("    Started at:", format(starttime), "\n")
-  msy_early = msy_search(samps_early, silent = silent); cat("      Early period complete\n")
-  msy_late = msy_search(samps_late, silent = silent); cat("      Late period complete\n")
-  msy_all = msy_search(samps_all, silent = silent); cat("      All period complete\n")
+  msy_early = eq_search(samps_early, q = "H", silent = silent); cat("      Early period complete\n")
+  msy_late = eq_search(samps_late, q = "H", silent = silent); cat("      Late period complete\n")
+  msy_all = eq_search(samps_all, q = "H", silent = silent); cat("      All period complete\n")
   msy = abind::abind(msy_early, msy_all, msy_late, along = 4)
   dimnames(msy)[[4]] = c("early", "all", "late")
   stoptime = Sys.time()
   cat("    Elapsed time:", format(round(stoptime - starttime, 1)), "\n")
+  
+  cat("  |--- Performing Rmax Calculations ---|\n")
+  starttime = Sys.time()
+  cat("    Started at:", format(starttime), "\n")
+  Rmax_early = eq_search(samps_early, q = "R", silent = silent); cat("      Early period complete\n")
+  Rmax_late = eq_search(samps_late, q = "R", silent = silent); cat("      Late period complete\n")
+  Rmax_all = eq_search(samps_all, q = "R", silent = silent); cat("      All period complete\n")
+  Rmax = abind::abind(Rmax_early, Rmax_all, Rmax_late, along = 4)
+  dimnames(Rmax)[[4]] = c("early", "all", "late")
+  stoptime = Sys.time()
+  cat("    Elapsed time:", format(round(stoptime - starttime, 1)), "\n")
+  
 }
 
 stoptime_after = Sys.time()
@@ -193,7 +206,10 @@ stoptime_after = Sys.time()
 # save files
 if (save_files) {
   cat("  |--- Saving Output Files ---|\n")
-  if (calc_msy) saveRDS(msy, file.path(out_dir, msy_name))
+  if (calc_eq) {
+    saveRDS(msy, file.path(out_dir, msy_name))
+    saveRDS(Rmax, file.path(out_dir, Rmax_name))
+  } 
   saveRDS(post, file.path(out_dir, post_name))
   saveRDS(
     append(
