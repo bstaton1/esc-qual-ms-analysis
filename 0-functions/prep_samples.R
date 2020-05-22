@@ -4,7 +4,7 @@
 # silent = F
 # post = post$samples
 
-prep_samples = function(post, keep_t = NULL, keep_y = NULL, len_trend = F, silent = F) {
+prep_samples = function(post, keep_t = NULL, keep_y = NULL, silent = F) {
   
   # keep all years if not specified
   if (is.null(keep_t)) keep_t = 1:nt
@@ -73,15 +73,11 @@ prep_samples = function(post, keep_t = NULL, keep_y = NULL, len_trend = F, silen
   }))
   colnames(mean_pi) = paste(as, "pi", sep = "_")
   if (!silent) cat("\n")
+  
   # extract average z value over the time period of interest
   mean_z = rep(NA, 2 * na)
-  if (len_trend) {
-    mean_z[1:na] = colMeans(z[keep_t,,1])
-    mean_z[(na+1):(na*2)] = colMeans(z[keep_t,,2])
-  } else {
-    mean_z[1:na] = colMeans(z[1:nt,,1])
-    mean_z[(na+1):(na*2)] = colMeans(z[1:nt,,2])
-  }
+  mean_z[1:na] = colMeans(z[keep_t,,1])
+  mean_z[(na+1):(na*2)] = colMeans(z[keep_t,,2])
   mean_z = matrix(mean_z, n_samp, na * 2, byrow = T)
   colnames(mean_z) = paste(as, "z", sep = "_")
   
