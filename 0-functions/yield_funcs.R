@@ -60,35 +60,51 @@ yield = function(log_F_max, i, post.samp, vuln, include_sex_ratio = F) {
   return(output)
 }
 
-# pass this function to optim to find equilibrium states at MSC
+### functions to minimize: returns negative values because optim minimizes the objective
+# pass this function to optim to find equilibrium states at at maximum yield (q = "H") or recruitment (q = "R")
 # option to include a sex penalty - won't consider F's which place the ratio below
 # some number - 1 is used below
-yield_min = function(log_F_max, i, post.samp, vuln, sex_penalty = F) {
+func_to_min = function(log_F_max, i, q, post.samp, vuln, sex_penalty = F) {
   out = yield(log_F_max, i, post.samp, vuln, include_sex_ratio = T)
-  out["H"] * -1 + ifelse(sex_penalty & out["male_per_fem"] < 1, 1e6, 0)
+  out[q] * -1 + ifelse(sex_penalty & out["male_per_fem"] < 1, 1e10, 0)
 }
 
-# wrapper to find MSC related quantities
-msy_search = function(post.samp, sex_penalty = F, silent = F) {
+# wrapper to find equilibrium quantities
+# searches for fishing mortality that maximizes harvest (q = "H") or recruitment (q = "R")
+# for each posterior sample and each vulnerability scenario
+eq_search = function(post.samp, q, sex_penalty = F, silent = F) {
+  
+  # how many posterior samples?
   n_samp = nrow(post.samp)
+  
+  # what are the names of the output?
   nms = names(yield(
     log_F_max = log(1), 
     i = 1, post.samp = post.samp,
     vuln = "unr", include_sex_ratio = sex_penalty
   ))
+  
+  # build a container for output: [sample,quantity,vuln]
   out = array(NA, dim = c(n_samp, length(nms), 3))
+  
+  # the vuln scenarios
   v_scenarios = c("unr", "res", "flat")
+  
+  # loop over scenarios and samples
   for (v in 1:length(v_scenarios)) {
     for (i in 1:n_samp) {
       if (!silent) cat("\r", " ", floor(i/n_samp * 100), "% (", v_scenarios[v], ")", sep = "")
+      
+      # obtain F that maximizes objective (R or H)
       fit_log_F_max = 
         optim(
           par = log(0.5), 
-          fn = yield_min, 
+          fn = func_to_min, 
           method = "Brent", lower = -10, upper = 3,
-          i = i, post.samp = post.samp, vuln = v_scenarios[v], sex_penalty = sex_penalty
+          q = q, i = i, post.samp = post.samp, vuln = v_scenarios[v], sex_penalty = sex_penalty
         )$par
       
+      # plug this in to get all eq. quantities
       out[i,,v] = 
         yield(
           log_F_max = fit_log_F_max, 
@@ -100,6 +116,7 @@ msy_search = function(post.samp, sex_penalty = F, silent = F) {
   
   if (!silent) cat("\n")
   
+  # summarize: extract posterior quantiles
   out = array(
     c(
       apply(out[,,1], 2, StatonMisc::summ, p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975), na.rm = T)[3:9,],
@@ -109,10 +126,13 @@ msy_search = function(post.samp, sex_penalty = F, silent = F) {
     dim = c(7, length(nms), 3)
   )
   
+  # set the names of the output
   dimnames(out) = list(
     names(StatonMisc::summ(rnorm(10), p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975)))[3:9],
     nms,
     v_scenarios
   )
+  
+  # return the output
   out
 }
