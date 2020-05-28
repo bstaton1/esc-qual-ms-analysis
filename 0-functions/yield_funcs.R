@@ -28,7 +28,7 @@ yield = function(log_F_max, i, post.samp, vuln, include_sex_ratio = F) {
   alphac = exp(log(alpha) + (sigma^2)/2/(1 - phi^2)) # corrected alpha
   R0 = log(alphac * zPR0)/(beta * zPR0)
   
-  # get fishing mortality at age (F_a) and fished z per recruit at age (zPRO_f_a)
+  # get fishing mortality at age (F_a) and fished z per recruit at age (zPR_f_a)
   F_max = exp(log_F_max)
   F_as = F_max * vuln_as
   U_as = 1 - exp(-F_as)
@@ -93,7 +93,7 @@ eq_search = function(post.samp, q, sex_penalty = F, silent = F) {
   # loop over scenarios and samples
   for (v in 1:length(v_scenarios)) {
     for (i in 1:n_samp) {
-      if (!silent) cat("\r", " ", floor(i/n_samp * 100), "% (", v_scenarios[v], ")", sep = "")
+      if (!silent) StatonMisc::progress_updater(i, n_samp, v_scenarios[v], indent = 5)
       
       # obtain F that maximizes objective (R or H)
       fit_log_F_max = 
