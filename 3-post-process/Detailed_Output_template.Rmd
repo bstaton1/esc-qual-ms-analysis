@@ -1,7 +1,6 @@
 ---
 title: "`r paste0('Online Supplement ', LETTERS[m + 1], ' to Staton et al.')`"
 subtitle: "`r paste0('_Detailed Output for Model: ', model_ids[model], '_')`"
-date: "`r format(Sys.Date(), '%m/%d/%Y')`"
 output:
   html_document:
     theme: cerulean
@@ -253,7 +252,7 @@ Rhat[is.na(Rhat) | Rhat == "Inf" | Rhat == "-Inf"] = "--"
 colnames(Rhat) = c("In Text", "In Code", "Mean", "Min", "2.5%", "10%", "25%", "50%", "75%", "90%", "97.5%", "Max")
 kable(
   Rhat, format = "html", digits = 2, align = "llcccccccccc",
-  caption = "Summaries of the $\\hat{R}$ convergence diagnostic for all estimated parameters/states. Values close to 1 are ideal, values greater than 1.1 of moderate concern. Summaries were generated across indices of the parameter; for example the max value for $F_{\\text{com},t}$ represents the maximum $\\hat{R}$ value across all years. Parameters that were fixed to have the same value each MCMC iteration have empty cells.", escape = F, row.names = F) %>%
+  caption = "Summaries of the $\\hat{R}$ convergence diagnostic for all estimated parameters/states. Values close to 1 are ideal, values greater than 1.1 are of moderate concern. Summaries were generated across indices of the parameter; for example the max value for $F_{\\text{com},t}$ represents the maximum $\\hat{R}$ value across all years. Parameters that were fixed to have the same value each MCMC iteration have empty cells.", escape = F, row.names = F) %>%
   kable_styling(full_width = F, bootstrap_options = c("condensed")) %>%
   add_header_above(c("Quantity" = 2, "Summary Across Indices (where applicable)" = 10))
 ```
@@ -892,7 +891,7 @@ lines(pi_f[3,] ~ by, col = "blue", lwd = 2)
 
 `r cntr = up_cntr("Figure", cntr, u_rates); create_label("Figure", cntr, T, level = 2, sub = "a", subb = "", text = "By Year", tabset = F, u_rates)`
 
-Red points represent the aggregate exploitation rate based on observed data: total catch (subsistence + escapement) divided by total catch + total escapement.
+Red points represent the aggregate exploitation rate based on observed data: total catch (subsistence + commercial) divided by total catch + total escapement.
 
 ```{r u-tot, eval = u_rates}
 U_fit = post_summ(post, "Utot_t[")[3,]
@@ -1267,9 +1266,9 @@ early_keep_t = 1:10; early_keep_y = 1:10
 late_keep_t = nt - 9:0; late_keep_y = ny - 9:0
 all_keep_t = 1:nt; all_keep_y = 1:ny
 
-samps_early = prep_samples(post, keep_t = early_keep_t, keep_y = early_keep_y, len_trend = meta$len_trend, silent = T)
-samps_late = prep_samples(post, keep_t = late_keep_t, keep_y = late_keep_y, len_trend = meta$len_trend, silent = T)
-samps_all = prep_samples(post, keep_t = all_keep_t, keep_y = all_keep_y, len_trend = meta$len_trend, silent = T)
+samps_early = prep_samples(post, keep_t = early_keep_t, keep_y = early_keep_y, silent = T)
+samps_late = prep_samples(post, keep_t = late_keep_t, keep_y = late_keep_y, silent = T)
+samps_all = prep_samples(post, keep_t = all_keep_t, keep_y = all_keep_y, silent = T)
 
 samps = list(
   early = matrix2mcmclist(cbind(postpack:::id_mat(post), samps_early)),
