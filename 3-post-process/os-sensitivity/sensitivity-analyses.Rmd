@@ -1147,4 +1147,161 @@ compare_fit("sub", "bp")
 compare_fit("com", "bp")
 ```
 
+# Analysis #5: $S_{\text{MAX}}$ instead of $S_{\text{MSC}}$
+
+Our findings in the main text equilibrium analysis illustrate that $S_{\text{MSC}}$ is sensitive to the specific demographic trends, time periods, and size-selectivity used to derive it. However, here we illustrate that we would have made similar conclusions had we used an alternative biological reference point: $S_{\text{MAX}}$. $S_{\text{MAX}}$ represents the total escapement (regardless of sex or age composition) necessary to maximize recruitment. The yield-per-recruit approach we employed is general enough as to allow maximizing another objective value -- for deriving $S_{\text{MSC}}$ in the main text analysis we set the algorithm to maximize total catch but by replacing this with total recruitment, we can find $S_{\text{MAX}}$ instead. Figure 4.1 below shows the same figure as presented in the main text Figure 7, but for $S_{\text{MAX}}$ and $H_{\text{MAX}}$ (harvest at maximum recruitment). Note the overall similarity between this figure and that for $S_{\text{MSC}}$ as shown in Figure 7 of the main text.
+
+**Figure 5.1** Estimated equilibrium values of $S_{\text{MAX}}$ (panels a, c, and e) and $H_{\text{MAX}}$ (panels b, d, and f) using 8-inch (panels a and b), non-selective (panels c and d), and 6-inch (panels e and f) mesh gillnet hear for a subset of models. The time period (symbol type) represents which years were used to calculate the average demographic qualities used in the equilibrium calculations. The percent change from the posterior median for model N-0 is displayed on the secondary $y$-axis for reference. Points are posterior medians, thick lines are the posterior central 50% limits, and thin lines are the posterior central 80% limits.
+
+```{r workspace4, fig.height = 5.5, fig.width = 7.2}
+rm(list = ls(all = T))
+data_dir = "../../2-model-fit/inputs/"
+model = 1  # just needed to build the data
+
+source("../../2-model-fit/1-compile-data.R")
+source("../../0-functions/id_model.R")
+rm(model) # clear out the model object 
+
+out_dir = "../../../model-output/"
+out_files = dir(out_dir, full.names = T)
+
+# reduce the set of models to only main-text models
+keep_mods = c(1,3,11,10,12)
+keep_mods = paste(paste0("-", keep_mods, "\\."), collapse = "|")
+out_files = out_files[str_detect(out_files, keep_mods)]
+
+# the file names of the output files
+mods = unique(str_extract(out_files, "[0-9]+"))
+metafiles = out_files[str_detect(out_files, "meta")]
+Rmaxfiles = out_files[str_detect(out_files, "Rmax")]
+
+# create empty objects to store the output from each model
+meta = list()
+# read in the posterior samples and meta data
+for (i in 1:length(mods)) {
+  meta[[i]] = readRDS(metafiles[i])
+}
+
+# create the ids for each model
+ids = unlist(lapply(meta, id_model))
+
+# read in the msy equilibrium quantities
+Rmax = readRDS(Rmaxfiles[1])
+for (i in 2:length(mods)) {
+  Rmax = abind(Rmax, readRDS(Rmaxfiles[i]), along = 5)
+}
+
+
+# give the objects model identifiers
+names(meta) = ids
+dimnames(Rmax)[[5]] = ids
+
+# function to create the plot comparing time periods and models for a given eq. quantity and vuln type
+Rmax_plot = function(keep_val = "S", keep_vuln = "unr", keep_mods, xticklabs = F, legend = F, letter) {
+  # extract the equilibrium info requested
+  keep = Rmax[,keep_val,keep_vuln,,keep_mods]
+  ylwr = ifelse(keep_val == "S", 40000, 75000)
+  yupr = ifelse(keep_val == "S", 180000, 325000)
+  
+  # create the basic plot: dimensions and spacing
+  mp = barplot(keep["50%",,keep_mods], yaxt = "n", xaxt = "n", col = "white", border = "white", las = 2,
+               beside = T, 
+               ylim = range(Rmax[c("10%", "90%"),keep_val,,,keep_mods]) * c(0.85, 1.2),
+               xlim = c(0.5, 20.5) 
+               # , ylim = c(ylwr, yupr)
+  )
+  
+  # extract user coordinates
+  usr = par("usr"); xdiff = diff(usr[1:2]); ydiff = diff(usr[3:4])
+  
+  # locations to draw vertical lines separating models
+  at_v = (mp[1,1:(length(keep_mods) - 1)] + mp[3,2:length(keep_mods)])/2
+  abline(v = at_v, col = "grey60")
+  
+  # locations of breaks: zero trends vs. one vs. two trends
+  zero_break = 3; one_break = 6; two_break = 9
+  
+  # determine locations and labels of tick marks for y-axes
+  at_y1 = axisTicks(usr[3:4], log = F, nint = 4)
+  at_y1_2 = seq(0, 500000, 10000)
+  lab_y1 = at_y1/1000
+  
+  lab_y2 = seq(50, 250, 50)
+  at_y2 = keep["50%","all","N-0"] * (lab_y2/100)
+  
+  # draw horizontal line at no change from N-0 model
+  abline(h = at_y2[lab_y2 == 100], lty = 2)
+  
+  # draw y-axes
+  axis(side = 2, at = at_y1, labels = lab_y1, las = 2)
+  axis(side = 2, at = at_y1_2, labels = F, tcl = -0.125)
+  axis(side = 4, at = at_y2, labels = paste0(lab_y2 - 100, "%"), las = 2)
+  
+  # draw thick line to separate zero vs. three trend models
+  abline(v = at_v[zero_break], lwd = 4, xpd = F, col = "grey60")
+  
+  # draw credible intervals: central 80%
+  segments(mp[1,], keep["10%","early",keep_mods], mp[1,], keep["90%","early",keep_mods])
+  segments(mp[2,], keep["10%","all",keep_mods], mp[2,], keep["90%","all",keep_mods])
+  segments(mp[3,], keep["10%","late",keep_mods], mp[3,], keep["90%","late",keep_mods])
+  
+  # draw credible intervals: central 50%
+  segments(mp[1,], keep["25%","early",keep_mods], mp[1,], keep["75%","early",keep_mods], lwd = 4)
+  segments(mp[2,], keep["25%","all",keep_mods], mp[2,], keep["75%","all",keep_mods], lwd = 4)
+  segments(mp[3,], keep["25%","late",keep_mods], mp[3,], keep["75%","late",keep_mods], lwd = 4)
+  
+  # draw medians
+  points(keep["50%","early",keep_mods] ~ mp[1,], pch = 21, bg = "grey60", cex = 1.2)
+  points(keep["50%","all",keep_mods] ~ mp[2,], pch = 22, bg = "grey60", cex = 1.2)
+  points(keep["50%","late",keep_mods] ~ mp[3,], pch = 24, bg = "grey60", cex = 1.2)
+  
+  # add a legend if requested
+  if (legend) {
+    legend("topleft", y.intersp = 0.75, legend = c("First 10 years", "All years", "Last 10 years"), title = "Demography",
+           pch = c(21,22,24), pt.bg = "grey60", pt.cex = 1, cex = 0.75, bg = "white", box.col = "black")
+  }
+  
+  # draw x-axis
+  if (xticklabs) {
+    axis(side = 1, at = mp[2,], labels = keep_mods, las = 2)
+  } else {
+    axis(side = 1, at = mp[2,], labels = F, las = 2)
+  }
+  
+  # draw the label identifying each plot
+  rect(usr[2] - xdiff * 0.23, usr[4] - ydiff * 0.22, usr[2] - xdiff * 0.17, usr[4], border = "white", col = "white")
+  text(x = usr[2] + xdiff * 0.025, y = usr[4] - ydiff * 0.12,
+       labels = ifelse(keep_vuln == "unr", paste0("(", letter, ")\n8 in. mesh"),
+                       ifelse(keep_vuln == "flat", paste0("(", letter, ")\nNo Selectivity"), paste0("(", letter, ")\n6 in. mesh"))), pos = 2, cex = 0.7, font = 2)
+  
+  # add a main title over top panel
+  mtext(side = 3, ifelse(keep_vuln == "unr", latex2exp::TeX(paste0(keep_val, "_{MAX}")), ""), line = 0, font = 2)
+  
+  # draw a border
+  box()
+}
+
+# which models to keep for plot
+keep_mods = c(
+  "N-0",
+  "E-0", "EM-0",
+  # "E-L", "E-A", "E-S",
+  # "E-AL", "E-AS", "E-SL",
+  "E-ASL", "EM-ASL")
+
+# make the plot itself
+par(mfcol = c(3,2), xaxs = "i", yaxs = "i", cex = 1, lend = "square", mar = c(0,1.75,0.75,2.25),
+    oma = c(3.5,0.75,0.5,2), tcl = -0.25, mgp = c(2,0.35,0), cex.axis = 0.9)
+Rmax_plot("S", "unr", keep_mods, legend = T, letter = "a")
+Rmax_plot("S", "flat", keep_mods, legend = F, letter = "c")
+Rmax_plot("S", "res", keep_mods, xticklabs = T, letter = "e"); par(mar = c(0,2.25,0.75,1.75))
+Rmax_plot("H", "unr", keep_mods, legend = F, letter = "b")
+Rmax_plot("H", "flat", keep_mods, legend = F, letter = "d")
+Rmax_plot("H", "res", keep_mods, xticklabs = T, letter = "f")
+mtext(side = 2, outer = T, "Escapement or Harvest (1000s)", line = -0.2)
+mtext(side = 4, outer = T, "% Change from Model N-0", line = 0.75)
+```
+
 # References
+
+$S_{R_{\text{MAX}}}$
