@@ -36,11 +36,13 @@ out_dir = "../../model-output/"
 post_name = paste("post-", model, ".rds", sep = "")
 meta_name = paste("meta-", model, ".rds", sep = "")
 msy_name = paste("msy-", model, ".rds", sep = "")
+Rmax_name = paste("Rmax-", model, ".rds", sep = "")
 
 # read in the saved output samples
 post = readRDS(file.path(out_dir, post_name))
 meta = readRDS(file.path(out_dir, meta_name))
 msy = readRDS(file.path(out_dir, msy_name))
+Rmax = readRDS(file.path(out_dir, Rmax_name))
 ```
 
 ```{r settings}
@@ -1403,6 +1405,46 @@ make_table = function(v) {
 `r if (big_tables) make_table("res")`
 
 `r create_label("Table", cntr, F, level = 4, sub = "d", subb = "3", text = "Flat", tabset = F, big_tables)`
+
+`r if (big_tables) make_table("flat")`
+
+```{r Rmax-table-prep, eval = big_tables}
+make_table = function(v) {
+  
+  x_early = t(Rmax[c("50%", "2.5%", "97.5%"),c("S", "H", "R"),v,"early"])
+  x_all = t(Rmax[c("50%", "2.5%", "97.5%"),c("S", "H", "R"),v,"all"])
+  x_late = t(Rmax[c("50%", "2.5%", "97.5%"),c("S", "H", "R"),v,"late"])
+  
+  x = cbind(x_early, x_all, x_late)
+  
+  x = apply(x, 2, round, digits = -3)
+  x = apply(x, 2, prettify)
+  x[,1] = paste0("**", x[,1], "**")
+  x[,4] = paste0("**", x[,4], "**")
+  x[,7] = paste0("**", x[,7], "**")
+  params = c("$S_{R_{\\text{MAX}}}$", "$$H_{R_{\\text{MAX}}}$$", "$$R_{\\text{MAX}}$$")
+  
+  x = cbind(params, x)
+  rownames(x) = NULL
+  colnames(x)[1] = "Quantity"
+  
+  kable(x, "html", escape = F, align = "lccccccccc") %>%
+    kable_styling(full_width = F, bootstrap_options = c("condensed")) %>%
+    add_header_above(c(" " = 1, "First 10 Years" = 3, "All Years" = 3, "Last 10 Years" = 3))
+}
+```
+
+`r create_label("Table", cntr, F, level = 3, sub = "e", subb = "", text = "Max. Recruits", tabset = T, big_tables)`
+
+`r create_label("Table", cntr, F, level = 4, sub = "e", subb = "1", text = "8-inch", tabset = F, big_tables)`
+
+`r if (big_tables) make_table("unr")`
+
+`r create_label("Table", cntr, F, level = 4, sub = "e", subb = "2", text = "6-inch", tabset = F, big_tables)`
+
+`r if (big_tables) make_table("res")`
+
+`r create_label("Table", cntr, F, level = 4, sub = "e", subb = "3", text = "Flat", tabset = F, big_tables)`
 
 `r if (big_tables) make_table("flat")`
 
