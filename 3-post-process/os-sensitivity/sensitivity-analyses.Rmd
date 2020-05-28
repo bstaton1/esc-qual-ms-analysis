@@ -1,7 +1,6 @@
 ---
 title: "Additional Information/Sensitivity Analyses"
 subtitle: "_Online Supplement A to Staton et al._"
-date: "`r format(Sys.Date(), '%m/%d/%Y')`"
 output:
   bookdown::html_document2:
     theme: cerulean
@@ -35,14 +34,14 @@ library(abind)
 
 # Analysis #1: Imputation of Missing Length-at-Age data
 
-For mean length-at-age data (mid-eye to tail-fork; METF, mm), we used individual fish records sampled at weirs scattered throughout the Kuskokwim drainage dating back to 1976. These data were used for two purposes in our analysis: 
+For mean length-at-age data (mid-eye to tail-fork; METF, mm), we used individual fish records sampled at weirs distributed throughout the Kuskokwim drainage dating back to 1976. These data were used for two purposes in our analysis: 
 
 (1)  to inform the relative reproductive output of females of different ages (i.e., $z_{t,a,s}$), by inserting the METF values from the Kuskokwim into fecundity/ovary mass versus METF relationships obtained from other systems and 
 (2)  to inform the relative selectivity of the fisheries using different mesh sizes via the Pearson gillnet selectivity function.
 
-Both uses required that a value be present for each year, age, and sex given they are essentially independent variables from a JAGS model standpoint. However, there were cases where no fish of a given age/sex class were sampled at any of the weirs operating throughout the basin. To impute values in these cases, we used a linear interpolation rule for missing values between two observations. If the first or last year in the data set was missing, then we used the average of the most-recent 5 or 10 years, whichever was lesser that still provided a non-missing value.
+Both uses required that a value be present for each year, age, and sex given they are essentially independent variables from a JAGS model standpoint. However, there were cases where no fish of a given age/sex class were sampled at any of the weirs operating throughout the basin. To impute values in these cases, we used a linear interpolation rule for missing values between two observations. If the first or last year in the data set was missing, we used the average of the most-recent 5 or 10 years, whichever was lesser that still provided a non-missing value.
 
-The output of this rule is shown in Figure 1.1, below. In general, most interpolation occurred in (a) the rare age/sex classes (age-4 females, age-7 of both sexes) and (b) at the beginning of the time series when fewer weirs were operational. No weirs operated in 1998, which explains the missing value for all ages/sexes that year.
+The output of this rule is shown in Figure 1.1, below. In general, most interpolation occurred (a) in the rare age/sex classes (age-4 females, age-7 of both sexes) and (b) at the beginning of the time series when fewer weirs were operational. No weirs operated in 1998, which explains the missing value for all ages/sexes that year.
 
 **Figure 1.1**: Time series (1976 -- 2017) of escapement average METF by age class including observed (blue) and imputed (red) values. Vertical lines represent the break points of the time series split into thirds (14 years each); the percentages denote the percent of all values that were imputed for that time block by age/sex.
 
@@ -159,13 +158,13 @@ The use of multinomial likelihoods as a description of the observation process o
 
 $$ESS_{i,t} = \frac{n_{i,t}}{\text{max}(n_{i})} \times 100$$  
 
-where $i$ indexes the fate (escapement, commercial, or subsistence harvest) and $t$ indexes the calendar year, and $n$ is the number of fish sampled for age and sex composition. This method places more weight on years in which more fish were aged, however the value of 100 is arbitrary [though it is commonly used in salmon stock assessments conducted by the Alaska Department of Fish and Game; e.g., @hamazaki-etal-2012] and places relatively equal weight on each of the fate-specific data sets. We refer to this scheme as the "scale" method.
+where $i$ indexes the fate (escapement, commercial, or subsistence harvest) and $t$ indexes the calendar year, and $n$ is the number of fish sampled for age and sex composition. This method places more weight on years in which more fish were aged, however the value of 100 is arbitrary and places relatively equal weight on each of the fate-specific data sets. We refer to this scheme as the "scale" method.
 
-We wished to evaluate whether the method we used to assign weight to these data sets is likely to have influenced our inference in the main text. For this sensitivity analysis, we assessed the influence of placing more weight on some data sets over others by replacing the value of 100 with 200 for each data set sequentially (i.e., refitting the model with different weights for each data set).  Additionally, we assessed an alternative scheme where the value of $ESS_{i,t}$ was obtained as:
+We wished to evaluate whether the method we used to assign weight to these data sets is likely to have influenced our inference in the main text analysis. For this sensitivity analysis, we assessed the influence of placing more weight on some data sets over others by replacing the value of 100 with 200 for each data set sequentially (i.e., refitting the model with different weights for each data set).  Additionally, we assessed an alternative scheme where the value of $ESS_{i,t}$ was obtained as:
 
 $$ESS_{i,t} = \text{min}(n_{i,t}, X)$$
 
-where $X$ took on the value of 100 or 200 depending on the scenario. We refer to this scheme as the "min" method, and it assumes that any additional fish beyond $X$ does not contribute any additional information to the multinomial sample. However, because the vast majority of years had greater than 200 fish for a given sampled fate, it has the tendency to weight all years equally. Table \@ref(tab:table) below summarizes the data weighting scenarios investigated in this sensitivity analysis:
+where $X$ took on the value of 100 or 200 depending on the scenario. We refer to this scheme as the "min" method, and it assumes that any additional fish beyond $X$ does not contribute any additional information to the multinomial sample. However, because the vast majority of years had greater than 200 fish for a given sampled fate, it has the tendency to weight all years equally within a data set. Table \@ref(tab:table) below summarizes the data weighting scenarios investigated in this sensitivity analysis:
 
 ```{r table}
 tab = data.frame(
