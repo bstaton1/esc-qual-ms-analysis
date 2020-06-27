@@ -167,6 +167,17 @@ s_ages = read.csv(file.path(data_dir, "sub-age-sex-comp.csv"))
 x_sub_tas = create_x_data(s_ages, n_eff_method = mod_info[,"sub_n_eff"])
 n_sub = rowSums(x_sub_tas)
 
+## SELECTIVITY PARAMETERS: FOR PRIORS
+Vtau_yukon = c(1.920, 0.012)
+Vsig_yukon = c(0.204, 0.021)
+Vtha_yukon = c(0.622, 0.033)
+Vlam_yukon = c(-0.547,0.075)
+
+Vtau_kusko = c(1.897, 0.046)
+Vsig_kusko = c(0.236, 0.081)
+Vtha_kusko = c(0.756, 0.186)
+Vlam_kusko = c(-1.049,0.382)
+
 ## bundle into a list for jags
 jags_dat = list(
   # dimensions
@@ -206,7 +217,9 @@ jags_dat = list(
 )
 
 # clean up workspace
-rm(list = setdiff(ls(), c("jags_dat", "data_dir", "years", "mod_key", "model", "z_unit", "ages")))
+rm(list = setdiff(ls(), c("jags_dat", "data_dir", "years", "mod_key", "model", "z_unit", "ages",
+                          "Vtau_yukon","Vsig_yukon","Vtha_yukon","Vlam_yukon",
+                          "Vtau_kusko","Vsig_kusko","Vtha_kusko","Vlam_kusko")))
 
 # get all elements in as objects in workspace
 for (i in 1:length(jags_dat)) assign(x = names(jags_dat)[i], value = jags_dat[[i]])
