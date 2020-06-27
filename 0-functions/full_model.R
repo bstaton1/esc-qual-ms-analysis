@@ -86,21 +86,10 @@ jags_model_code = function() {
   }
   
   # 3b) Create age/sex/year/mesh-specific selectivity schedule
-  # these are the parameters used in the model
-  Vtau ~ dnorm(1.920, 1/(0.012 * 10)^2)
-  Vsig ~ dnorm(0.204, 1/(0.021 * 10)^2) %_% I(0,)
-  Vtha ~ dnorm(0.622, 1/(0.033 * 10)^2) %_% I(0,)
-  Vlam ~ dnorm(-0.547, 1/(0.075 * 10)^2)
-  # these are the prior values - not updated: for comparison to posteriors
-  Vtau_prior ~ dnorm(1.920, 1/(0.012 * 10)^2)
-  Vsig_prior ~ dnorm(0.204, 1/(0.021 * 10)^2) %_% I(0,)
-  Vtha_prior ~ dnorm(0.622, 1/(0.033 * 10)^2) %_% I(0,)
-  Vlam_prior ~ dnorm(-0.547, 1/(0.075 * 10)^2)
-  # these are the values for the yukon (bromaghin paper) - not updated: for comparison to kusko posteriors
-  Vtau_yukon ~ dnorm(1.920, 1/(0.012)^2)
-  Vsig_yukon ~ dnorm(0.204, 1/(0.021)^2) %_% I(0,)
-  Vtha_yukon ~ dnorm(0.622, 1/(0.033)^2) %_% I(0,)
-  Vlam_yukon ~ dnorm(-0.547, 1/(0.075)^2)
+  Vtau ~ dnorm(Vtau_prior[1], 1/(Vtau_prior[2] * 10)^2)
+  Vsig ~ dnorm(Vsig_prior[1], 1/(Vsig_prior[2] * 10)^2) %_% I(0,)
+  Vtha ~ dnorm(Vtha_prior[1], 1/(Vtha_prior[2] * 10)^2) %_% I(0,)
+  Vlam ~ dnorm(Vlam_prior[1], 1/(Vlam_prior[2] * 10)^2)
   
   for (t in 1:nt) {
     for (s in 1:2) {
