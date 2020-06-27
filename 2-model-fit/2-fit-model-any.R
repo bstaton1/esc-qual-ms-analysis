@@ -33,10 +33,16 @@ mcmc_long =   T  # run with long mcmc settings?
 calc_eq =     T  # calculate equilibrium quantities (based on fishing mortialities that provide msy and Rmax)?
 save_files =  T  # save output?
 rand_age =    F  # use dirichlet-distributed ages?
+Vprior = "kusko" # which data set to use as priors for selectivity parameters?
 
 # make sure only one MCMC setting was specified
 if (sum(c(mcmc_vshort, mcmc_lshort, mcmc_medium, mcmc_long)) != 1) {
   stop("you incorrectly specified how long to run the MCMC algorithm for")
+}
+
+# make sure a correct Vprior was specified
+if (Vprior %!in% c("yukon", "kusko")) {
+  stop("Vprior must be one of 'yukon' or 'kusko'")
 }
 
 # which time effects are included?
@@ -59,6 +65,14 @@ if (mcmc_lshort)  {npost = 5000; nburn = 1000; nthin = 2 * nchain; nadapt = 1000
 if (mcmc_medium)  {npost = 50000; nburn = 20000; nthin = 40; nadapt = 10000}
 if (mcmc_long)    {npost = 1000000; nburn = 100000; nthin = 200; nadapt = 10000}
 
+# set the selectivity priors
+jags_dat = append(jags_dat, list(
+  Vtau_prior = {if (Vprior == "kusko") Vtau_kusko else Vtau_yukon},
+  Vsig_prior = {if (Vprior == "kusko") Vsig_kusko else Vsig_yukon},
+  Vtha_prior = {if (Vprior == "kusko") Vtha_kusko else Vtha_yukon},
+  Vlam_prior = {if (Vprior == "kusko") Vlam_kusko else Vlam_yukon}
+))
+
 # set nodes to monitor
 jags_params = c(
   # SRA params
@@ -77,9 +91,7 @@ jags_params = c(
   "Z_per_S_t", "Z_per_female_t",
   
   # fishery/selectivity parameters
-  "Fcom", "Fsub", "v", "Vtau", "Vsig", "Vtha", "Vlam",
-  "Vtau_prior", "Vsig_prior", "Vtha_prior", "Vlam_prior",
-  "Vtau_yukon", "Vsig_yukon", "Vtha_yukon", "Vlam_yukon"
+  "Fcom", "Fsub", "v", "Vtau", "Vsig", "Vtha", "Vlam"
 )
 if (rand_age) jags_params = c(jags_params, "D_sum")
 
