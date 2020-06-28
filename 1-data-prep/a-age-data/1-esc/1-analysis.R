@@ -113,12 +113,10 @@ for (yr in all_years) {
   
   z = apply(dat_y[,stringr::str_detect(colnames(dat_y), "^m|^f")], 2, function(x) sum(x * dat_y$p_passage))
   
-  
-  ess = sum(dat_y$n_aged * dat_y$p_passage)
   n_weirs = nrow(dat_y)
-  n_aged_tot = sum(dat_y$n_aged)
+  n_aged = sum(dat_y$n_aged)
   
-  z = t(data.frame(c(year = yr, z, n_weirs = n_weirs, ess = ess, N_aged_tot = n_aged_tot))); rownames(z) = NULL
+  z = t(data.frame(c(year = yr, z, n_weirs = n_weirs, n_aged = n_aged))); rownames(z) = NULL
   z
   
   dat_ave = rbind(dat_ave, z)
