@@ -13,7 +13,7 @@ source("0-functions.R")
 # set working directory HERE. 
 
 # the range of years observed across all stocks
-all_years = 1976:2017
+all_years = 1976:2019
 
 write = T
 
