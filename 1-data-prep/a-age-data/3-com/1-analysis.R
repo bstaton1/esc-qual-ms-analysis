@@ -5,15 +5,16 @@ rm(list = ls(all = T))
 # needed packages
 suppressMessages(library(dplyr))
 suppressMessages(library(reshape2))
+suppressMessages(library(StatonMisc))
 source("0-functions.R")
 
-setwd("C:/Users/bas0041/Dropbox/PhD Project/Manuscripts/Escapement Quality/esc-qual-ms-analysis/1-data-prep/a-age-data/3-com/")
+# set the working directory HERE.
 
 # do you want to write the output?
 write = T
 
 # the range of years observed across all stocks
-all_years = 1976:2017
+all_years = 1976:2019
 
 # directories
 dat_dir = "inputs"
