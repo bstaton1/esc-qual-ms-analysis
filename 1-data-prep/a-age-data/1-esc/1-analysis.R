@@ -15,7 +15,7 @@ source("0-functions.R")
 write = T
 
 # the range of years observed across all stocks
-all_years = 1976:2017
+all_years = 1976:2019
 
 # directories
 asl_dir = "inputs/asl"
