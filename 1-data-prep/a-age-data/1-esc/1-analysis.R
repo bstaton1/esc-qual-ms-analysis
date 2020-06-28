@@ -9,7 +9,7 @@ suppressMessages(library(reshape2))
 suppressMessages(library(StatonMisc))
 source("0-functions.R")
 
-setwd("C:/Users/bas0041/Dropbox/PhD Project/Manuscripts/Escapement Quality/esc-qual-ms-analysis/1-data-prep/a-age-data/1-esc/")
+# set the working directory HERE.
 
 # do you want to write the output?
 write = T
