@@ -6,15 +6,16 @@ rm(list = ls(all = T))
 suppressMessages(library(dplyr))
 suppressMessages(library(reshape2))
 suppressMessages(library(stringr))
+suppressMessages(library(StatonMisc))
 source("0-functions.R")
 
-setwd("C:/Users/bas0041/Dropbox/PhD Project/Manuscripts/Escapement Quality/esc-qual-ms-analysis/1-data-prep/a-age-data/2-sub/")
+# set the working directory HERE.
 
 # do you want to write the output?
 write = T
 
 # the range of years observed across all stocks
-all_years = 1976:2017
+all_years = 1976:2019
 
 # directories
 dat_dir = "inputs"
@@ -51,6 +52,8 @@ cal_raw = read.csv(file.path(dat_dir, "Calendar Data.csv"), stringsAsFactors = F
 cal = data.frame(t(sapply(asl_yrs, function(y) cal_prep(cal_raw, yr = y, v = villages[[as.character(y)]]))))
 colnames(cal) = str_remove(colnames(cal), "X")
 
+cal$year = unlist(cal$year)
+cal = cal[order(cal$year),]
 # apply weighted average calculations to each year separately
 out = t(sapply(all_years, function(x) get_wt_avg(yr = x, asl, cal)))
 
