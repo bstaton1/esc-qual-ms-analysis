@@ -54,6 +54,9 @@ colnames(cal) = str_remove(colnames(cal), "X")
 
 cal$year = unlist(cal$year)
 cal = cal[order(cal$year),]
+
+cal[cal$year %in% c(2018,2019),2:ncol(cal)] = 1
+
 # apply weighted average calculations to each year separately
 out = t(sapply(all_years, function(x) get_wt_avg(yr = x, asl, cal)))
 
