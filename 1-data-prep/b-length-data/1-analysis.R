@@ -10,7 +10,7 @@ suppressMessages(library(StatonMisc))
 
 source("0-functions.R")
 
-setwd("C:/Users/bas0041/Dropbox/PhD Project/Manuscripts/Escapement Quality/esc-qual-ms-analysis/1-data-prep/b-length-data")
+# set working directory HERE. 
 
 # the range of years observed across all stocks
 all_years = 1976:2017
@@ -18,8 +18,8 @@ all_years = 1976:2017
 write = T
 
 # directories
-asl_dir = "inputs/asl"
-esc_dir = "inputs/daily-esc/"
+asl_dir = "../a-age-data/1-esc/inputs/asl"
+esc_dir = "../a-age-data/1-esc/inputs/daily-esc/"
 out_dir = "outputs"
 
 # create the output directory if it doesn't exist
@@ -97,7 +97,7 @@ for (s in 1:length(stocks)) {
 }
 
 ##### COMBINE STOCK-SPECIFIC ESTIMATES INTO A DRAINAGE-WIDE ESTIMATE #####
-weir_counts = read.csv("inputs/weir_counts.csv")
+weir_counts = read.csv("../a-age-data/1-esc/inputs/weir_counts.csv")
 colnames(weir_counts)[1] = "year"
 weir_counts = weir_counts %>% melt(id.vars = "year", value.name = "passage", variable.name = "stock")
 
