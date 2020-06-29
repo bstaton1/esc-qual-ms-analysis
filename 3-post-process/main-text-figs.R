@@ -138,6 +138,8 @@ dev.off()
 
 ##### SELECTIVITY PLOT: FULL SHAPE #####
 
+rlm_seq = seq(min(rlm), max(rlm), length = 1000)
+
 pearson = function(rlm, lambda, theta, sigma, tau) {
   
   # separate calculation into 5 steps
@@ -152,57 +154,49 @@ pearson = function(rlm, lambda, theta, sigma, tau) {
   v/max(v)
 }
 
-kusko_ests = post_subset(post_list[["E-ASL"]], "^V...$", T)
-yukon_ests = post_subset(post_list[["E-ASL"]], "^V..._yukon$", T)
 
-kusko_pearson = function(rlm, i) {
+ssm_ests = post_subset(post_list[["E-ASL"]], "^V...$", T)
+
+ssm_pearson = function(rlm, i) {
   pearson(
     rlm, 
-    tau = kusko_ests[i,1], sigma = kusko_ests[i,2], theta = kusko_ests[i,3], lambda = kusko_ests[i,4]
-  )
-}
-
-yukon_pearson = function(rlm, i) {
-  pearson(
-    rlm, 
-    tau = yukon_ests[i,1], sigma = yukon_ests[i,2], theta = yukon_ests[i,3], lambda = yukon_ests[i,4]
+    tau = ssm_ests[i,1], sigma = ssm_ests[i,2], theta = ssm_ests[i,3], lambda = ssm_ests[i,4]
   )
 }
 
 
-rlm_seq = seq(min(rlm), max(rlm), length = 1000)
-
-out = t(sapply(1:post_dim(post_list[["E-ASL"]], "saved"), function(i) kusko_pearson(rlm_seq, i)))
-v_kusko = apply(out, 2, summ)
-out = t(sapply(1:post_dim(post_list[["E-ASL"]], "saved"), function(i) yukon_pearson(rlm_seq, i)))
-v_yukon = apply(out, 2, summ)
+out = t(sapply(1:post_dim(post_list[["E-ASL"]], "saved"), function(i) ssm_pearson(rlm_seq, i)))
+v_ssm = apply(out, 2, summ)
+v_kusko = pearson(rlm_seq, Vlam_kusko[1], Vtha_kusko[1], Vsig_kusko[1], Vtau_kusko[1])
+v_yukon = pearson(rlm_seq, Vlam_yukon[1], Vtha_yukon[1], Vsig_yukon[1], Vtau_yukon[1])
 
 file_device(file.path(fig_dir, paste0("v-length.", file_type)), h = 3.4, w = 3.4)
 par(mar = c(2,2.25,2,0.5), mgp = c(1.25,0.2,0), tcl = -0.15, cex.axis = 0.75, lend = "square", cex.lab = 0.8)
-plot(1,1, xlim = range(rlm_seq), ylim = c(min(v_kusko[4,]), 1), type = "n", ylab = "Selectivity", las = 2, xaxt = "n", xlab = "", lwd = 2, lty = 1)
-polygon(x = c(rlm_seq, rev(rlm_seq)), y = c(v_kusko[4,], rev(v_kusko[5,])),
+plot(1,1, xlim = range(rlm_seq), ylim = c(min(v_ssm[4,]), 1), type = "n", ylab = "Selectivity", las = 2, xaxt = "n", xlab = "", lwd = 2, lty = 1)
+polygon(x = c(rlm_seq, rev(rlm_seq)), y = c(v_ssm[4,], rev(v_ssm[5,])),
         border = NA, col = "grey90")
 
-lines(v_kusko[3,] ~ rlm_seq, lwd = 4, lend = "round")
+lines(v_ssm[3,] ~ rlm_seq, lwd = 4, lend = "round")
 
-lines(v_yukon[3,] ~ rlm_seq, lty = 2)
+lines(v_yukon ~ rlm_seq, lty = 2)
+lines(v_kusko ~ rlm_seq, lty = 3, lwd = 1.4)
 
 # keep_t = (nt - 9):nt
 keep_t = 1:nt
 
 at_rlm1 = sapply(colMeans(rlm[keep_t,,1,1]), function(a) which_closest(rlm_seq, a))
-points(v_kusko[3,at_rlm1] ~ colMeans(rlm[keep_t,,1,1]),
+points(v_ssm[3,at_rlm1] ~ colMeans(rlm[keep_t,,1,1]),
        pch = 21, bg = "grey90", col = "grey90", cex = 1.5)
-points(v_kusko[3,at_rlm1] ~ colMeans(rlm[keep_t,,1,1]),
+points(v_ssm[3,at_rlm1] ~ colMeans(rlm[keep_t,,1,1]),
        pch = c("4", "5", "6", "7"), col = "black", cex = 0.8)
 at_rlm2 = sapply(colMeans(rlm[keep_t,,1,2]), function(a) which_closest(rlm_seq, a))
-points(v_kusko[3,at_rlm2] ~ colMeans(rlm[keep_t,,1,2]),
+points(v_ssm[3,at_rlm2] ~ colMeans(rlm[keep_t,,1,2]),
        pch = 21, bg = "grey90", col = "grey90", cex = 1.5)
-points(v_kusko[3,at_rlm2] ~ colMeans(rlm[keep_t,,1,2]),
+points(v_ssm[3,at_rlm2] ~ colMeans(rlm[keep_t,,1,2]),
        pch = c("4", "5", "6", "7"), col = "grey60", cex = 0.8)
 
-lines(v_kusko[4,] ~ rlm_seq, lwd = 1, lty = 1, col = "grey")
-lines(v_kusko[5,] ~ rlm_seq, lwd = 1, lty = 1, col = "grey")
+lines(v_ssm[4,] ~ rlm_seq, lwd = 1, lty = 1, col = "grey")
+lines(v_ssm[5,] ~ rlm_seq, lwd = 1, lty = 1, col = "grey")
 unr_perim = 8 * 2* 25.4  
 res_perim = 6 * 2 * 25.4
 
@@ -213,7 +207,9 @@ axis(side = 3, at = rlm_seq[axis_i], labels = round(rlm_seq[axis_i] * res_perim,
 mtext(side = 3, "METF (mm) w/6 in. Mesh", line = 1, col = "grey60", font = 2, cex = 0.8)
 segments(par("usr")[1], par("usr")[4], par("usr")[2], par("usr")[4],col = "grey60", xpd = T)
 mtext(side = 1, "METF (mm) w/8 in. Mesh", line = 1, font = 2, cex = 0.8)
+legend("topright", legend = c("SSM", "Yukon R.", "Kuskokwim R."), lty = c(1,2,3), lwd = c(4,1,1.4), bty = "n", cex = 0.75)
 dev.off()
+
 
 
 ##### AGE/SEX COMPOSITION COMPARISONS #####
