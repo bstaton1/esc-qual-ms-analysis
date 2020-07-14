@@ -100,7 +100,7 @@ for (s in 1:length(stocks)) {
 weir_counts = read.csv("../a-age-data/1-esc/inputs/weir_counts.csv")
 colnames(weir_counts)[1] = "year"
 weir_counts = weir_counts %>% melt(id.vars = "year", value.name = "passage", variable.name = "stock")
-
+weir_counts$stock = gsub(pattern = "_", replacement = "-", x = weir_counts$stock)
 dat_ave = NULL
 
 yr = all_years[1]
