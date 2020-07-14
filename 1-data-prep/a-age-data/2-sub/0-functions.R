@@ -59,8 +59,7 @@ asl_data_prep2 = function(asl) {
   # calculate age and sex composition by year and stratum
   asl = asl %>%
     group_by(year, stratum, age_sex) %>%
-    summarize(n_age_sex = n()) %>%
-    ungroup %>%
+    summarize(n_age_sex = n(), .groups = "drop") %>%
     group_by(year, stratum) %>%
     mutate(n_tot = sum(n_age_sex)) %>%
     ungroup() %>%
@@ -102,7 +101,7 @@ cal_prep = function(cal, yr, v) {
     # merge in the stratum_key
     cal = merge(x = cal, y = strata_key, by = "doy", all.y = T)
     
-    cal %>% group_by(stratum) %>% summarize(catch = sum(chinook, na.rm = T)) %>% mutate(year = yr) %>%
+    cal %>% group_by(stratum) %>% summarize(catch = sum(chinook, na.rm = T), .groups = "drop") %>% mutate(year = yr) %>%
       dcast(year ~ stratum, value.var = "catch")
   } else {
     data.frame(year = yr, "1" = NA, "2" = NA, "3" = NA, "4" = NA, "5" = NA)
