@@ -31,6 +31,7 @@ create_strata_key = function(min_x, max_x, len) {
 esc_data_prep = function(dat) {
   
   # reformat dates
+  colnames(dat)[1] = "date"
   dat$date = paste(dat$date, dat$year, sep = "/")
   
   # big data manipulation
@@ -43,12 +44,12 @@ esc_data_prep = function(dat) {
     ungroup %>% 
     # get a total passage estimate, estimates + observed
     group_by(year, doy) %>%
-    summarise(count = sum(count, na.rm = T)) %>%
-    ungroup
+    summarise(count = sum(count, na.rm = T), .groups = "drop")
 }
 
 ##### PREPARE THE RAW ASL FILES
 asl_data_prep = function(dat) {
+  colnames(dat)[1] = "date"
   dat %>%
     # remove other species and keep only years in range
     filter(species == "Chinook" & year %in% all_years) %>%
@@ -71,7 +72,7 @@ esc_data_prep2 = function(esc) {
   # calculates counts by year and strata
   esc = esc %>% 
     group_by(year, stratum) %>% 
-    summarise(count = sum(count)) %>%
+    summarise(count = sum(count), .groups = "drop") %>%
     dcast(year ~ stratum, value.var = "count")
   esc[is.na(esc)] = 0
   esc
@@ -86,11 +87,10 @@ asl_data_prep2 = function(asl) {
   # calculate age and sex composition by year and stratum
   asl = asl %>%
     group_by(year, stratum, age_sex) %>%
-    summarize(n_age_sex = n()) %>%
-    ungroup %>%
+    summarize(n_age_sex = n(), .groups = "drop") %>%
     group_by(year, stratum) %>%
     mutate(n_tot = sum(n_age_sex)) %>%
-    ungroup() %>%
+    ungroup %>%
     mutate(age_sex_comp = round(n_age_sex/n_tot, 2))
   
   comp = asl %>%

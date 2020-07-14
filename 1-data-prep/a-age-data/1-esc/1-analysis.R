@@ -100,7 +100,7 @@ for (s in 1:length(stocks)) {
 weir_counts = read.csv("inputs/weir_counts.csv")
 colnames(weir_counts)[1] = "year"
 weir_counts = weir_counts %>% melt(id.vars = "year", value.name = "passage", variable.name = "stock")
-
+weir_counts$stock = gsub(pattern = "_", replacement = "-", x = weir_counts$stock)
 dat_ave = NULL
 
 for (yr in all_years) {
@@ -117,10 +117,8 @@ for (yr in all_years) {
   n_aged = sum(dat_y$n_aged)
   
   z = t(data.frame(c(year = yr, z, n_weirs = n_weirs, n_aged = n_aged))); rownames(z) = NULL
-  z
   
   dat_ave = rbind(dat_ave, z)
-  
 }
 
 write.csv(dat_ave, file.path(out_dir, "esc-age-sex-comp.csv"), row.names = F)
