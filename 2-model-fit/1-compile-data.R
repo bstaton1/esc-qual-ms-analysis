@@ -13,7 +13,7 @@ mod_info = mod_key[mod_key$model == model,]
 
 ### dimensional variables
 ft = 1976
-lt = 2017
+lt = 2019
 years = ft:lt
 nt = length(years)
 
@@ -36,6 +36,19 @@ m_ind = which(stringr::str_detect(A, "m"))
 ## abundance-related states
 states = read.csv(file.path(data_dir, "esc-harv-ests-cv.csv"))
 
+# calculate escapement
+states$S_tot_obs = states$N_tot_obs - states$H_com_tot_obs - states$H_sub_tot_obs
+
+# calculate CV of escapement: sum the log-normal variances of the components
+states$S_tot_obs_cv = 
+  StatonMisc::sig2cv(
+    sqrt(
+      StatonMisc::cv2sig(states$N_tot_obs_cv)^2 +
+       StatonMisc::cv2sig(states$H_com_tot_obs_cv)^2 + 
+       StatonMisc::cv2sig(states$H_sub_tot_obs_cv)^2
+    )
+  )
+  
 ## mean length at age
 ldat = read.csv(file.path(data_dir, "esc-mean-length.csv"))
 ldat = as.matrix(round(ldat[,-1]))
