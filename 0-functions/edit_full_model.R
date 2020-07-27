@@ -1,5 +1,5 @@
 
-edit_full_model = function(model_lines, outfile, z_unit, sex_trend, age_trend, rand_age, keep_whitespace = F, keep_comments = F) {
+edit_full_model = function(model_lines, outfile, z_unit, sex_trend, age_trend, rand_age, keep_whitespace = F, keep_comments = F, ppd = T) {
   
   # 1.) replace function() with model {
   model_lines[model_lines == "function() {"] = "model {"
@@ -66,6 +66,11 @@ edit_full_model = function(model_lines, outfile, z_unit, sex_trend, age_trend, r
     model_lines = model_lines[-c(D_scale_line, D_sum_line, gamma_line, g_line)]
   }
   
+  ### ALTERATIONS TO CODE BASED ON WHETHER CALCULATING PPD (FOR WAIC) ###
+  if (!ppd) {
+    ppd_lines = stringr::str_which(model_lines, "ppd")
+    model_lines = model_lines[-c(min(ppd_lines):max(ppd_lines))]
+  }
+  
   cat(paste0(model_lines, collapse = "\n"), file = outfile)
 }
-
