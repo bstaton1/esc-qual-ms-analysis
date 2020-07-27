@@ -1491,7 +1491,7 @@ make_table = function(v) {
 edit_full_model(
   model_lines = readLines(file.path("2-model-fit", "model-files", "full-model.txt")),
   outfile = "", age_trend = meta$age_trend, sex_trend = meta$sex_trend, z_unit = meta$z_unit,
-  keep_comments = T, keep_whitespace = T, rand_age = meta$rand_age
+  keep_comments = T, keep_whitespace = T, rand_age = meta$rand_age, ppd = T
   )
 ```
 
