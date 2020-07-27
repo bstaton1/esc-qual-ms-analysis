@@ -192,5 +192,19 @@ jags_model_code = function() {
     x_esc[t,1:(2*na)] ~ dmulti(q_esc[t,1:(2*na)], n_esc[t])
     x_com[t,1:(2*na)] ~ dmulti(q_com[t,1:(2*na)], n_com[t])
     x_sub[t,1:(2*na)] ~ dmulti(q_sub[t,1:(2*na)], n_sub[t])
+    
+    ### ppd calculations (for WAIC) ###
+    # lppd: aggregate abundance state observations
+    lppd_S[t] <- logdensity.lnorm(S_obs[t], log(S_t[t]), 1/S_obs_sig[t]^2)
+    lppd_Hcom[t] <- logdensity.lnorm(Hcom_obs[t], log(Hcom[t]), 1/Hcom_obs_sig[t]^2)
+    lppd_Hsub[t] <- logdensity.lnorm(Hsub_obs[t], log(Hsub[t]), 1/Hsub_obs_sig[t]^2)
+    
+    # lppd: composition observations
+    lppd_x_esc[t] <- logdensity.multi(x_esc[t,1:(2*na)], q_esc[t,1:(2*na)], n_esc[t])
+    lppd_x_com[t] <- logdensity.multi(x_com[t,1:(2*na)], q_com[t,1:(2*na)], n_com[t])
+    lppd_x_sub[t] <- logdensity.multi(x_sub[t,1:(2*na)], q_sub[t,1:(2*na)], n_sub[t])
+    
+    # ppd: totaled across obs types; assumes all data sources are independent - already assumed in fitting model
+    ppd_total[t] <- exp(lppd_S[t] + lppd_Hcom[t] + lppd_Hsub[t] + lppd_x_esc[t] + lppd_x_com[t] + lppd_x_sub[t])
   }
 }
