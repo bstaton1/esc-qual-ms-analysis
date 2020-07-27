@@ -1,9 +1,4 @@
 
-# WORKING DIRECTORY SHOULD BE SET TO PROJECT LOCATION
-# IF ON LOCAL COMPUTER, JUST HAVE PROJECT OPEN IN RSTUDIO SESSION
-# IF ON HPC OR COMMAND LINE WITH CURRENT DIRECTORY SET TO THIS LOCATION, UNCOMMENT THIS LINE
-# setwd("../")
-
 # clear the workspace
 rm(list = ls(all = T))
 
@@ -11,17 +6,20 @@ rm(list = ls(all = T))
 args = commandArgs(trailingOnly = T)
 model = as.numeric(args[1])
 
+# location of data files
+data_dir = "inputs"
+
 # compile the data
-source("2-model-fit/1-compile-data.R")
+source("1-compile-data.R")
 
 # load in additional functions
-source("load-functions.R")
+source("../load-functions.R")
 
 # starttime of everything
 starttime_all = Sys.time()
 
 # location of output files
-out_dir = "model-output"
+out_dir = "../model-output/"
 
 nchain =      4  # number of chains
 parallel =    T  # run chains in parallel?
@@ -29,22 +27,17 @@ verbose =     T  # print JAGS messages to console?
 silent =      F  # print post processing progress?
 seed =        9  # seed for initial value and mcmc sampling
 mcmc_vshort = F  # run with very short mcmc settings?
-mcmc_lshort = T  # run with less short mcmc settings?
+mcmc_lshort = F  # run with less short mcmc settings?
 mcmc_medium = F  # run with medium mcmc settings?
-mcmc_long =   F  # run with long mcmc settings?
+mcmc_long =   T  # run with long mcmc settings?
 calc_eq =     T  # calculate equilibrium quantities (based on fishing mortialities that provide msy and Rmax)?
 save_files =  T  # save output?
 rand_age =    F  # use dirichlet-distributed ages?
-Vprior = "kusko" # which data set to use as priors for selectivity parameters ('yukon' or 'kusko' - doesn't make a difference b/c SE multiplied by 10)?
+do_waic =     T  # perform WAIC calculations and store output?
 
 # make sure only one MCMC setting was specified
 if (sum(c(mcmc_vshort, mcmc_lshort, mcmc_medium, mcmc_long)) != 1) {
   stop("you incorrectly specified how long to run the MCMC algorithm for")
-}
-
-# make sure a correct Vprior was specified
-if (!(Vprior %in% c("yukon", "kusko"))) {
-  stop("Vprior must be one of 'yukon' or 'kusko'")
 }
 
 # which time effects are included?
@@ -53,8 +46,8 @@ sex_trend = as.logical(mod_key$sex_trend[mod_key$model == model])
 age_trend = as.logical(mod_key$age_trend[mod_key$model == model])
 
 # names for output
-if (!dir.exists("2-model-fit/model-files")) dir.create("2-model-fit/model-files")
-model_file = file.path("2-model-fit/model-files", paste("model-", model, ".txt", sep = ""))
+if (!dir.exists("model-files")) dir.create("model-files")
+model_file = file.path("model-files", paste("model-", model, ".txt", sep = ""))
 if (!dir.exists(out_dir) & save_files) dir.create(out_dir)
 post_name = paste("post-", model, ".rds", sep = "")
 meta_name = paste("meta-", model, ".rds", sep = "")
@@ -67,14 +60,6 @@ if (mcmc_lshort)  {npost = 5000; nburn = 1000; nthin = 2 * nchain; nadapt = 1000
 if (mcmc_medium)  {npost = 50000; nburn = 20000; nthin = 40; nadapt = 10000}
 if (mcmc_long)    {npost = 1000000; nburn = 100000; nthin = 200; nadapt = 10000}
 
-# set the selectivity priors
-jags_dat = append(jags_dat, list(
-  Vtau_prior = {if (Vprior == "kusko") Vtau_kusko else Vtau_yukon},
-  Vsig_prior = {if (Vprior == "kusko") Vsig_kusko else Vsig_yukon},
-  Vtha_prior = {if (Vprior == "kusko") Vtha_kusko else Vtha_yukon},
-  Vlam_prior = {if (Vprior == "kusko") Vlam_kusko else Vlam_yukon}
-))
-
 # set nodes to monitor
 jags_params = c(
   # SRA params
@@ -84,7 +69,8 @@ jags_params = c(
   "N_t", "S_t", "Z_t", "R", "log_mean_R0", "Hcom", "Hsub",
   
   # demographic parameters
-  "delta_0", "delta_1", "gamma_0", "gamma_1", "psi", "pi",
+  "b0_sex", "b1_sex", "b0_mat", "b1_mat", "p", "mu_pi_f",
+  "mu_pi_mat",
   
   # derived quantities
   "q_sub", "q_com", "q_esc", "q_run", 
@@ -92,17 +78,20 @@ jags_params = c(
   "Z_per_S_t", "Z_per_female_t",
   
   # fishery/selectivity parameters
-  "Fcom", "Fsub", "v", "Vtau", "Vsig", "Vtha", "Vlam"
+  "Fcom", "Fsub", "v", "Vtau", "Vsig", "Vtha", "Vlam",
+  "Vtau_prior", "Vsig_prior", "Vtha_prior", "Vlam_prior",
+  "Vtau_yukon", "Vsig_yukon", "Vtha_yukon", "Vlam_yukon"
 )
-if (rand_age) jags_params = c(jags_params, c("D_sum", "p"))
+if (rand_age) jags_params = c(jags_params, "D_sum")
+if (do_waic) jags_params = c(jags_params, "ppd_total")
 
 # set nodes to monitor diagnostics for
-diag_nodes = c("alpha", "beta", "beta_e10", "R", "delta_0", 
-               "delta_1", "gamma_0", "gamma_1", "pi",
+diag_nodes = c("alpha", "beta", "beta_e10", "R", "b0_sex", 
+               "b1_sex", "b0_mat", "b1_mat", "p",
                "phi", "sigma_R_white", "sigma_R0", 
                "Fcom", "Fsub", "Vtau", "Vsig", "Vtha", "Vlam", "log_mean_R0"
 )
-if (rand_age) diag_nodes = c(jags_params, c("D_sum", "p"))
+if (rand_age) diag_nodes = c(jags_params, "D_sum")
 
 ## write the model file
 # the full model - this one gets simplified based on the specific trend assumptions
@@ -114,12 +103,13 @@ if (rand_age) diag_nodes = c(jags_params, c("D_sum", "p"))
 
 # stringr::str_magic!!
 edit_full_model(
-  model_lines = readLines(file.path("2-model-fit", "model-files", "full-model.txt")),
+  model_lines = readLines(file.path("model-files", "full-model.txt")),
   outfile = model_file,
   z_unit = z_unit,
   age_trend = age_trend, 
   sex_trend = sex_trend,
-  rand_age = rand_age
+  rand_age = rand_age,
+  ppd = do_waic
   )
 
 # create initial values
@@ -212,6 +202,12 @@ if (calc_eq) {
   
 }
 
+### calculate WAIC if requested ###
+if (do_waic) {
+  ppd_total = postpack::post_subset(post, "ppd_total", matrix = T)
+  WAIC = get_WAIC(ppd_total)
+}
+
 stoptime_after = Sys.time()
 
 # save files
@@ -238,9 +234,8 @@ if (save_files) {
         rand_age = rand_age,
         R.hat = R.hat,
         n.eff = n.eff,
-        Vprior = Vprior
+        WAIC = {if (do_waic) WAIC else NULL}
       )), file.path(out_dir, meta_name))
-  
 }
 stoptime_all = Sys.time()
 
