@@ -122,32 +122,48 @@ jags_model_code = function() {
   
   # 3c: calculate harvest by age, sex, year, and fishery
   for (t in 1:nt) {
-    Fsub[t] ~ dunif(0,10)
-    Fcom[t] ~ dunif(0,10)
+    Fsub[t] ~ dunif(0,10)  # instantaneous subsistence fishing mortality of fully-selected age/sex by year
+    Fcom[t] ~ dunif(0,10)  # instantaneous commercial fishing mortality of fully-selected age/sex by year
     for (a in 1:na) {
       for (s in 1:2) {
+        # fishing mortality by year/age/sex/fishery
         Fcom_tas[t,a,s] <- Fcom[t] * v[t,a,s,com_mesh[t]]
         Fsub_tas[t,a,s] <- Fsub[t] * v[t,a,s,sub_mesh[t]]
+        
+        # total fishing mortality by year/age/sex
         Ftot_tas[t,a,s] <- Fcom_tas[t,a,s] + Fsub_tas[t,a,s]
         
+        # harvest by year/age/sex/fishery
         Hsub_tas[t,a,s] <- N_tas[t,a,s] * (Fsub_tas[t,a,s]/Ftot_tas[t,a,s]) * (1 - exp(-Ftot_tas[t,a,s]))
         Hcom_tas[t,a,s] <- N_tas[t,a,s] * (Fcom_tas[t,a,s]/Ftot_tas[t,a,s]) * (1 - exp(-Ftot_tas[t,a,s]))
+        
+        # escapement by year/age/sex
         S_tas[t,a,s] <- N_tas[t,a,s] - Hsub_tas[t,a,s] - Hcom_tas[t,a,s]
-        Z_tas[t,a,s] <- S_tas[t,a,s] * z[t,a,s]
+        
+        # exploitation rate by year/age/sex
         Utot_tas[t,a,s] <- (N_tas[t,a,s] - S_tas[t,a,s])/N_tas[t,a,s]
+        
+        # total reproductive output by year/age/sex
+        Z_tas[t,a,s] <- S_tas[t,a,s] * z[t,a,s]
       }
+      # harvest by fishery, escapement, and exploitation rate by year/age
       Hsub_ta[t,a] <- sum(Hsub_tas[t,a,1:2])
       Hcom_ta[t,a] <- sum(Hcom_tas[t,a,1:2])
       S_ta[t,a] <- sum(S_tas[t,a,1:2])
       Utot_ta[t,a] <- (N_ta[t,a] - S_ta[t,a])/N_ta[t,a]
     }
+    # harvest by fishery, escapement, and exploitation rate by year
     Hsub[t] <- sum(Hsub_ta[t,1:na])
     Hcom[t] <- sum(Hcom_ta[t,1:na])
     S_t[t] <- sum(S_ta[t,1:na])
+    Utot_t[t] <- (N_t[t] - S_t[t])/N_t[t]
+    
+    # reproductive units, summarized in different useful ways
     Z_t[t] <- sum(Z_tas[t,1:na,1:2])
     Z_per_S_t[t] <- Z_t[t]/S_t[t]
     Z_per_female_t[t] <- Z_t[t]/sum(S_tas[t,1:na,1])
-    Utot_t[t] <- (N_t[t] - S_t[t])/N_t[t]
+    
+    # exploitation rate by year/sex
     for (s in 1:2) {
       Utot_ts[t,s] <- (sum(N_tas[t,1:na,s]) - sum(S_tas[t,1:na,s]))/sum(N_tas[t,1:na,s])
     }
