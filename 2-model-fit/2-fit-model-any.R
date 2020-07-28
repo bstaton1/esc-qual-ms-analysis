@@ -34,7 +34,7 @@ mcmc_long =   F  # run with long mcmc settings?
 calc_eq =     T  # calculate equilibrium quantities (based on fishing mortialities that provide msy and Rmax)?
 save_files =  T  # save output?
 rand_age =    F  # use dirichlet-distributed ages?
-Vprior = "kusko" # which data set to use as priors for selectivity parameters?
+Vprior = "kusko" # which data set to use as priors for selectivity parameters ('yukon' or 'kusko' - doesn't make a difference b/c SE multiplied by 10)?
 
 # make sure only one MCMC setting was specified
 if (sum(c(mcmc_vshort, mcmc_lshort, mcmc_medium, mcmc_long)) != 1) {
@@ -237,7 +237,8 @@ if (save_files) {
         age_trend = age_trend,
         rand_age = rand_age,
         R.hat = R.hat,
-        n.eff = n.eff
+        n.eff = n.eff,
+        Vprior = Vprior
       )), file.path(out_dir, meta_name))
   
 }
