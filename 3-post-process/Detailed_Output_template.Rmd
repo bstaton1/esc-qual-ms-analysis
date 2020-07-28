@@ -748,35 +748,70 @@ axis(side = 1, at = 4:7, labels = 4:7)
 
 ```{r sel-prior-plot-func, eval = selectivity}
 v_prior_plot = function(p) {
-  samps = post_subset(post, paste0("V", p), matrix = T)
+  # obtain posterior samples
+  post_samps = post_subset(post, paste0("V", p), matrix = T)
+  
+  # obtain the name of the object controlling the prior
+  prior_name = paste0("V", p, "_", meta$Vprior)
+
+  # calculate values: the source (straight as published) and the prior (with se * 10)
+  source_p = eval(parse(text = prior_name))
+  prior_p = source_p; prior_p[2] = prior_p[2] * 10
+
+  # sample from these distributions: previous versions of code embedded this in the JAGS model
+  # need to use truncated normal for sigma and theta parameters
+  if (p %in% c("sig", "tha")) {
+    source_samps = truncnorm::rtruncnorm(n = nrow(post_samps), a = 0, b = "Inf", mean = source_p[1], sd = source_p[2])
+    prior_samps = truncnorm::rtruncnorm(n = nrow(post_samps), a = 0, b = "Inf", mean = prior_p[1], sd = prior_p[2])
+  } else {
+    source_samps = rnorm(nrow(post_samps), source_p[1], source_p[2])
+    prior_samps = rnorm(nrow(post_samps), prior_p[1], prior_p[2])
+  }
+  
+  # combine samples from the three dists
+  samps = cbind(post_samps, prior_samps, source_samps)
+
+  # fit KDE to each dist
   dens = apply(samps, 2, density)
+  
+  # draw a blank plot
   par(mar = c(3,3,1,1), xaxs = "i", yaxs = "i", mgp = c(2,0.5,0), tcl = -0.25)
   plot(1,1, type = "n", xlab = "Parameter Value", ylab = "Density",
        ylim = c(0, max(dens[[1]]$y, dens[[2]]$y, dens[[3]]$y)) * 1.2,
        xlim = range(dens[[1]]$x, dens[[2]]$x, dens[[3]]$x))
   
-  # the prior
+  # KDE: the prior
   with(dens[[2]], polygon(x = c(x, rev(x)), y = c(y, rep(0, length(y))), col = scales::alpha("orange", 0.5), border = NA))
   lines(dens[[2]]$y ~ dens[[2]]$x, col = "black")
   
-  # the posterior
+  # KDE: the posterior
   with(dens[[1]], polygon(x = c(x, rev(x)), y = c(y, rep(0, length(y))), col = scales::alpha("skyblue4", 0.3), border = NA))
   lines(dens[[1]]$y ~ dens[[1]]$x, col = "blue")
   
-  # yukon 
+  # KDE: the source 
   with(dens[[3]], polygon(x = c(x, rev(x)), y = c(y, rep(0, length(y))), col = scales::alpha("salmon4", 0.3), border = NA))
   lines(dens[[3]]$y ~ dens[[3]]$x, col = "red")
   
   box()
-  legend("top", legend = c("Prior", "Posterior", "Yukon"), pch = 22,
+  legend("top", legend = c("Prior", "Posterior", capitalize(meta$Vprior)), pch = 22,
          pt.bg = scales::alpha(c("orange", "skyblue4", "salmon4"), c(0.5, 0.3, 0.3)),
          col = c("black", "blue", "red"), horiz = T, bty = "n", pt.cex = 3)
 
 }
-
 ```
 
-`r if (selectivity) 'The prior on each selectivity parameter ($\\tau$, $\\sigma$, $\\theta$, and $\\lambda$) was normal with mean equal to the estimates presented in Bromaghin ([2005](https://doi.org/10.1016/j.fishres.2005.03.004){target="_blank"}), and standard deviation equal to the standard error presented therein times 10 (purposefully uninformative). The "Yukon" estimates are from Bromaghin ([2005](https://doi.org/10.1016/j.fishres.2005.03.004){target="_blank"}) with unaltered standard error.'`
+```{r, eval = selectivity}
+if (meta$Vprior == "kusko") {
+  sel_message = 'The prior on each selectivity parameter ($\\tau$, $\\sigma$, $\\theta$, and $\\lambda$) was normal (or truncated normal to ensure $\\sigma>0$ and $\\theta>0$) with mean equal to the estimates from the Kuskokwim lower river sonar site provided by the Alaska Department of Fish and Game (ADF&G; see Birchfield and Smith [2017](http://www.adfg.alaska.gov/FedAidPDFs/FDS19-27.pdf){target="_blank"} for methods), and standard deviation equal to the standard error provided times 10 (purposefully uninformative). The "Kusko" estimates are those provided by ADF&G with unaltered standard error.'
+}
+
+if (meta$Vprior == "yukon") {
+  sel_message = 'The prior on each selectivity parameter ($\\tau$, $\\sigma$, $\\theta$, and $\\lambda$) was normal (or truncated normal to ensure $\\sigma>0$ and $\\theta>0$) with mean equal to the estimates presented in Bromaghin ([2005](https://doi.org/10.1016/j.fishres.2005.03.004){target="_blank"}), and standard deviation equal to the standard error presented therein times 10 (purposefully uninformative). The "Yukon" estimates are from Bromaghin ([2005](https://doi.org/10.1016/j.fishres.2005.03.004){target="_blank"}) with unaltered standard error.'
+}
+```
+
+
+`r if (selectivity) sel_message`
 
 `r create_label("Figure", cntr, F, level = 3, sub = "c", subb = "1", text = "$\\tau$", tabset = F, selectivity)`
 
