@@ -126,11 +126,12 @@ jags_model_code = function() {
     Fcom[t] ~ dunif(0,10)
     for (a in 1:na) {
       for (s in 1:2) {
-        Usub_tas[t,a,s] <- 1 - exp(-Fsub[t] * v[t,a,s,sub_mesh[t]])
-        Ucom_tas[t,a,s] <- 1 - exp(-Fcom[t] * v[t,a,s,com_mesh[t]])
+        Fcom_tas[t,a,s] <- Fcom[t] * v[t,a,s,com_mesh[t]]
+        Fsub_tas[t,a,s] <- Fsub[t] * v[t,a,s,sub_mesh[t]]
+        Ftot_tas[t,a,s] <- Fcom_tas[t,a,s] + Fsub_tas[t,a,s]
         
-        Hsub_tas[t,a,s] <- N_tas[t,a,s] * Usub_tas[t,a,s]
-        Hcom_tas[t,a,s] <- (N_tas[t,a,s] * (1 - Usub_tas[t,a,s])) * Ucom_tas[t,a,s]
+        Hsub_tas[t,a,s] <- N_tas[t,a,s] * (Fsub_tas[t,a,s]/Ftot_tas[t,a,s]) * (1 - exp(-Ftot_tas[t,a,s]))
+        Hcom_tas[t,a,s] <- N_tas[t,a,s] * (Fcom_tas[t,a,s]/Ftot_tas[t,a,s]) * (1 - exp(-Ftot_tas[t,a,s]))
         S_tas[t,a,s] <- N_tas[t,a,s] - Hsub_tas[t,a,s] - Hcom_tas[t,a,s]
         Z_tas[t,a,s] <- S_tas[t,a,s] * z[t,a,s]
         Utot_tas[t,a,s] <- (N_tas[t,a,s] - S_tas[t,a,s])/N_tas[t,a,s]
