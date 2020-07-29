@@ -1,26 +1,27 @@
 
+# WORKING DIRECTORY SHOULD BE SET TO PROJECT LOCATION
+# IF ON LOCAL COMPUTER, JUST HAVE PROJECT OPEN IN RSTUDIO SESSION
+# IF ON HPC, UNCOMMENT THIS LINE
+# setwd("../")
+
 # clear the workspace
 rm(list = ls(all = T))
 
 # settings
 args = commandArgs(trailingOnly = T)
 model = as.numeric(args[1])
-model = 10
-
-# location of data files
-data_dir = "inputs"
 
 # compile the data
-source("1-compile-data.R")
+source("2-model-fit/1-compile-data.R")
 
 # load in additional functions
-source("../load-functions.R")
+source("load-functions.R")
 
 # starttime of everything
 starttime_all = Sys.time()
 
 # location of output files
-out_dir = "../model-output/"
+out_dir = "model-output"
 
 nchain =      4  # number of chains
 parallel =    T  # run chains in parallel?
@@ -52,8 +53,8 @@ sex_trend = as.logical(mod_key$sex_trend[mod_key$model == model])
 age_trend = as.logical(mod_key$age_trend[mod_key$model == model])
 
 # names for output
-if (!dir.exists("model-files")) dir.create("model-files")
-model_file = file.path("model-files", paste("model-", model, ".txt", sep = ""))
+if (!dir.exists("2-model-fit/model-files")) dir.create("2-model-fit/model-files")
+model_file = file.path("2-model-fit/model-files", paste("model-", model, ".txt", sep = ""))
 if (!dir.exists(out_dir) & save_files) dir.create(out_dir)
 post_name = paste("post-", model, ".rds", sep = "")
 meta_name = paste("meta-", model, ".rds", sep = "")
@@ -110,11 +111,11 @@ if (rand_age) diag_nodes = c(jags_params, "D_sum")
 # with the correct contents, but with improper formatting. I have no idea why dput works differently in these two cases
 # This causes edit_full_model() to bomb. Thus, you need to write out the full model 
 # BEFORE calling this script via Rscript
-# write_full_model()
+write_full_model()
 
 # stringr::str_magic!!
 edit_full_model(
-  model_lines = readLines(file.path("model-files", "full-model.txt")),
+  model_lines = readLines(file.path("2-model-fit", "model-files", "full-model.txt")),
   outfile = model_file,
   z_unit = z_unit,
   age_trend = age_trend, 
