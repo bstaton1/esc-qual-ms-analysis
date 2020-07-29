@@ -1,4 +1,7 @@
 
+# WORKING DIRECTORY SHOULD BE SET TO PROJECT LOCATION
+# JUST HAVE PROJECT OPEN IN RSTUDIO SESSION
+
 rm(list = ls(all = T))
 
 library(StatonMisc)
@@ -8,20 +11,19 @@ library(stringr)
 
 ##### SESSION SETUP #####
 
-data_dir = "../2-model-fit/inputs/"
+# load data/functions
 model = 1  # just needed to build the data
-
-source("../2-model-fit/1-compile-data.R")
-source("../load-functions.R")
+source("2-model-fit/1-compile-data.R")
+source("load-functions.R")
 rm(model) # clear out the model object 
 
-out_dir = "../../model-output/"
+out_dir = "model-output/permanent"
 out_files = dir(out_dir, full.names = T)
 
 # HOW DO YOU WANT TO SAVE THE OUTPUT
 file_type = "pdf"
 # file_type = "jpg"
-fig_dir = "ms-figs"
+fig_dir = "3-post-process/ms-figs"
 
 # create directory to store output figures if it doesn't exist
 if (!dir.exists(fig_dir)) dir.create(fig_dir)
@@ -465,7 +467,6 @@ points(meds[3,] ~ mp[3,], pch = 24, bg = "grey60", cex = 0.8)
 # segments(mp[1,], lwrs2[1,], mp[1,], uprs2[1,], lwd = 4)
 # segments(mp[2,], lwrs2[2,], mp[2,], uprs2[2,], lwd = 4)
 # segments(mp[3,], lwrs2[3,], mp[3,], uprs2[3,], lwd = 4)
-block = rep(1:3, each = 14)
 lab1 = paste(paste0("'", substr(range(years[block == 1]), 3, 4)), collapse = "-")
 lab2 = paste(paste0("'", substr(range(years[block == 2]), 3, 4)), collapse = "-")
 lab3 = paste(paste0("'", substr(range(years[block == 3]), 3, 4)), collapse = "-")
