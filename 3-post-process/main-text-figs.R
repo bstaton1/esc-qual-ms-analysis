@@ -38,11 +38,13 @@ postfiles = out_files[str_detect(out_files, "post")]
 mods = str_extract(postfiles, "[0-9]+")
 metafiles = out_files[str_detect(out_files, "meta")]
 msyfiles = out_files[str_detect(out_files, "msy")]
+Rmaxfiles = out_files[str_detect(out_files, "Rmax")]
 
 # create empty objects to store the output from each model
 meta = list()
 post_list = list()
 msy = NULL
+Rmax = NULL
 
 # read in the posterior samples and meta data
 for (i in 1:length(mods)) {
@@ -56,8 +58,10 @@ ids = unlist(lapply(meta, id_model))
 
 # read in the msy equilibrium quantities
 msy = readRDS(msyfiles[1])
+Rmax = readRDS(Rmaxfiles[1])
 for (i in 2:length(mods)) {
   msy = abind(msy, readRDS(msyfiles[i]), along = 5)
+  Rmax = abind(Rmax, readRDS(Rmaxfiles[i]), along = 5)
 }
 
 
