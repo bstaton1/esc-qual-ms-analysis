@@ -3,13 +3,13 @@
 ##### SESSION SETUP #####
 rm(list = ls(all = T))
 
+# WORKING DIRECTORY SHOULD BE SET TO PROJECT DIRECTORY
+
 # needed packages
 suppressMessages(library(dplyr))
 suppressMessages(library(reshape2))
 suppressMessages(library(StatonMisc))
-source("0-functions.R")
-
-# set the working directory HERE.
+source("1-data-prep/a-age-data/1-esc/0-functions.R")
 
 # do you want to write the output?
 write = T
@@ -18,9 +18,9 @@ write = T
 all_years = 1976:2019
 
 # directories
-asl_dir = "inputs/asl"
-esc_dir = "inputs/daily-esc/"
-out_dir = "outputs"
+asl_dir = "1-data-prep/a-age-data/1-esc/inputs/asl"
+esc_dir = "1-data-prep/a-age-data/1-esc/inputs/daily-esc/"
+out_dir = "1-data-prep/a-age-data/1-esc/outputs"
 
 # create the output directory if it doesn't exist
 if (!dir.exists(out_dir)) dir.create(out_dir)
@@ -89,7 +89,7 @@ for (s in 1:length(stocks)) {
   
   # write the output
   if (write) {
-    write.csv(dat, paste("outputs/", stocks[s], "_age_comps.csv", sep = ""), row.names = F)
+    write.csv(dat, file.path(out_dir, paste0(stocks[s], "_age_comps.csv", sep = "")), row.names = F)
   }
   
   dat_all = rbind(dat_all, dat)
@@ -97,7 +97,7 @@ for (s in 1:length(stocks)) {
 }
 
 ##### COMBINE STOCK-SPECIFIC ESTIMATES INTO A DRAINAGE-WIDE ESTIMATE #####
-weir_counts = read.csv("inputs/weir_counts.csv")
+weir_counts = read.csv("1-data-prep/a-age-data/1-esc/inputs/weir_counts.csv")
 colnames(weir_counts)[1] = "year"
 weir_counts = weir_counts %>% melt(id.vars = "year", value.name = "passage", variable.name = "stock")
 weir_counts$stock = gsub(pattern = "_", replacement = "-", x = weir_counts$stock)
@@ -121,4 +121,6 @@ for (yr in all_years) {
   dat_ave = rbind(dat_ave, z)
 }
 
-write.csv(dat_ave, file.path(out_dir, "esc-age-sex-comp.csv"), row.names = F)
+if (write) {
+  write.csv(dat_ave, file.path(out_dir, "esc-age-sex-comp.csv"), row.names = F)
+}
