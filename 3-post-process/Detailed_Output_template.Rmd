@@ -12,8 +12,13 @@ editor_options:
 ---
 
 ```{r setup, include = F}
+# chunk options
 knitr::opts_chunk$set(echo = F, message = F, warning = F, fig.align = "center")
 
+# directory to knit from: the project root, which is one directory up from here
+knitr::opts_knit$set(root.dir = "../")
+
+# packages
 library(postpack)
 library(StatonMisc)
 library(magrittr)
@@ -21,16 +26,17 @@ library(knitr)
 library(kableExtra)
 library(stringr)
 library(scales)
+```
 
+```{r load-information}
 # compile the data
-data_dir = "../2-model-fit/inputs"
-source("../2-model-fit/1-compile-data.R")
+source("2-model-fit/1-compile-data.R")
 
 # load in additional functions
-source("../load-functions.R")
+source("load-functions.R")
 
 # location of output files
-out_dir = "../../model-output/"
+out_dir = "model-output"
 
 # names of output files
 post_name = paste("post-", model, ".rds", sep = "")
@@ -1489,7 +1495,7 @@ make_table = function(v) {
 
 ```{r jags-code, eval = jags_code, comment = NA}
 edit_full_model(
-  model_lines = readLines(file.path("../2-model-fit/model-files", "full-model.txt")),
+  model_lines = readLines(file.path("2-model-fit", "model-files", "full-model.txt")),
   outfile = "", age_trend = meta$age_trend, sex_trend = meta$sex_trend, z_unit = meta$z_unit,
   keep_comments = T, keep_whitespace = T, rand_age = meta$rand_age
   )
