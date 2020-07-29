@@ -1,6 +1,9 @@
 # clear the workspace
 rm(list = ls(all = T))
 
+# set the working directory to this location
+setwd("3-post-process")
+
 # where to put the output
 html_dir = "os-detailed"
 if (!dir.exists(html_dir)) dir.create(html_dir)
@@ -17,5 +20,9 @@ for (m in 1:n_models) {
   out_file = paste0("Supp-", LETTERS[m+1], "_", model_ids[model], ".html", sep = "")
   rmarkdown::render(
     input = "Detailed_Output_template.Rmd",
-    output_file = file.path(html_dir, out_file))
+    output_file = file.path(html_dir, out_file)
+  )
 }
+
+# set the working directory back to the project root
+setwd("../")
