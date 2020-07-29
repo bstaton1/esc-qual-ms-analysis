@@ -3,14 +3,14 @@
 ##### SESSION SETUP #####
 rm(list = ls(all = T))
 
+# WORKING DIRECTORY SHOULD BE SET TO PROJECT DIRECTORY
+
 # needed packages
 suppressMessages(library(dplyr))
 suppressMessages(library(reshape2))
 suppressMessages(library(StatonMisc))
 
-source("0-functions.R")
-
-# set working directory HERE. 
+source("1-data-prep/b-length-data/0-functions.R")
 
 # the range of years observed across all stocks
 all_years = 1976:2019
@@ -18,9 +18,9 @@ all_years = 1976:2019
 write = T
 
 # directories
-asl_dir = "../a-age-data/1-esc/inputs/asl"
-esc_dir = "../a-age-data/1-esc/inputs/daily-esc/"
-out_dir = "outputs"
+asl_dir = "1-data-prep/a-age-data/1-esc/inputs/asl"
+esc_dir = "1-data-prep/a-age-data/1-esc/inputs/daily-esc/"
+out_dir = "1-data-prep/b-length-data/outputs"
 
 # create the output directory if it doesn't exist
 if (!dir.exists(out_dir)) dir.create(out_dir)
@@ -36,7 +36,6 @@ stocks = unname(sapply(asl_files, function(x) unlist(strsplit(x, "_"))[1]))
 stratum_length = 14
 
 ##### GET MEAN LENGTH AT AGE AND SEX AND STOCK AND YEAR THAT HAVE IT #####
-s = 1
 dat_all = NULL
 for (s in 1:length(stocks)) {
   
@@ -89,7 +88,7 @@ for (s in 1:length(stocks)) {
   
   # write the output
   if (write) {
-    write.csv(dat, paste("outputs/", stocks[s], "_mean_length.csv", sep = ""), row.names = F)
+    write.csv(dat, file.path(out_dir, paste0(stocks[s], "_mean_length.csv", sep = "")), row.names = F)
   }
   
   dat_all = rbind(dat_all, dat)
@@ -97,7 +96,7 @@ for (s in 1:length(stocks)) {
 }
 
 ##### COMBINE STOCK-SPECIFIC ESTIMATES INTO A DRAINAGE-WIDE ESTIMATE #####
-weir_counts = read.csv("../a-age-data/1-esc/inputs/weir_counts.csv")
+weir_counts = read.csv("1-data-prep/a-age-data/1-esc/inputs/weir_counts.csv")
 colnames(weir_counts)[1] = "year"
 weir_counts = weir_counts %>% melt(id.vars = "year", value.name = "passage", variable.name = "stock")
 weir_counts$stock = gsub(pattern = "_", replacement = "-", x = weir_counts$stock)
@@ -140,5 +139,7 @@ for (a in 1:8) {
   dat_ave_interp[,A[a]] = interp(dat_ave[,c("year", A[a])])
 }
 
-write.csv(dat_ave, file.path(out_dir, "esc-mean-length-no-interp.csv"), row.names = F)
-write.csv(dat_ave_interp, file.path(out_dir, "esc-mean-length.csv"), row.names = F)
+if (write) {
+  write.csv(dat_ave, file.path(out_dir, "esc-mean-length-no-interp.csv"), row.names = F)
+  write.csv(dat_ave_interp, file.path(out_dir, "esc-mean-length.csv"), row.names = F)
+}
