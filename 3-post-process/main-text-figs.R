@@ -64,7 +64,6 @@ for (i in 2:length(mods)) {
   Rmax = abind(Rmax, readRDS(Rmaxfiles[i]), along = 5)
 }
 
-
 # give the objects model identifiers
 names(meta) = ids
 names(post_list) = ids
@@ -280,7 +279,7 @@ file_device(file.path(fig_dir, paste0("pi-trends.", file_type)), h = 4, w = 7.2)
 par(mfrow = c(1,2), mar = c(1, 0.25, 0.25, 0.25), oma = c(1.5,3,1.5,2), xaxs = "i", yaxs = "i",
     cex.axis = 1, cex.main = 1, tcl = -0.25, mgp = c(2,0.4,0), lend = "square")
 fill_col = c("grey35", "grey55", "grey80", "white")
-by = 1969:2013
+by = 1969:2015
 sex = c("Female", "Male")
 for (s in 1:2) {
   plot(1,1, type = "n", xlim = range(by), ylim = c(0,1), las = 1, yaxt = "n", xaxt = "n")
@@ -414,8 +413,16 @@ round(mass_fun(colMeans(ldat[f10,]))/mass_fun(mean(ldat[f10,4])), 2)
 
 ##### PER CAPITA REPRODUCTIVE OUTPUT #####
 
+# create time blocks: try to break time series into thirds
+early_t = 1:15
+late_t = (nt - 14):nt
+block = ifelse(years %in% years[early_t], 1, 
+       ifelse(years %in% years[late_t], 3, 2))
+table(block)
+sapply(1:3, function(x) range(years[block == x]))
+
+
 f = function(post) {
-  block = rep(1:3, each = nt/3)
   Z = post_subset(post, "^Z_per_S_t[", T)
   
   out = t(sapply(1:post_dim(post, "saved"), function(i) {
