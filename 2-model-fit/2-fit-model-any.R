@@ -1,34 +1,35 @@
 
+# WORKING DIRECTORY SHOULD BE SET TO PROJECT LOCATION
+# IF ON LOCAL COMPUTER, JUST HAVE PROJECT OPEN IN RSTUDIO SESSION
+# IF ON HPC OR COMMAND LINE WITH CURRENT DIRECTORY SET TO THIS LOCATION, UNCOMMENT THIS LINE
+# setwd("../")
+
 # clear the workspace
 rm(list = ls(all = T))
 
 # settings
 args = commandArgs(trailingOnly = T)
 model = as.numeric(args[1])
-model = 10
-
-# location of data files
-data_dir = "inputs"
 
 # compile the data
-source("1-compile-data.R")
+source("2-model-fit/1-compile-data.R")
 
 # load in additional functions
-source("../load-functions.R")
+source("load-functions.R")
 
 # starttime of everything
 starttime_all = Sys.time()
 
 # location of output files
-out_dir = "../model-output/"
+out_dir = "model-output"
 
 nchain =      4  # number of chains
 parallel =    T  # run chains in parallel?
 verbose =     T  # print JAGS messages to console?
 silent =      F  # print post processing progress?
 seed =        9  # seed for initial value and mcmc sampling
-mcmc_vshort = T  # run with very short mcmc settings?
-mcmc_lshort = F  # run with less short mcmc settings?
+mcmc_vshort = F  # run with very short mcmc settings?
+mcmc_lshort = T  # run with less short mcmc settings?
 mcmc_medium = F  # run with medium mcmc settings?
 mcmc_long =   F  # run with long mcmc settings?
 calc_eq =     T  # calculate equilibrium quantities (based on fishing mortialities that provide msy and Rmax)?
@@ -52,8 +53,8 @@ sex_trend = as.logical(mod_key$sex_trend[mod_key$model == model])
 age_trend = as.logical(mod_key$age_trend[mod_key$model == model])
 
 # names for output
-if (!dir.exists("model-files")) dir.create("model-files")
-model_file = file.path("model-files", paste("model-", model, ".txt", sep = ""))
+if (!dir.exists("2-model-fit/model-files")) dir.create("2-model-fit/model-files")
+model_file = file.path("2-model-fit/model-files", paste("model-", model, ".txt", sep = ""))
 if (!dir.exists(out_dir) & save_files) dir.create(out_dir)
 post_name = paste("post-", model, ".rds", sep = "")
 meta_name = paste("meta-", model, ".rds", sep = "")
@@ -114,7 +115,7 @@ if (rand_age) diag_nodes = c(jags_params, "D_sum")
 
 # stringr::str_magic!!
 edit_full_model(
-  model_lines = readLines(file.path("model-files", "full-model.txt")),
+  model_lines = readLines(file.path("2-model-fit", "model-files", "full-model.txt")),
   outfile = model_file,
   z_unit = z_unit,
   age_trend = age_trend, 

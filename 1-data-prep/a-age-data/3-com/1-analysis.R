@@ -2,13 +2,13 @@
 ##### SESSION SETUP #####
 rm(list = ls(all = T))
 
+# WORKING DIRECTORY SHOULD BE SET TO PROJECT DIRECTORY
+
 # needed packages
 suppressMessages(library(dplyr))
 suppressMessages(library(reshape2))
 suppressMessages(library(StatonMisc))
-source("0-functions.R")
-
-# set the working directory HERE.
+source("1-data-prep/a-age-data/3-com/0-functions.R")
 
 # do you want to write the output?
 write = T
@@ -17,8 +17,8 @@ write = T
 all_years = 1976:2019
 
 # directories
-dat_dir = "inputs"
-out_dir = "outputs"
+dat_dir = "1-data-prep/a-age-data/3-com/inputs"
+out_dir = "1-data-prep/a-age-data/3-com/outputs"
 
 # create the output directory if it doesn't exist
 if (!dir.exists(out_dir)) dir.create(out_dir)
@@ -47,4 +47,6 @@ out = t(sapply(all_years, function(x) get_wt_avg(yr = x, asl, harv)))
 dat = data.frame(year = all_years, out)
 colnames(dat) = c("year", "f4", "f5", "f6", "f7", "m4", "m5", "m6", "m7", "n_aged")
 
-write.csv(dat, file.path(out_dir, "com-age-sex-comp.csv"), row.names = F)
+if (write) {
+  write.csv(dat, file.path(out_dir, "com-age-sex-comp.csv"), row.names = F)
+}

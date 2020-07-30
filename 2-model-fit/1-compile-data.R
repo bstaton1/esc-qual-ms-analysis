@@ -1,9 +1,12 @@
 
-# THIS SCRIPT REQUIRES OBJECTS CALLED "model" and "data_dir"
+# THIS SCRIPT REQUIRES AN OBJECT CALLED "model"
 # to be defined prior to sourcing it
 
+# location of data files
+data_dir = "2-model-fit/inputs"
+
 ### obtain meta info for all models
-mod_key = read.csv(file.path(data_dir, "../model-key.csv"), stringsAsFactors = F)
+mod_key = read.csv("2-model-fit/model-key.csv", stringsAsFactors = F)
 
 # stop if model is not found
 if (!(model %in% mod_key$model)) stop("Info for requested model not found.")

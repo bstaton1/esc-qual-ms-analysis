@@ -2,14 +2,14 @@
 ##### SESSION SETUP #####
 rm(list = ls(all = T))
 
+# WORKING DIRECTORY SHOULD BE SET TO PROJECT DIRECTORY
+
 # needed packages
 suppressMessages(library(dplyr))
 suppressMessages(library(reshape2))
 suppressMessages(library(stringr))
 suppressMessages(library(StatonMisc))
-source("0-functions.R")
-
-# set the working directory HERE.
+source("1-data-prep/a-age-data/2-sub/0-functions.R")
 
 # do you want to write the output?
 write = T
@@ -18,8 +18,8 @@ write = T
 all_years = 1976:2019
 
 # directories
-dat_dir = "inputs"
-out_dir = "outputs"
+dat_dir = "1-data-prep/a-age-data/2-sub/inputs"
+out_dir = "1-data-prep/a-age-data/2-sub/outputs"
 
 # create the output directory if it doesn't exist
 if (!dir.exists(out_dir)) dir.create(out_dir)
@@ -30,7 +30,11 @@ if (!dir.exists(out_dir)) dir.create(out_dir)
 asl_raw = read.csv(file.path(dat_dir, "SubsistenceASL.csv"), stringsAsFactors = F)
 
 # proof that 2014 was first year of net restrictions:
-with(asl_raw, table(mesh, year))
+mesh = data.frame(year = asl_raw$year, mesh = asl_raw$mesh)
+mesh = mesh[asl_raw$species == "Chinook",]
+mesh$le6 = ifelse(mesh$mesh <= 6, 1, 0)
+p_le6 = tapply(mesh$le6, mesh$year, mean, na.rm = T)
+barplot(p_le6, las = 2)
 
 asl_raw = asl_data_prep(asl_raw)
 
@@ -62,5 +66,6 @@ out = t(sapply(all_years, function(x) get_wt_avg(yr = x, asl, cal)))
 dat = data.frame(year = all_years, out)
 colnames(dat) = c("year", "f4", "f5", "f6", "f7", "m4", "m5", "m6", "m7", "n_aged")
 
-write.csv(dat, file.path(out_dir, "sub-age-sex-comp.csv"), row.names = F)
-
+if (write) {
+  write.csv(dat, file.path(out_dir, "sub-age-sex-comp.csv"), row.names = F)
+}

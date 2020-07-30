@@ -15,10 +15,13 @@ editor_options:
   chunk_output_type: console
 ---
 
-**NOTE:** All figure and table references apply only to this supplement, not to the the main text or other supplements.
+**NOTE:** All figure and table references apply only to this supplement, not to the the main text or other supplements, unless explicitly stated.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F, fig.align = "center")
+
+# directory to knit from: the project root, which is two directories up from here
+knitr::opts_knit$set(root.dir = "../../")
 ```
 
 ```{r packages, message = F, warning = F}
@@ -46,8 +49,8 @@ The output of this rule is shown in Figure 1.1, below. In general, most interpol
 **Figure 1.1**: Time series (1976 -- 2017) of escapement average METF by age class including observed (blue) and imputed (red) values. Vertical lines represent the break points of the time series split into thirds (14 years each); the percentages denote the percent of all values that were imputed for that time block by age/sex.
 
 ```{r, fig.width = 5, fig.height = 7}
-dat = read.csv("../../1-data-prep/b-length-data/outputs/esc-mean-length-no-interp.csv")
-dat_all = read.csv("../../1-data-prep/b-length-data/outputs/esc-mean-length.csv")
+dat = read.csv("1-data-prep/b-length-data/outputs/esc-mean-length-no-interp.csv")
+dat_all = read.csv("1-data-prep/b-length-data/outputs/esc-mean-length.csv")
 
 years = dat[,"year"]
 
@@ -57,7 +60,7 @@ dat_all = dat_all[,-1]
 ages = paste("Age", 4:7)
 
 A = c(paste(ages, "Females"), paste(ages, "Males"))
-breaks = rep(1:3, each = 14)
+breaks = c(rep(1, 15), rep(2, 14), rep(3, 15))
 mids = tapply(years, breaks, mean)
 
 line1 = mean(years[c(max(which(breaks == 1)), min(which(breaks == 2)))])
@@ -89,14 +92,12 @@ mtext(side = 2, outer = T, line = 2.5, "Average Escapement METF (mm)")
 # Analysis #2: Alternative Composition Data Weighting
 
 ```{r workspace1}
-data_dir = "../../2-model-fit/inputs/"
 model = 1  # just needed to build the data
-
-source("../../2-model-fit/1-compile-data.R")
-source("../../0-functions/id_model.R")
+source("2-model-fit/1-compile-data.R")
+source("load-functions.R")
 rm(model) # clear out the model object 
 
-out_dir = "../../../model-output/"
+out_dir = "model-output/permanent"
 out_files = dir(out_dir, full.names = T)
 
 # select the models to read in models
@@ -213,7 +214,7 @@ Although there are many other weighting schemes that we could have evaluated, we
 **Figure 2.1:** Variability in the probability of returning as a female across composition data weighting scenarios. Blue lines represent the "scale" ESS method, red lines represent the "min" method. The thick blue line is the scenario used in  main text analyses.
 
 ```{r sex-p, fig.width = 6, fig.height = 4}
-by = seq(1969, 2013)
+by = (min(years) - a_max):(max(years) - a_min)
 at_x = seq(1, length(by), 10)
 
 par(mar = c(3,3,1,1), tcl = -0.25, mgp = c(2,0.45,0))
@@ -260,7 +261,7 @@ mtext(side = 2, outer = T, line = 1, "Coefficient Value")
 
 ```{r age-p, fig.width = 5, fig.height = 7}
 a = 1; s = 1
-by = seq(1969, 2013)
+by = (min(years) - a_max):(max(years) - a_min)
 at_x = seq(1, length(by), 10)
 par(mfcol = c(4,2), mar = c(0.5,0.5,1.5,0.5), oma = c(3,4,0,2),
     tcl = -0.25, mgp = c(2,0.45,0))
@@ -574,14 +575,12 @@ legend("topleft", legend = c("First 10", "All", "Last 10"),
 # Analysis #3: Alternative Length-Fecundity Relationships
 
 ```{r workspace2}
-data_dir = "../../2-model-fit/inputs/"
 model = 1  # just needed to build the data
-
-source("../../2-model-fit/1-compile-data.R")
-source("../../0-functions/id_model.R")
+source("2-model-fit/1-compile-data.R")
+source("load-functions.R")
 rm(model) # clear out the model object 
 
-out_dir = "../../../model-output/"
+out_dir = "model-output/permanent"
 out_files = dir(out_dir, full.names = T)
 
 # select the models to read in models
@@ -699,7 +698,7 @@ years = c(
    "YK_56" = "2005"
 )
 
-meta_tab = read.csv("fecund-meta.csv", stringsAsFactors = F)
+meta_tab = read.csv("3-post-process/os-sensitivity/fecund-meta.csv", stringsAsFactors = F)
 tab = data.frame(
   abbrev = names(systems),
   dataset = letters[1:7],
@@ -976,19 +975,17 @@ mtext(side = 1, "Fecundity Data Set", line = 1.75)
 mtext(side = 3, "All Trends (Model E-ASL)", line = 0.25, font = 2)
 ```
 
-# Analysis 4: Between-Model Fit to Composition Data
+# Analysis #4: Between-Model Fit to Composition Data
 
 ```{r workspace3}
 rm(list = ls(all = T))
-data_dir = "../../2-model-fit/inputs/"
 model = 1  # just needed to build the data
 
-source("../../2-model-fit/1-compile-data.R")
-source("../../0-functions/id_model.R")
-source("../../0-functions/pp_checks.R")
+source("2-model-fit/1-compile-data.R")
+source("load-functions.R")
 rm(model) # clear out the model object 
 
-out_dir = "../../../model-output/"
+out_dir = "model-output/permanent"
 out_files = dir(out_dir, full.names = T)
 
 # reduce the set of models to only main-text models
@@ -1155,14 +1152,12 @@ Our findings in the main text equilibrium analysis illustrate that $S_{\text{MSC
 
 ```{r workspace4, fig.height = 5.5, fig.width = 7.2}
 rm(list = ls(all = T))
-data_dir = "../../2-model-fit/inputs/"
 model = 1  # just needed to build the data
-
-source("../../2-model-fit/1-compile-data.R")
-source("../../0-functions/id_model.R")
+source("2-model-fit/1-compile-data.R")
+source("load-functions.R")
 rm(model) # clear out the model object 
 
-out_dir = "../../../model-output/"
+out_dir = "model-output/permanent"
 out_files = dir(out_dir, full.names = T)
 
 # reduce the set of models to only main-text models
@@ -1303,5 +1298,3 @@ mtext(side = 4, outer = T, "% Change from Model N-0", line = 0.75)
 ```
 
 # References
-
-$S_{R_{\text{MAX}}}$

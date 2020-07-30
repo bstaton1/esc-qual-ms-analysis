@@ -12,8 +12,13 @@ editor_options:
 ---
 
 ```{r setup, include = F}
+# chunk options
 knitr::opts_chunk$set(echo = F, message = F, warning = F, fig.align = "center")
 
+# directory to knit from: the project root, which is one directory up from here
+knitr::opts_knit$set(root.dir = "../")
+
+# packages
 library(postpack)
 library(StatonMisc)
 library(magrittr)
@@ -21,16 +26,17 @@ library(knitr)
 library(kableExtra)
 library(stringr)
 library(scales)
+```
 
+```{r load-information}
 # compile the data
-data_dir = "../2-model-fit/inputs"
-source("../2-model-fit/1-compile-data.R")
+source("2-model-fit/1-compile-data.R")
 
 # load in additional functions
-source("../load-functions.R")
+source("load-functions.R")
 
 # location of output files
-out_dir = "../../model-output/"
+out_dir = "model-output"
 
 # names of output files
 post_name = paste("post-", model, ".rds", sep = "")
@@ -851,7 +857,7 @@ par(mar = c(2,2,2,2), oma = c(2,3,0,0), xaxs = "i", yaxs = "i",
     cex.axis = 1.4, cex.main = 1.4)
 # fill_col = c("grey50", "grey65", "grey80", "grey95")
 fill_col = rev(brewer_pal(palette = "Blues")(4))
-by = 1969:2013
+by = (min(years) - a_max):(max(years) - a_min)
 sex = c("Females", "Males")
 for (s in 1:2) {
   plot(1,1, type = "n", xlim = range(by), ylim = c(0,1), main = sex[s], las = 1)
@@ -885,7 +891,7 @@ par(mar = c(2,2,2,2), oma = c(2,3,0,0), xaxs = "i", yaxs = "i",
     cex.axis = 1.4, cex.main = 1.4)
 # fill_col = c("grey50", "grey65", "grey80", "grey95")
 fill_col = rev(brewer_pal(palette = "Blues")(4))
-by = 1969:2013
+by = (min(years) - a_max):(max(years) - a_min)
 sex = c("Females", "Males")
 for (s in 1:2) {
   plot(1,1, type = "n", xlim = range(by), ylim = c(0,1), main = sex[s], las = 1)
@@ -913,7 +919,7 @@ legend("center", title = "Age", legend = rev(c(4:7)), pch = 22, pt.bg = rev(fill
 ```{r mat-sex, eval = return_comp}
 pi_f = post_summ(post, "mu_pi_f")
 # p_f = summ_post(post, "p_f")
-by = 1969:2013
+by = (min(years) - a_max):(max(years) - a_min)
 par(mar = c(3.5,3.5,1,1), mgp = c(2.3, 0.4, 0), tcl = -0.25)
 plot(pi_f[3,] ~ by, type = "l", xlab = "Brood Year", ylab = "Probability of Return-as-Female", las = 1, ylim = c(0.2, 0.5))
 polygon(x = c(by, rev(by)), y = c(pi_f[4,], rev(pi_f[5,])), col = "skyblue", border = NA)
@@ -1172,7 +1178,7 @@ lines(Z_per_S[4,] ~ years, col = "skyblue3")
 lines(Z_per_S[5,] ~ years, col = "skyblue3")
 lines(Z_per_S[3,] ~ years, lwd = 2, col = "blue")
 mtext(side = 4, line = 2, "% Change From All Year Average")
-x = rep(1:3, each = 14)
+x = c(rep(1, 15), rep(2, 14), rep(3, 15))
 
 means = tapply(Z_per_S[3,], x, mean)
 segments(min(years[x == 1]), means[1], max(years[x == 1]), means[1], lty = 1, col = "black", lwd = 5)
@@ -1197,7 +1203,7 @@ lines(Z_per_fS[4,] ~ years, col = "skyblue3")
 lines(Z_per_fS[5,] ~ years, col = "skyblue3")
 lines(Z_per_fS[3,] ~ years, lwd = 2, col = "blue")
 mtext(side = 4, line = 2, "% Change From All Year Average")
-x = rep(1:3, each = 14)
+x = c(rep(1, 15), rep(2, 14), rep(3, 15))
 
 means = tapply(Z_per_fS[3,], x, mean)
 segments(min(years[x == 1]), means[1], max(years[x == 1]), means[1], lty = 1, col = "black", lwd = 5)
@@ -1352,7 +1358,7 @@ rownames(out) = NULL
 tab = out[,c("latex", "sex", "age", "early", "all", "late")]
 group = out[,"group"]
 colnames(tab)[1:3] = c("Quantity", "Sex", "Age")
-brood_years = 1969:2013
+brood_years = (min(years) - a_max):(max(years) - a_min)
 early_t = paste(paste0("'", substr(range(years[early_keep_t]), 3, 4)), collapse= "-")
 all_t = paste(paste0("'", substr(range(years[all_keep_t]), 3, 4)), collapse= "-")
 late_t = paste(paste0("'", substr(range(years[late_keep_t]), 3, 4)), collapse= "-")
@@ -1489,7 +1495,7 @@ make_table = function(v) {
 
 ```{r jags-code, eval = jags_code, comment = NA}
 edit_full_model(
-  model_lines = readLines(file.path("../2-model-fit/model-files", "full-model.txt")),
+  model_lines = readLines(file.path("2-model-fit", "model-files", "full-model.txt")),
   outfile = "", age_trend = meta$age_trend, sex_trend = meta$sex_trend, z_unit = meta$z_unit,
   keep_comments = T, keep_whitespace = T, rand_age = meta$rand_age
   )
