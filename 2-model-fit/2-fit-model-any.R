@@ -98,11 +98,11 @@ if (rand_age) jags_params = c(jags_params, c("D_sum", "p"))
 
 # set nodes to monitor diagnostics for
 diag_nodes = c("alpha", "beta", "beta_e10", "R", "delta_0", 
-               "delta_1", "gamma_0", "gamma_1", "p",
+               "delta_1", "gamma_0", "gamma_1", "pi",
                "phi", "sigma_R_white", "sigma_R0", 
                "Fcom", "Fsub", "Vtau", "Vsig", "Vtha", "Vlam", "log_mean_R0"
 )
-if (rand_age) diag_nodes = c(jags_params, "D_sum")
+if (rand_age) diag_nodes = c(jags_params, c("D_sum", "p"))
 
 ## write the model file
 # the full model - this one gets simplified based on the specific trend assumptions
