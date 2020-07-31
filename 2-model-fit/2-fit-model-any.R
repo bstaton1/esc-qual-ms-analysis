@@ -84,8 +84,7 @@ jags_params = c(
   "N_t", "S_t", "Z_t", "R", "log_mean_R0", "Hcom", "Hsub",
   
   # demographic parameters
-  "delta_0", "delta_1", "gamma_0", "gamma_1", "p", "psi",
-  "pi",
+  "delta_0", "delta_1", "gamma_0", "gamma_1", "psi", "pi",
   
   # derived quantities
   "q_sub", "q_com", "q_esc", "q_run", 
@@ -95,7 +94,7 @@ jags_params = c(
   # fishery/selectivity parameters
   "Fcom", "Fsub", "v", "Vtau", "Vsig", "Vtha", "Vlam"
 )
-if (rand_age) jags_params = c(jags_params, "D_sum")
+if (rand_age) jags_params = c(jags_params, c("D_sum", "p"))
 
 # set nodes to monitor diagnostics for
 diag_nodes = c("alpha", "beta", "beta_e10", "R", "delta_0", 
