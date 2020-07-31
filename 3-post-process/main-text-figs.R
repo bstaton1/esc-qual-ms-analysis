@@ -615,8 +615,8 @@ range(p[-1])
 
 ##### CONVERGENCE SUMMARIES #####
 
-# diag_nodes = c("alpha", "beta_e10", "^R[", "b0_sex",
-#                "b1_sex", "b0_mat", "b1_mat",
+# diag_nodes = c("alpha", "beta_e10", "^R[", "delta_0",
+#                "delta_1", "gamma_0", "gamma_1",
 #                "phi", "sigma_R_white", "sigma_R0",
 #                "Fcom", "Fsub", "^Vtau$", "^Vsig$", "^Vtha$", "^Vlam$", "log_mean_R0"
 # )
@@ -749,7 +749,7 @@ keep_mod = "E-ASL"
 
 # probability of returning as female in all years under no-sex trend models
 sapply(post_list["E-0"], function(post) {
-  post_samps = post_subset(post, "b0_sex", T)
+  post_samps = post_subset(post, "delta_0", T)
   summ(expit(post_samps), rnd = 2)
 })
 
@@ -763,14 +763,14 @@ sapply(post_list[keep_mod], function(post) {
   post_samps = post_summ(post, "mu_pi_f[45]", rnd = 2)
 })
 
-# median coefficient of b1_sex
+# median coefficient of delta_1
 sapply(post_list[keep_mod], function(post) {
-  post_samps = post_summ(post, "b1_sex", rnd = 3)
+  post_samps = post_summ(post, "delta_1", rnd = 3)
 })
 
 # odds ratio of female
 sapply(post_list[keep_mod], function(post) {
-  post_samps = post_subset(post, "b1_sex", T)
+  post_samps = post_subset(post, "delta_1", T)
   summ(exp(post_samps), rnd = 3)
 })
 
@@ -786,9 +786,9 @@ post_summ(post_list[[keep_mod]], c("mu_pi_mat[1,1,2]", "mu_pi_mat[45,1,2]"), rnd
 # male return probability at age 6 in first and last brood years
 post_summ(post_list[[keep_mod]], c("mu_pi_mat[1,3,2]", "mu_pi_mat[45,3,2]"), rnd = 2)
 
-b1_mat = post_summ(post_list[[keep_mod]], "b1_mat", rnd = 3)
-array_format(b1_mat[4,])
-array_format(b1_mat[5,])
+gamma_1 = post_summ(post_list[[keep_mod]], "gamma_1", rnd = 3)
+array_format(gamma_1[4,])
+array_format(gamma_1[5,])
 
 med_msy_all = msy["50%", "S", "unr", "all",]
 range(round((med_msy_all[E_mods | EM_mods] - med_msy_all["N-0"])/med_msy_all["N-0"], 2))

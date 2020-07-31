@@ -38,10 +38,10 @@ jags_model_code = function() {
   
   ### PART 2: MATURITY PROCESS SUBMODEL ###
   # 2a) brood-year specific sex ratio
-  b0_sex ~ dnorm(0,1e-6)
-  b1_sex ~ dnorm(0,1e-6)
+  delta_0 ~ dnorm(0,1e-6)
+  delta_1 ~ dnorm(0,1e-6)
   for (y in 1:ny) {
-    logit(mu_pi_f[y]) <- b0_sex + b1_sex * y
+    logit(mu_pi_f[y]) <- delta_0 + delta_1 * y
     R_sex[y,1] <- R[y] * mu_pi_f[y]
     R_sex[y,2] <- R[y] * (1 - mu_pi_f[y])
   }
@@ -52,19 +52,19 @@ jags_model_code = function() {
   for (s in 1:2) {
     
     # set coefs for last age
-    b0_mat[s,na] <- 0
-    b1_mat[s,na] <- 0
+    gamma_0[s,na] <- 0
+    gamma_1[s,na] <- 0
     
     # estimate coefficients for the rest of the ages
     for (a in 1:(na-1)) {
-      b0_mat[s,a] ~ dnorm(0,1e-6)
-      b1_mat[s,a] ~ dnorm(0,1e-6)
+      gamma_0[s,a] ~ dnorm(0,1e-6)
+      gamma_1[s,a] ~ dnorm(0,1e-6)
     }
     
     # create brood year-specific return-at-age/sex vectors
     for (y in 1:ny) {
       for (a in 1:na) {
-        eta_mat[y,a,s] <- exp(b0_mat[s,a] + b1_mat[s,a] * y)
+        eta_mat[y,a,s] <- exp(gamma_0[s,a] + gamma_1[s,a] * y)
         mu_pi_mat[y,a,s] <- eta_mat[y,a,s] / sum(eta_mat[y,1:na,s])
         gamma[y,a,s] <- D_sum * mu_pi_mat[y,a,s]
         g[y,a,s] ~ dgamma(gamma[y,a,s],0.1)

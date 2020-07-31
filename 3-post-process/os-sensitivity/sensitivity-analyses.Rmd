@@ -229,7 +229,7 @@ axis(side = 1, at = at_x, labels = by[at_x])
 
 ```{r sex-coef, fig.width = 8, fig.height = 4}
 par(mfrow = c(1,2), mar = c(0,1,1,1), oma = c(2.5,2,0,0), mgp = c(2,0.5,0), tcl = -0.25)
-x = sapply(post_list, function(post) post_summ(post, "b0_sex", p_summ = c(0.5, 0.25, 0.75, 0.025, 0.975)))
+x = sapply(post_list, function(post) post_summ(post, "delta_0", p_summ = c(0.5, 0.25, 0.75, 0.025, 0.975)))
 rownames(x) = c("mean", "sd", "50%", "25%", "75%", "2.5%", "97.5%")
 mp = barplot(x["50%",], names.arg = 1:length(ids),
              ylim = range(0, x[c("2.5%", "97.5%"),]) * 1.05,
@@ -241,7 +241,7 @@ axis(side = 1, at = mp, labels = F); box()
 usr = par("usr"); xdiff = diff(usr[1:2]); ydiff = diff(usr[3:4])
 text(usr[1], usr[4] - ydiff * 0.05, labels = "(a)", pos = 4, font = 2)
 
-x = sapply(post_list, function(post) post_summ(post, "b1_sex", p_summ = c(0.5, 0.25, 0.75, 0.025, 0.975)))
+x = sapply(post_list, function(post) post_summ(post, "delta_1", p_summ = c(0.5, 0.25, 0.75, 0.025, 0.975)))
 rownames(x) = c("mean", "sd", "50%", "25%", "75%", "2.5%", "97.5%")
 mp = barplot(x["50%",], names.arg = 1:length(ids), ylim = range(0, x[c("2.5%", "97.5%"),]) * 1.05, col = "white", border = "white")
 segments(mp, x["2.5%",], mp, x["97.5%",], col = col)
@@ -298,7 +298,7 @@ sex = c("Female", "Male")
 age = 4:7
 for (s in 1:2) {
   for (a in 1:4) {
-    p_sub = str_replace("b0_mat[s,a]", "s,a", paste0(s, ",", a))
+    p_sub = str_replace("gamma_0[s,a]", "s,a", paste0(s, ",", a))
     x = sapply(post_list, function(post) post_summ(post, p_sub, p_summ = c(0.5, 0.25, 0.75, 0.025, 0.975)))
     rownames(x) = c("mean", "sd", "50%", "25%", "75%", "2.5%", "97.5%")
     mp = barplot(x["50%",], names.arg = 1:length(ids),
@@ -334,7 +334,7 @@ sex = c("Female", "Male")
 age = 4:7
 for (s in 1:2) {
   for (a in 1:4) {
-    p_sub = str_replace("b1_mat[s,a]", "s,a", paste0(s, ",", a))
+    p_sub = str_replace("gamma_1[s,a]", "s,a", paste0(s, ",", a))
     x = sapply(post_list, function(post) post_summ(post, p_sub, p_summ = c(0.5, 0.25, 0.75, 0.025, 0.975)))
     rownames(x) = c("mean", "sd", "50%", "25%", "75%", "2.5%", "97.5%")
     mp = barplot(x["50%",], names.arg = 1:length(ids),
