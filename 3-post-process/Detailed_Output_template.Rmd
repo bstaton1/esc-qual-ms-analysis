@@ -107,7 +107,7 @@ math_key = c(
   "D_sum"          = "$D$",
   "Fcom"           = "$F_{\\text{com},t}$",
   "Fsub"           = "$F_{\\text{sub},t}$",
-  "p"              = "$p$"
+  "pi"              = "$\\pi$"
 )
 ```
 
@@ -245,9 +245,6 @@ kable(round(tab), caption = "Model fit statistics.", row.names = F) %>%
 ```{r Rhat-info, eval = mcmc_info}
 Rhat = meta$R.hat
 params = rownames(Rhat)
-if (!meta$rand_age) {
-  params = params[-which(params %in% c("p", "D_sum"))]
-}
 Rhat = Rhat[params,]
 Rhat = round(Rhat, 3)
 
@@ -270,9 +267,6 @@ kable(
 ```{r ess-info, eval = mcmc_info}
 ess = meta$n.eff
 params = rownames(ess)
-if (!meta$rand_age) {
-  params = params[-which(params %in% c("p", "D_sum"))]
-}
 params = params[-which(params == "beta")]
 ess = ess[params,]
 ess = apply(round(ess, -2), 2, prettify)
@@ -1164,7 +1158,7 @@ legend("topright", legend = c("Z/max(Z)", "S/max(S)"),
 
 `r cntr = up_cntr("Section", cntr, per_cap); create_label("Section", cntr, T, level = 1, sub = "", subb = "", text = "Per Capita Reproductive Potential", tabset = T, per_cap)`
 
-`r if (per_cap) "Black bars show the mean of the posterior medians for each third of the time series (14 years each). Black dashed line shows the mean of the posterior medians across all years; the secondary _y_-axis shows the percent change from this mean."`
+`r if (per_cap) "Black bars show the mean of the posterior medians for each third of the time series (~14 years each). Black dashed line shows the mean of the posterior medians across all years; the secondary _y_-axis shows the percent change from this mean."`
 
 `r cntr = up_cntr("Figure", cntr, per_cap); create_label("Figure", cntr, T, level = 2, sub = ifelse(meta$z_unit == "fish_count", "", "a"), subb = "", text = "Per Spawner", tabset = F, per_cap)`
 
@@ -1234,9 +1228,9 @@ param_names = list(
     ifelse(meta$z_unit == "fish_count","beta_e5", "beta_e10"),
     "sigma_R", "phi", "^mean_R0"
     ),
-  age_f = c("b._mat[1,"),
-  age_m = c("b._mat[2,"),
-  sex = c("b._sex"),
+  age_f = c("gamma_.[1,"),
+  age_m = c("gamma_.[2,"),
+  sex = c("delta_."),
   sel = c("^V...$")
 )
 
