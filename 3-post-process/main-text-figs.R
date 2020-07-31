@@ -96,10 +96,10 @@ summ_v = function(keep_t, keep_sex, keep_vuln) {
   cbind(mean = out["mean",], lwr = out["2.5%",], upr = out["97.5%",])
 }
 
-v_f_unr = abind(early = summ_v(early_t, 1, 1), all =  summ_v(all_t, 1, 1), late = summ_v(late_t, 1, 1), along = 3)
-v_m_unr = abind(early = summ_v(early_t, 2, 1), all =  summ_v(all_t, 2, 1), late = summ_v(late_t, 2, 1), along = 3)
-v_f_res = abind(early = summ_v(early_t, 1, 2), all =  summ_v(all_t, 1, 2), late = summ_v(late_t, 1, 2), along = 3)
-v_m_res = abind(early = summ_v(early_t, 2, 2), all =  summ_v(all_t, 2, 2), late = summ_v(late_t, 2, 2), along = 3)
+v_f_mesh8 = abind(early = summ_v(early_t, 1, 1), all =  summ_v(all_t, 1, 1), late = summ_v(late_t, 1, 1), along = 3)
+v_m_mesh8 = abind(early = summ_v(early_t, 2, 1), all =  summ_v(all_t, 2, 1), late = summ_v(late_t, 2, 1), along = 3)
+v_f_mesh6 = abind(early = summ_v(early_t, 1, 2), all =  summ_v(all_t, 1, 2), late = summ_v(late_t, 1, 2), along = 3)
+v_m_mesh6 = abind(early = summ_v(early_t, 2, 2), all =  summ_v(all_t, 2, 2), late = summ_v(late_t, 2, 2), along = 3)
 
 x_t = seq(0.15,0.05, -0.05)
 xf = a_min:a_max - 0.01
@@ -112,8 +112,8 @@ plot(1,1, ylim = c(0,1), xlim = range(min(xf) - max(x_t), max(xm) + max(x_t)),
 col = c("black", "grey", "white")
 
 for (t in (1:3)) {
-  lines(xf - x_t[t], v_f_unr[,"mean",t], type = "o", pch = 21, bg = col[t], cex = 1.4)
-  lines(xm + rev(x_t)[t], v_m_unr[,"mean",t], type = "o", pch = 23, bg = col[t], lty = 2, cex = 1.4)
+  lines(xf - x_t[t], v_f_mesh8[,"mean",t], type = "o", pch = 21, bg = col[t], cex = 1.4)
+  lines(xm + rev(x_t)[t], v_m_mesh8[,"mean",t], type = "o", pch = 23, bg = col[t], lty = 2, cex = 1.4)
 }
 
 legend("bottomright", c("Female", "Male", "First 10 Yrs", "All Yrs", "Last 10 Yrs"), bty = "n", x.intersp = 0.5, seg.len = 3,
@@ -128,8 +128,8 @@ plot(1,1, ylim = c(0,1), xlim = range(min(xf) - max(x_t), max(xm) + max(x_t)),
      col = "red", pch = 16, type = "o",xaxt = "n", las = 2)
 
 for (t in (1:3)) {
-  lines(xf - x_t[t], v_f_res[,"mean",t], type = "o", pch = 21, bg = col[t], cex = 1.4)
-  lines(xm + rev(x_t)[t], v_m_res[,"mean",t], type = "o", pch = 23, bg = col[t], lty = 2, cex = 1.4)
+  lines(xf - x_t[t], v_f_mesh6[,"mean",t], type = "o", pch = 21, bg = col[t], cex = 1.4)
+  lines(xm + rev(x_t)[t], v_m_mesh6[,"mean",t], type = "o", pch = 23, bg = col[t], lty = 2, cex = 1.4)
 }
 
 axis(side = 1, at = 4:7, labels = 4:7)
@@ -202,13 +202,13 @@ points(v_ssm[3,at_rlm2] ~ colMeans(rlm[keep_t,,1,2]),
 
 lines(v_ssm[4,] ~ rlm_seq, lwd = 1, lty = 1, col = "grey")
 lines(v_ssm[5,] ~ rlm_seq, lwd = 1, lty = 1, col = "grey")
-unr_perim = 8 * 2* 25.4  
-res_perim = 6 * 2 * 25.4
+mesh8_perim = 8 * 2* 25.4  
+mesh6_perim = 6 * 2 * 25.4
 
 axis_i = seq(1, length(rlm_seq), 150)
 
-axis(side = 1, at = rlm_seq[axis_i], labels = round(rlm_seq[axis_i] * unr_perim, -1))
-axis(side = 3, at = rlm_seq[axis_i], labels = round(rlm_seq[axis_i] * res_perim, -1), col.axis = "grey60", col.ticks = "grey60")
+axis(side = 1, at = rlm_seq[axis_i], labels = round(rlm_seq[axis_i] * mesh8_perim, -1))
+axis(side = 3, at = rlm_seq[axis_i], labels = round(rlm_seq[axis_i] * mesh6_perim, -1), col.axis = "grey60", col.ticks = "grey60")
 mtext(side = 3, "METF (mm) w/6 in. Mesh", line = 1, col = "grey60", font = 2, cex = 0.8)
 segments(par("usr")[1], par("usr")[4], par("usr")[2], par("usr")[4],col = "grey60", xpd = T)
 mtext(side = 1, "METF (mm) w/8 in. Mesh", line = 1, font = 2, cex = 0.8)
@@ -496,7 +496,7 @@ round((meds[3,"E-A"] - meds[1,"E-A"])/meds[1,"E-A"], 2)
 ##### MSY FIGURE #####
 
 # function to create the plot comparing time periods and models for a given eq. quantity and vuln type
-msy_plot = function(keep_val = "S", keep_vuln = "unr", keep_mods, xticklabs = F, legend = F, letter) {
+msy_plot = function(keep_val = "S", keep_vuln = "mesh8", keep_mods, xticklabs = F, legend = F, letter) {
   # extract the equilibrium info requested
   keep = msy[,keep_val,keep_vuln,,keep_mods]
   ylwr = ifelse(keep_val == "S", 40000, 75000)
@@ -570,11 +570,11 @@ msy_plot = function(keep_val = "S", keep_vuln = "unr", keep_mods, xticklabs = F,
   # draw the label identifying each plot
   rect(usr[2] - xdiff * 0.23, usr[4] - ydiff * 0.22, usr[2] - xdiff * 0.17, usr[4], border = "white", col = "white")
   text(x = usr[2] + xdiff * 0.025, y = usr[4] - ydiff * 0.12,
-       labels = ifelse(keep_vuln == "unr", paste0("(", letter, ")\n8 in. mesh"),
+       labels = ifelse(keep_vuln == "mesh8", paste0("(", letter, ")\n8 in. mesh"),
                        ifelse(keep_vuln == "flat", paste0("(", letter, ")\nNo Selectivity"), paste0("(", letter, ")\n6 in. mesh"))), pos = 2, cex = 0.7, font = 2)
   
   # add a main title over top panel
-  mtext(side = 3, ifelse(keep_vuln == "unr", latex2exp::TeX(paste0(keep_val, "_{MSC}")), ""), line = 0, font = 2)
+  mtext(side = 3, ifelse(keep_vuln == "mesh8", latex2exp::TeX(paste0(keep_val, "_{MSC}")), ""), line = 0, font = 2)
   
   # draw a border
   box()
@@ -592,19 +592,19 @@ keep_mods = c(
 file_device(file.path(fig_dir, paste0("msc.", file_type)), h = 5.5, w = 7.2)
 par(mfcol = c(3,2), xaxs = "i", yaxs = "i", cex = 1, lend = "square", mar = c(0,1.75,0.75,2.25),
     oma = c(3.5,0.75,0.5,2), tcl = -0.25, mgp = c(2,0.35,0), cex.axis = 0.9)
-msy_plot("S", "unr", keep_mods, legend = T, letter = "a")
+msy_plot("S", "mesh8", keep_mods, legend = T, letter = "a")
 msy_plot("S", "flat", keep_mods, legend = F, letter = "c")
-msy_plot("S", "res", keep_mods, xticklabs = T, letter = "e"); par(mar = c(0,2.25,0.75,1.75))
-msy_plot("H", "unr", keep_mods, legend = F, letter = "b")
+msy_plot("S", "mesh6", keep_mods, xticklabs = T, letter = "e"); par(mar = c(0,2.25,0.75,1.75))
+msy_plot("H", "mesh8", keep_mods, legend = F, letter = "b")
 msy_plot("H", "flat", keep_mods, legend = F, letter = "d")
-msy_plot("H", "res", keep_mods, xticklabs = T, letter = "f")
+msy_plot("H", "mesh6", keep_mods, xticklabs = T, letter = "f")
 mtext(side = 2, outer = T, "Escapement or Harvest (1000s)", line = -0.2)
 mtext(side = 4, outer = T, "% Change from Model N-0", line = 0.75)
 dev.off()
 
 
 keep_val = "H"
-keep_vuln = "unr"
+keep_vuln = "mesh8"
 keep_mods = c("N-0", "E-0", "EM-0", "E-A", "E-S", "E-L", "E-AS", "E-AL", "E-SL", "E-ASL", "EM-ASL")
 
 x = msy["50%", keep_val, keep_vuln, "all", keep_mods]
@@ -734,16 +734,16 @@ range(p[-1])
 tau_est = mean(sapply(post_list, function(post) post_summ(post, "^Vtau$", rnd = 2)["mean",]))
 Ytau_est = mean(sapply(post_list, function(post) post_summ(post, "^Vtau_yukon$", rnd = 2)["mean",]))
 
-unr_perim = 8 * 2 * 25.4  
-res_perim = 6 * 2 * 25.4
+mesh8_perim = 8 * 2 * 25.4  
+mesh6_perim = 6 * 2 * 25.4
 
-kusko_unr = tau_est * unr_perim
-kusko_res = tau_est * res_perim
-yukon_unr = Ytau_est * unr_perim
-yukon_res = Ytau_est * res_perim
+kusko_mesh8 = tau_est * mesh8_perim
+kusko_mesh6 = tau_est * mesh6_perim
+yukon_mesh8 = Ytau_est * mesh8_perim
+yukon_mesh6 = Ytau_est * mesh6_perim
 
-kusko_unr - yukon_unr
-kusko_res - yukon_res
+kusko_mesh8 - yukon_mesh8
+kusko_mesh6 - yukon_mesh6
 
 keep_mod = "E-ASL"
 
@@ -790,23 +790,23 @@ gamma_1 = post_summ(post_list[[keep_mod]], "gamma_1", rnd = 3)
 array_format(gamma_1[4,])
 array_format(gamma_1[5,])
 
-med_msy_all = msy["50%", "S", "unr", "all",]
+med_msy_all = msy["50%", "S", "mesh8", "all",]
 range(round((med_msy_all[E_mods | EM_mods] - med_msy_all["N-0"])/med_msy_all["N-0"], 2))
 
-med_msy_all = msy["50%", "H", "unr", "all",]
+med_msy_all = msy["50%", "H", "mesh8", "all",]
 range(round((med_msy_all[E_mods | EM_mods] - med_msy_all["N-0"])/med_msy_all["N-0"], 2))
 
-med_msy = msy["50%", "H", "unr", "late",]
+med_msy = msy["50%", "H", "mesh8", "late",]
 range(round((med_msy[E_mods | EM_mods] - med_msy["N-0"])/med_msy["N-0"], 2))
 
-med_msy = msy["50%", "S", "res", "all",]
+med_msy = msy["50%", "S", "mesh6", "all",]
 range(round((med_msy[E_mods | EM_mods] - med_msy["N-0"])/med_msy["N-0"], 2))
 
-med_msy = msy["50%", "H", "res", "all",]
+med_msy = msy["50%", "H", "mesh6", "all",]
 range(round((med_msy[E_mods | EM_mods] - med_msy["N-0"])/med_msy["N-0"], 2))
 
 
-med_msy_early = msy["50%", "H", "res", "early",]
-med_msy_late = msy["50%", "H", "res", "late",]
+med_msy_early = msy["50%", "H", "mesh6", "early",]
+med_msy_late = msy["50%", "H", "mesh6", "late",]
 
 round(((med_msy_late - med_msy_early)/med_msy_early) * 100)

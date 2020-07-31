@@ -14,7 +14,7 @@ yield = function(log_F_max, i, post.samp, vuln, include_sex_ratio = F) {
   # extract and name the relevant age/sex-structured quantities
   pi_as = unname(post.samp[i,stringr::str_detect(cn, "pi")])
   z_as = unname(post.samp[i,stringr::str_detect(cn, "z")])
-  if (vuln %in% c("unr", "res")) {
+  if (vuln %in% c("mesh8", "mesh6")) {
     vuln_as = unname(post.samp[i,stringr::str_detect(cn, vuln)])
   } else {
     vuln_as = rep(1, 8)
@@ -81,14 +81,14 @@ eq_search = function(post.samp, q, sex_penalty = F, silent = F) {
   nms = names(yield(
     log_F_max = log(1), 
     i = 1, post.samp = post.samp,
-    vuln = "unr", include_sex_ratio = sex_penalty
+    vuln = "mesh8", include_sex_ratio = sex_penalty
   ))
   
   # build a container for output: [sample,quantity,vuln]
   out = array(NA, dim = c(n_samp, length(nms), 3))
   
   # the vuln scenarios
-  v_scenarios = c("unr", "res", "flat")
+  v_scenarios = c("mesh8", "mesh6", "flat")
   
   # loop over scenarios and samples
   for (v in 1:length(v_scenarios)) {

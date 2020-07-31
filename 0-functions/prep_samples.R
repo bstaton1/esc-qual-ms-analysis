@@ -13,8 +13,8 @@ prep_samples = function(post, keep_t = NULL, keep_y = NULL, silent = F) {
   as = c(paste("f", a_min:a_max, sep = ""), paste("m", a_min:a_max, sep = ""))
   
   # indicators for which indices correspond to which sexes/gears
-  unr = 1
-  res = 2
+  mesh8 = 1
+  mesh6 = 2
   female = 1
   male = 2
   
@@ -29,7 +29,7 @@ prep_samples = function(post, keep_t = NULL, keep_y = NULL, silent = F) {
     if (!silent) StatonMisc::progress_updater(i, n_samp, grp = "Mean Vulnerability", indent = 5)
     
     v_out = NULL
-    for (mesh in c(unr, res)) {
+    for (mesh in c(mesh8, mesh6)) {
       for (sex in c(female, male)) {
         for (age in 1:4) {
           keep_columns = paste("v[", keep_t, ",", age, ",", sex, ",", mesh, "]", sep = "")
@@ -42,7 +42,7 @@ prep_samples = function(post, keep_t = NULL, keep_y = NULL, silent = F) {
     v_out[((na*2)+1):(na*4)] = v_out[((na*2)+1):(na*4)]/max(v_out[((na*2)+1):(na*4)]) 
     v_out
   }))
-  colnames(mean_v) = c(paste(as, "v_unr", sep = "_"), paste(as, "v_res", sep = "_"))
+  colnames(mean_v) = c(paste(as, "v_mesh8", sep = "_"), paste(as, "v_mesh6", sep = "_"))
   
   # extract the probability of maturation at age and sex
   pi = postpack::post_subset(post, "pi", T)

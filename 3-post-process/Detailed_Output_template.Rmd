@@ -412,7 +412,7 @@ for (as in 1:8) {
 
 `r create_label("Figure", cntr, F, level = 4, sub = "a", subb = "2", text = "Commercial", tabset = F, fit)`
 
-`r if (fit) "_Vertical dashed lines represent the year the fishery switched from unrestricted mesh to restricted mesh._"`
+`r if (fit) "_Vertical dashed lines represent the year the fishery switched from mostly 8 inch mesh to mostly 6 inch mesh._"`
 
 ```{r com-age-sex-fit, fig.height = 8, fig.width = 6, eval = fit}
 q_fit = array_format(post_summ(post, "q_com")[3,])
@@ -437,7 +437,7 @@ for (as in 1:8) {
 
 `r create_label("Figure", cntr, F, level = 4, sub = "a", subb = "3", text = "Subsistence", tabset = F, fit)`
 
-`r if (fit) "_Vertical dashed lines represent the year the fishery switched from unrestricted mesh to restricted mesh._"`
+`r if (fit) "_Vertical dashed lines represent the year the fishery switched from mostly 8 inch mesh to mostly 6 inch mesh._"`
 
 ```{r sub-age-sex-fit, fig.height = 8, fig.width = 6, eval = fit}
 q_fit = array_format(post_summ(post, "q_sub")[3,])
@@ -482,7 +482,7 @@ points(pf_esc ~ years, pch = 21, cex = 1.2, col = "red", bg = alpha("salmon", 0.
 
 `r create_label("Figure", cntr, F, level = 4, sub = "b", subb = "2", text = "Commercial", tabset = F, fit)`
 
-`r if (fit) "_Vertical dashed line represents the year the fishery switched from unrestricted mesh to restricted mesh._"`
+`r if (fit) "_Vertical dashed lines represent the year the fishery switched from mostly 8 inch mesh to mostly 6 inch mesh._"`
 
 ```{r com-sex-fit, eval = fit}
 pf_fit_com = rowSums(array_format(post_summ(post, "q_com")[3,])[,1:4])
@@ -501,7 +501,7 @@ abline(v = years[min(which(com_mesh == 2))] - 0.5, lty = 2)
 
 `r create_label("Figure", cntr, F, level = 4, sub = "b", subb = "3", text = "Subsistence", tabset = F, fit)`
 
-`r if (fit) "_Vertical dashed line represents the year the fishery switched from unrestricted mesh to restricted mesh._"`
+`r if (fit) "_Vertical dashed lines represent the year the fishery switched from mostly 8 inch mesh to mostly 6 inch mesh._"`
 
 ```{r sub-sex-fit, eval = fit}
 pf_fit_sub = rowSums(array_format(post_summ(post, "q_sub")[3,])[,1:4])
@@ -699,22 +699,22 @@ lines(V_med ~ rlm_seq, col = "blue", lwd = 4)
 
 v = array_format(post_summ(post, "v[")[3,])
 
-unr_fit = apply(v[,,,1], 3, function(x) apply(x, 2, mean))
-unr_lwr = apply(v[,,,1], 3, function(x) apply(x, 2, function(z) quantile(z, 0.025)))
-unr_upr = apply(v[,,,1], 3, function(x) apply(x, 2, function(z) quantile(z, 0.975)))
+mesh8_fit = apply(v[,,,1], 3, function(x) apply(x, 2, mean))
+mesh8_lwr = apply(v[,,,1], 3, function(x) apply(x, 2, function(z) quantile(z, 0.025)))
+mesh8_upr = apply(v[,,,1], 3, function(x) apply(x, 2, function(z) quantile(z, 0.975)))
 v = array_format(post_summ(post, "v[")[3,])
 
 xf = a_min:a_max - 0.05
 xm = a_min:a_max + 0.05
 
 par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
-plot(unr_fit[,1] ~ xf, ylim = c(0,1), xlim = range(xf, xm),
+plot(mesh8_fit[,1] ~ xf, ylim = c(0,1), xlim = range(xf, xm),
      type = "n", xaxt = "n", las = 2,
      xlab = "Age", ylab = "Selectivity", cex = 1.2)
-segments(xf, unr_lwr[,1], xf, unr_upr[,1], col = "red")
-segments(xm, unr_lwr[,2], xm, unr_upr[,2], col = "blue")
-points(unr_fit[,2] ~ xm,  col = "blue", bg = "skyblue", pch = 21, type = "o", cex = 1.2)
-points(unr_fit[,1] ~ xf,  col = "red", bg = "salmon", pch = 21, type = "o", cex = 1.2)
+segments(xf, mesh8_lwr[,1], xf, mesh8_upr[,1], col = "red")
+segments(xm, mesh8_lwr[,2], xm, mesh8_upr[,2], col = "blue")
+points(mesh8_fit[,2] ~ xm,  col = "blue", bg = "skyblue", pch = 21, type = "o", cex = 1.2)
+points(mesh8_fit[,1] ~ xf,  col = "red", bg = "salmon", pch = 21, type = "o", cex = 1.2)
 legend("bottomright", legend = c("Males", "Females"), pch = 21,
        col = c("blue", "red"), pt.bg = c("skyblue", "salmon"), lty = 1, pt.cex = 1.2, cex = 0.8)
 axis(side = 1, at = 4:7, labels = 4:7)
@@ -727,22 +727,22 @@ axis(side = 1, at = 4:7, labels = 4:7)
 
 v = array_format(post_summ(post, "v[")[3,])
 
-res_fit = apply(v[,,,2], 3, function(x) apply(x, 2, mean))
-res_lwr = apply(v[,,,2], 3, function(x) apply(x, 2, function(z) quantile(z, 0.025)))
-res_upr = apply(v[,,,2], 3, function(x) apply(x, 2, function(z) quantile(z, 0.975)))
+mesh6_fit = apply(v[,,,2], 3, function(x) apply(x, 2, mean))
+mesh6_lwr = apply(v[,,,2], 3, function(x) apply(x, 2, function(z) quantile(z, 0.025)))
+mesh6_upr = apply(v[,,,2], 3, function(x) apply(x, 2, function(z) quantile(z, 0.975)))
 
 xf = a_min:a_max - 0.05
 xm = a_min:a_max + 0.05
 
 
 par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
-plot(res_fit[,1] ~ xf, ylim = c(0,1), xlim = range(xf, xm),
+plot(mesh6_fit[,1] ~ xf, ylim = c(0,1), xlim = range(xf, xm),
      type = "n", xaxt = "n", las = 2,
      xlab = "Age", ylab = "Selectivity", cex = 1.2)
-segments(xf, res_lwr[,1], xf, res_upr[,1], col = "red")
-segments(xm, res_lwr[,2], xm, res_upr[,2], col = "blue")
-points(res_fit[,2] ~ xm,  col = "blue", bg = "skyblue", pch = 21, type = "o", cex = 1.2)
-points(res_fit[,1] ~ xf,  col = "red", bg = "salmon", pch = 21, type = "o", cex = 1.2)
+segments(xf, mesh6_lwr[,1], xf, mesh6_upr[,1], col = "red")
+segments(xm, mesh6_lwr[,2], xm, mesh6_upr[,2], col = "blue")
+points(mesh6_fit[,2] ~ xm,  col = "blue", bg = "skyblue", pch = 21, type = "o", cex = 1.2)
+points(mesh6_fit[,1] ~ xf,  col = "red", bg = "salmon", pch = 21, type = "o", cex = 1.2)
 legend("bottomright", legend = c("Males", "Females"), pch = 21,
        col = c("blue", "red"), pt.bg = c("skyblue", "salmon"), lty = 1, pt.cex = 1.2, cex = 0.8)
 axis(side = 1, at = 4:7, labels = 4:7)
@@ -1342,9 +1342,9 @@ build_name = function(x) {
   j_key = c(paste0("f", a_min:a_max), paste0("m", a_min:a_max))
   j_num = 1:8
   j = unname(sapply(x, function(j) j_num[str_detect(j_key, str_extract(j, "^[:alnum:]+"))]))
-  m = ifelse(str_detect(x, "v_unr"), ",1", 
-             ifelse(str_detect(x, "v_res"), ",2", ""))
-  group = ifelse(m == ",1", "v_unr", ifelse(m == ",2", "v_res", group))
+  m = ifelse(str_detect(x, "v_mesh8"), ",1", 
+             ifelse(str_detect(x, "v_mesh6"), ",2", ""))
+  group = ifelse(m == ",1", "v_mesh8", ifelse(m == ",2", "v_mesh6", group))
   data.frame(
     group = group,
     latex = paste0("$", symbol, "_{", "i,", j, m, "}$"),
@@ -1403,11 +1403,11 @@ make_table = function(grp) {
 
 `r create_label("Table", cntr, F, level = 4, sub = "c", subb = "1", text = "8-inch", tabset = F, big_tables)`
 
-`r if (big_tables) make_table("v_unr")`
+`r if (big_tables) make_table("v_mesh8")`
 
 `r create_label("Table", cntr, F, level = 4, sub = "c", subb = "2", text = "6-inch", tabset = F, big_tables)`
 
-`r if (big_tables) make_table("v_res")`
+`r if (big_tables) make_table("v_mesh6")`
 
 ```{r msc-table-prep, eval = big_tables}
 make_table = function(v) {
@@ -1439,11 +1439,11 @@ make_table = function(v) {
 
 `r create_label("Table", cntr, F, level = 4, sub = "d", subb = "1", text = "8-inch", tabset = F, big_tables)`
 
-`r if (big_tables) make_table("unr")`
+`r if (big_tables) make_table("mesh8")`
 
 `r create_label("Table", cntr, F, level = 4, sub = "d", subb = "2", text = "6-inch", tabset = F, big_tables)`
 
-`r if (big_tables) make_table("res")`
+`r if (big_tables) make_table("mesh6")`
 
 `r create_label("Table", cntr, F, level = 4, sub = "d", subb = "3", text = "Flat", tabset = F, big_tables)`
 
@@ -1479,11 +1479,11 @@ make_table = function(v) {
 
 `r create_label("Table", cntr, F, level = 4, sub = "e", subb = "1", text = "8-inch", tabset = F, big_tables)`
 
-`r if (big_tables) make_table("unr")`
+`r if (big_tables) make_table("mesh8")`
 
 `r create_label("Table", cntr, F, level = 4, sub = "e", subb = "2", text = "6-inch", tabset = F, big_tables)`
 
-`r if (big_tables) make_table("res")`
+`r if (big_tables) make_table("mesh6")`
 
 `r create_label("Table", cntr, F, level = 4, sub = "e", subb = "3", text = "Flat", tabset = F, big_tables)`
 
