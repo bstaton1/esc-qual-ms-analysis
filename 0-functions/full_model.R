@@ -41,9 +41,9 @@ jags_model_code = function() {
   delta_0 ~ dnorm(0,1e-6)
   delta_1 ~ dnorm(0,1e-6)
   for (y in 1:ny) {
-    logit(mu_pi_f[y]) <- delta_0 + delta_1 * y
-    R_sex[y,1] <- R[y] * mu_pi_f[y]
-    R_sex[y,2] <- R[y] * (1 - mu_pi_f[y])
+    logit(psi[y]) <- delta_0 + delta_1 * y
+    R_sex[y,1] <- R[y] * psi[y]
+    R_sex[y,2] <- R[y] * (1 - psi[y])
   }
   
   # 2b) brood year-specific return-at-age schedules by sex, with separate estimated time trends for each sex
@@ -65,8 +65,8 @@ jags_model_code = function() {
     for (y in 1:ny) {
       for (a in 1:na) {
         eta_mat[y,a,s] <- exp(gamma_0[s,a] + gamma_1[s,a] * y)
-        mu_pi_mat[y,a,s] <- eta_mat[y,a,s] / sum(eta_mat[y,1:na,s])
-        gamma[y,a,s] <- D_sum * mu_pi_mat[y,a,s]
+        pi[y,a,s] <- eta_mat[y,a,s] / sum(eta_mat[y,1:na,s])
+        gamma[y,a,s] <- D_sum * pi[y,a,s]
         g[y,a,s] ~ dgamma(gamma[y,a,s],0.1)
         p[y,a,s] <- g[y,a,s]/sum(g[y,1:na,s])
       }

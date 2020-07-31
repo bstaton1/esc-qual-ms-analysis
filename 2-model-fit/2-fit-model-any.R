@@ -84,8 +84,8 @@ jags_params = c(
   "N_t", "S_t", "Z_t", "R", "log_mean_R0", "Hcom", "Hsub",
   
   # demographic parameters
-  "delta_0", "delta_1", "gamma_0", "gamma_1", "p", "mu_pi_f",
-  "mu_pi_mat",
+  "delta_0", "delta_1", "gamma_0", "gamma_1", "p", "psi",
+  "pi",
   
   # derived quantities
   "q_sub", "q_com", "q_esc", "q_run", 

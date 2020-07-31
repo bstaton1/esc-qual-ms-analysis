@@ -272,7 +272,7 @@ mtext(side = 2, outer = T, line = 3, "Proportional Contribution")
 dev.off()
 
 ##### RETURN AT AGE PLOT #####
-pi = array_format(post_summ(post_list[["E-ASL"]], "mu_pi_mat")[3,])
+pi = array_format(post_summ(post_list[["E-ASL"]], "pi")[3,])
 
 ppi = 600
 file_device(file.path(fig_dir, paste0("pi-trends.", file_type)), h = 4, w = 7.2)
@@ -755,12 +755,12 @@ sapply(post_list["E-0"], function(post) {
 
 # probability of returning as female in first year under sex trend models
 sapply(post_list[keep_mod], function(post) {
-  post_samps = post_summ(post, "mu_pi_f[1]", rnd = 2)
+  post_samps = post_summ(post, "psi[1]", rnd = 2)
 })
 
 # probability of returning as female in last year under sex trend models
 sapply(post_list[keep_mod], function(post) {
-  post_samps = post_summ(post, "mu_pi_f[45]", rnd = 2)
+  post_samps = post_summ(post, "psi[45]", rnd = 2)
 })
 
 # median coefficient of delta_1
@@ -775,16 +775,16 @@ sapply(post_list[keep_mod], function(post) {
 })
 
 # female return probability at age 6 in first and last brood years
-post_summ(post_list[[keep_mod]], c("mu_pi_mat[1,3,1]", "mu_pi_mat[45,3,1]"), rnd = 2)
+post_summ(post_list[[keep_mod]], c("pi[1,3,1]", "pi[45,3,1]"), rnd = 2)
 
 # female return probability at age 5 in first and last brood years
-post_summ(post_list[[keep_mod]], c("mu_pi_mat[1,2,1]", "mu_pi_mat[45,2,1]"), rnd = 2)
+post_summ(post_list[[keep_mod]], c("pi[1,2,1]", "pi[45,2,1]"), rnd = 2)
 
 # male return probability at age 4 in first and last brood years
-post_summ(post_list[[keep_mod]], c("mu_pi_mat[1,1,2]", "mu_pi_mat[45,1,2]"), rnd = 2)
+post_summ(post_list[[keep_mod]], c("pi[1,1,2]", "pi[45,1,2]"), rnd = 2)
 
 # male return probability at age 6 in first and last brood years
-post_summ(post_list[[keep_mod]], c("mu_pi_mat[1,3,2]", "mu_pi_mat[45,3,2]"), rnd = 2)
+post_summ(post_list[[keep_mod]], c("pi[1,3,2]", "pi[45,3,2]"), rnd = 2)
 
 gamma_1 = post_summ(post_list[[keep_mod]], "gamma_1", rnd = 3)
 array_format(gamma_1[4,])

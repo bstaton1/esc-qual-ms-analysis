@@ -50,12 +50,12 @@ edit_full_model = function(model_lines, outfile, z_unit, sex_trend, age_trend, r
   
   # handle brood year random age variability
   # cuts the random link at the p node assignment
-  # if rand_age == T: p[y,,] are dirichlet distributed around mu_pi_mat
-  # if rand_age == F: p[y,,] are are set to mu_pi_mat[y,]
+  # if rand_age == T: p[y,,] are dirichlet distributed around pi
+  # if rand_age == F: p[y,,] are are set to pi[y,]
   if (!rand_age) {
     match = model_lines[stringr::str_detect(model_lines, "p\\[y,a,s\\] <- ")]
     white_space = unlist(stringr::str_extract_all(match, "  +"))
-    replace = "p[y,a,s] <- mu_pi_mat[y,a,s]"
+    replace = "p[y,a,s] <- pi[y,a,s]"
     model_lines[which(model_lines == match)] = paste(white_space, replace, sep = "")
     
     # remove D_scale, D_sum, gamma, and g

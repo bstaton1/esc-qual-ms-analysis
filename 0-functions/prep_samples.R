@@ -45,8 +45,8 @@ prep_samples = function(post, keep_t = NULL, keep_y = NULL, silent = F) {
   colnames(mean_v) = c(paste(as, "v_unr", sep = "_"), paste(as, "v_res", sep = "_"))
   
   # extract the probability of maturation at age and sex
-  mu_pi_mat = postpack::post_subset(post, "mu_pi_mat", T)
-  mu_pi_f = postpack::post_subset(post, "mu_pi_f", T)
+  pi = postpack::post_subset(post, "pi", T)
+  psi = postpack::post_subset(post, "psi", T)
   
   mean_pi = t(sapply(1:n_samp, function(i) {
     if (!silent) StatonMisc::progress_updater(i, n_samp, grp = "Mean Maturity", indent = 5)
@@ -56,15 +56,15 @@ prep_samples = function(post, keep_t = NULL, keep_y = NULL, silent = F) {
     pi_mat = matrix(NA, na, 2)
     for (sex in c(female, male)) {
       for (age in 1:4) {
-        keep_columns = paste("mu_pi_mat[", keep_y, ",", age, ",", sex, "]", sep = "")
+        keep_columns = paste("pi[", keep_y, ",", age, ",", sex, "]", sep = "")
         
-        pi_mat[age,sex] = mean(mu_pi_mat[i,keep_columns])
+        pi_mat[age,sex] = mean(pi[i,keep_columns])
       }
     }
     
-    pi_f = mean(mu_pi_f[i,keep_y])
+    psi = mean(psi[i,keep_y])
     
-    nRs = c(pi_f, 1 - pi_f) * nR
+    nRs = c(psi, 1 - psi) * nR
     nRsa = t(apply(pi_mat, 1, function(x) x * nRs))
     pRsa = as.numeric(nRsa/sum(nRsa))
     pRsa

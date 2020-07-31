@@ -218,7 +218,7 @@ by = (min(years) - a_max):(max(years) - a_min)
 at_x = seq(1, length(by), 10)
 
 par(mar = c(3,3,1,1), tcl = -0.25, mgp = c(2,0.45,0))
-x = sapply(post_list, function(post) post_summ(post, "mu_pi_f")[3,])
+x = sapply(post_list, function(post) post_summ(post, "psi")[3,])
 matplot(x, type = "l", ylim = c(0.25, 0.45), 
         lty = lty, col = col, lwd = lwd, xaxt = "n",
         xlab = "Brood Year", ylab = "Probability of Returning as Female")
@@ -270,7 +270,7 @@ sex = c("Female", "Male")
 age = 4:7
 for (s in 1:2) {
   for (a in 1:4) {
-    p_sub = str_replace("mu_pi_mat[.+,a,s]", "a,s", paste0(a, ",", s))
+    p_sub = str_replace("pi[.+,a,s]", "a,s", paste0(a, ",", s))
     x = sapply(post_list, function(post) post_summ(post, p_sub)[3,])
     matplot(x, type = "l", lty = lty, col = col, lwd = lwd,
             ylim = c(0, max(max(x), 0.1)), xaxt = "n", yaxt = "n",
