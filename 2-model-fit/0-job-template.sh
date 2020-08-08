@@ -13,9 +13,11 @@
 export LD_LIBRARY_PATH=/tools/jags-4.3.0/lib64:$LD_LIBRARY_PATH
 
 ###load your modules once on the node
-module load R/3.6.3
-module load jags/4.3.0
+module load gcc/5.3.0
 module load blas/gcc/3.6.0
+module load jags/4.3.0
+module load R/3.6.3
+module load curl/7.47.1
 
 ###send the job
 echo "Running Model: MODEL"
