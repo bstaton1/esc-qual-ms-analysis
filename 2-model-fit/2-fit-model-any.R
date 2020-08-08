@@ -10,16 +10,16 @@ model = as.numeric(args[1])
 data_dir = "inputs"
 
 # compile the data
-source("1-compile-data.R")
+source("2-model-fit/1-compile-data.R")
 
 # load in additional functions
-source("../load-functions.R")
+source("load-functions.R")
 
 # starttime of everything
 starttime_all = Sys.time()
 
 # location of output files
-out_dir = "../model-output/"
+out_dir = "model-output"
 
 nchain =      4  # number of chains
 parallel =    T  # run chains in parallel?
@@ -34,6 +34,7 @@ calc_eq =     T  # calculate equilibrium quantities (based on fishing mortialiti
 save_files =  T  # save output?
 rand_age =    F  # use dirichlet-distributed ages?
 do_waic =     T  # perform WAIC calculations and store output?
+Vprior = "kusko" # which data set to use as priors for selectivity parameters ('yukon' or 'kusko' - doesn't make a difference b/c SE multiplied by 10)?
 
 # make sure only one MCMC setting was specified
 if (sum(c(mcmc_vshort, mcmc_lshort, mcmc_medium, mcmc_long)) != 1) {
@@ -46,8 +47,8 @@ sex_trend = as.logical(mod_key$sex_trend[mod_key$model == model])
 age_trend = as.logical(mod_key$age_trend[mod_key$model == model])
 
 # names for output
-if (!dir.exists("model-files")) dir.create("model-files")
-model_file = file.path("model-files", paste("model-", model, ".txt", sep = ""))
+if (!dir.exists("2-model-fit/model-files")) dir.create("2-model-fit/model-files")
+model_file = file.path("2-model-fit/model-files", paste("model-", model, ".txt", sep = ""))
 if (!dir.exists(out_dir) & save_files) dir.create(out_dir)
 post_name = paste("post-", model, ".rds", sep = "")
 meta_name = paste("meta-", model, ".rds", sep = "")
@@ -60,6 +61,14 @@ if (mcmc_lshort)  {npost = 5000; nburn = 1000; nthin = 2 * nchain; nadapt = 1000
 if (mcmc_medium)  {npost = 50000; nburn = 20000; nthin = 40; nadapt = 10000}
 if (mcmc_long)    {npost = 1000000; nburn = 100000; nthin = 200; nadapt = 10000}
 
+# set the selectivity priors
+jags_dat = append(jags_dat, list(
+  Vtau_prior = {if (Vprior == "kusko") Vtau_kusko else Vtau_yukon},
+  Vsig_prior = {if (Vprior == "kusko") Vsig_kusko else Vsig_yukon},
+  Vtha_prior = {if (Vprior == "kusko") Vtha_kusko else Vtha_yukon},
+  Vlam_prior = {if (Vprior == "kusko") Vlam_kusko else Vlam_yukon}
+))
+
 # set nodes to monitor
 jags_params = c(
   # SRA params
@@ -69,8 +78,7 @@ jags_params = c(
   "N_t", "S_t", "Z_t", "R", "log_mean_R0", "Hcom", "Hsub",
   
   # demographic parameters
-  "b0_sex", "b1_sex", "b0_mat", "b1_mat", "p", "mu_pi_f",
-  "mu_pi_mat",
+  "delta_0", "delta_1", "gamma_0", "gamma_1", "pi", "psi",
   
   # derived quantities
   "q_sub", "q_com", "q_esc", "q_run", 
@@ -78,20 +86,18 @@ jags_params = c(
   "Z_per_S_t", "Z_per_female_t",
   
   # fishery/selectivity parameters
-  "Fcom", "Fsub", "v", "Vtau", "Vsig", "Vtha", "Vlam",
-  "Vtau_prior", "Vsig_prior", "Vtha_prior", "Vlam_prior",
-  "Vtau_yukon", "Vsig_yukon", "Vtha_yukon", "Vlam_yukon"
+  "Fcom", "Fsub", "v", "Vtau", "Vsig", "Vtha", "Vlam"
 )
-if (rand_age) jags_params = c(jags_params, "D_sum")
+if (rand_age) jags_params = c(jags_params, "D_sum", "p")
 if (do_waic) jags_params = c(jags_params, "ppd_total")
 
 # set nodes to monitor diagnostics for
-diag_nodes = c("alpha", "beta", "beta_e10", "R", "b0_sex", 
-               "b1_sex", "b0_mat", "b1_mat", "p",
+diag_nodes = c("alpha", "beta", "beta_e10", "R", 
+               "delta_0", "delta_1", "gamma_0", "gamma_1",
                "phi", "sigma_R_white", "sigma_R0", 
                "Fcom", "Fsub", "Vtau", "Vsig", "Vtha", "Vlam", "log_mean_R0"
 )
-if (rand_age) diag_nodes = c(jags_params, "D_sum")
+if (rand_age) diag_nodes = c(jags_params, "D_sum", "p")
 
 ## write the model file
 # the full model - this one gets simplified based on the specific trend assumptions
@@ -103,7 +109,7 @@ if (rand_age) diag_nodes = c(jags_params, "D_sum")
 
 # stringr::str_magic!!
 edit_full_model(
-  model_lines = readLines(file.path("model-files", "full-model.txt")),
+  model_lines = readLines(file.path("2-model-fit", "model-files", "full-model.txt")),
   outfile = model_file,
   z_unit = z_unit,
   age_trend = age_trend, 
