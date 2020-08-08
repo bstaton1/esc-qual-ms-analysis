@@ -13,7 +13,7 @@
 export LD_LIBRARY_PATH=/tools/jags-4.3.0/lib64:$LD_LIBRARY_PATH
 
 ###load your modules once on the node
-module load R/3.4.3
+module load R/3.6.3
 module load jags/4.3.0
 module load blas/gcc/3.6.0
 
