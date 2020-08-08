@@ -1,4 +1,9 @@
 
+# WORKING DIRECTORY SHOULD BE SET TO PROJECT LOCATION
+# IF ON LOCAL COMPUTER, JUST HAVE PROJECT OPEN IN RSTUDIO SESSION
+# IF ON HPC OR COMMAND LINE WITH CURRENT DIRECTORY SET TO THIS LOCATION, UNCOMMENT THIS LINE
+setwd("../")
+
 # clear the workspace
 rm(list = ls(all = T))
 
@@ -27,9 +32,9 @@ verbose =     T  # print JAGS messages to console?
 silent =      F  # print post processing progress?
 seed =        9  # seed for initial value and mcmc sampling
 mcmc_vshort = F  # run with very short mcmc settings?
-mcmc_lshort = F  # run with less short mcmc settings?
+mcmc_lshort = T  # run with less short mcmc settings?
 mcmc_medium = F  # run with medium mcmc settings?
-mcmc_long =   T  # run with long mcmc settings?
+mcmc_long =   F  # run with long mcmc settings?
 calc_eq =     T  # calculate equilibrium quantities (based on fishing mortialities that provide msy and Rmax)?
 save_files =  T  # save output?
 rand_age =    F  # use dirichlet-distributed ages?
