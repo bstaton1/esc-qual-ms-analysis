@@ -1,6 +1,6 @@
 
 # Function to calculate yield at a given F for a particular posterior sample and vuln scenario
-yield = function(log_F_max, i, post.samp, vuln, include_sex_ratio = F) {  
+yield = function(log_F_max, i, post.samp, vuln) {  
   
   # extract column names
   cn = colnames(post.samp)
@@ -49,14 +49,10 @@ yield = function(log_F_max, i, post.samp, vuln, include_sex_ratio = F) {
     H = H,
     S = S,
     R = RF,
+    p_female = sum(S_as[1:4])/S,
     Z_million = Z/1e6
     )
-  
-  if (include_sex_ratio) {
-    S_female = sum(S_as[1:(length(S_as)/2)])
-    output = c(output, male_per_fem = (S - S_female)/S_female)
-  }
-  
+
   return(output)
 }
 
@@ -64,15 +60,14 @@ yield = function(log_F_max, i, post.samp, vuln, include_sex_ratio = F) {
 # pass this function to optim to find equilibrium states at at maximum yield (q = "H") or recruitment (q = "R")
 # option to include a sex penalty - won't consider F's which place the ratio below
 # some number - 1 is used below
-func_to_min = function(log_F_max, i, q, post.samp, vuln, sex_penalty = F) {
-  out = yield(log_F_max, i, post.samp, vuln, include_sex_ratio = T)
-  out[q] * -1 + ifelse(sex_penalty & out["male_per_fem"] < 1, 1e10, 0)
+func_to_min = function(log_F_max, i, q, post.samp, vuln) {
+  yield(log_F_max, i, post.samp, vuln)[q] * -1
 }
 
 # wrapper to find equilibrium quantities
 # searches for fishing mortality that maximizes harvest (q = "H") or recruitment (q = "R")
 # for each posterior sample and each vulnerability scenario
-eq_search = function(post.samp, q, sex_penalty = F, silent = F) {
+eq_search = function(post.samp, q, silent = F) {
   
   # how many posterior samples?
   n_samp = nrow(post.samp)
@@ -81,7 +76,7 @@ eq_search = function(post.samp, q, sex_penalty = F, silent = F) {
   nms = names(yield(
     log_F_max = log(1), 
     i = 1, post.samp = post.samp,
-    vuln = "mesh8", include_sex_ratio = sex_penalty
+    vuln = "mesh8"
   ))
   
   # build a container for output: [sample,quantity,vuln]
@@ -101,7 +96,7 @@ eq_search = function(post.samp, q, sex_penalty = F, silent = F) {
           par = log(0.5), 
           fn = func_to_min, 
           method = "Brent", lower = -10, upper = 3,
-          q = q, i = i, post.samp = post.samp, vuln = v_scenarios[v], sex_penalty = sex_penalty
+          q = q, i = i, post.samp = post.samp, vuln = v_scenarios[v]
         )$par
       
       # plug this in to get all eq. quantities
@@ -109,7 +104,7 @@ eq_search = function(post.samp, q, sex_penalty = F, silent = F) {
         yield(
           log_F_max = fit_log_F_max, 
           i = i, post.samp = post.samp,
-          vuln = v_scenarios[v], include_sex_ratio = sex_penalty
+          vuln = v_scenarios[v]
         )
     }
   }
