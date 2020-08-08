@@ -1,15 +1,13 @@
 
-# WORKING DIRECTORY SHOULD BE SET TO PROJECT LOCATION
-# IF ON LOCAL COMPUTER, JUST HAVE PROJECT OPEN IN RSTUDIO SESSION
-# IF ON HPC OR COMMAND LINE WITH CURRENT DIRECTORY SET TO THIS LOCATION, UNCOMMENT THIS LINE
-# setwd("../")
-
 # clear the workspace
 rm(list = ls(all = T))
 
 # settings
 args = commandArgs(trailingOnly = T)
 model = as.numeric(args[1])
+
+# location of data files
+data_dir = "inputs"
 
 # compile the data
 source("2-model-fit/1-compile-data.R")
@@ -29,22 +27,18 @@ verbose =     T  # print JAGS messages to console?
 silent =      F  # print post processing progress?
 seed =        9  # seed for initial value and mcmc sampling
 mcmc_vshort = F  # run with very short mcmc settings?
-mcmc_lshort = T  # run with less short mcmc settings?
+mcmc_lshort = F  # run with less short mcmc settings?
 mcmc_medium = F  # run with medium mcmc settings?
-mcmc_long =   F  # run with long mcmc settings?
+mcmc_long =   T  # run with long mcmc settings?
 calc_eq =     T  # calculate equilibrium quantities (based on fishing mortialities that provide msy and Rmax)?
 save_files =  T  # save output?
 rand_age =    F  # use dirichlet-distributed ages?
+do_waic =     T  # perform WAIC calculations and store output?
 Vprior = "kusko" # which data set to use as priors for selectivity parameters ('yukon' or 'kusko' - doesn't make a difference b/c SE multiplied by 10)?
 
 # make sure only one MCMC setting was specified
 if (sum(c(mcmc_vshort, mcmc_lshort, mcmc_medium, mcmc_long)) != 1) {
   stop("you incorrectly specified how long to run the MCMC algorithm for")
-}
-
-# make sure a correct Vprior was specified
-if (!(Vprior %in% c("yukon", "kusko"))) {
-  stop("Vprior must be one of 'yukon' or 'kusko'")
 }
 
 # which time effects are included?
@@ -84,7 +78,7 @@ jags_params = c(
   "N_t", "S_t", "Z_t", "R", "log_mean_R0", "Hcom", "Hsub",
   
   # demographic parameters
-  "delta_0", "delta_1", "gamma_0", "gamma_1", "psi", "pi",
+  "delta_0", "delta_1", "gamma_0", "gamma_1", "pi", "psi",
   
   # derived quantities
   "q_sub", "q_com", "q_esc", "q_run", 
@@ -94,15 +88,16 @@ jags_params = c(
   # fishery/selectivity parameters
   "Fcom", "Fsub", "v", "Vtau", "Vsig", "Vtha", "Vlam"
 )
-if (rand_age) jags_params = c(jags_params, c("D_sum", "p"))
+if (rand_age) jags_params = c(jags_params, "D_sum", "p")
+if (do_waic) jags_params = c(jags_params, "ppd_total")
 
 # set nodes to monitor diagnostics for
-diag_nodes = c("alpha", "beta", "beta_e10", "R", "delta_0", 
-               "delta_1", "gamma_0", "gamma_1", "pi",
+diag_nodes = c("alpha", "beta", "beta_e10", "R", 
+               "delta_0", "delta_1", "gamma_0", "gamma_1",
                "phi", "sigma_R_white", "sigma_R0", 
                "Fcom", "Fsub", "Vtau", "Vsig", "Vtha", "Vlam", "log_mean_R0"
 )
-if (rand_age) diag_nodes = c(jags_params, c("D_sum", "p"))
+if (rand_age) diag_nodes = c(jags_params, "D_sum", "p")
 
 ## write the model file
 # the full model - this one gets simplified based on the specific trend assumptions
@@ -119,7 +114,8 @@ edit_full_model(
   z_unit = z_unit,
   age_trend = age_trend, 
   sex_trend = sex_trend,
-  rand_age = rand_age
+  rand_age = rand_age,
+  ppd = do_waic
   )
 
 # create initial values
@@ -212,6 +208,12 @@ if (calc_eq) {
   
 }
 
+### calculate WAIC if requested ###
+if (do_waic) {
+  ppd_total = postpack::post_subset(post, "ppd_total", matrix = T)
+  WAIC = get_WAIC(ppd_total)
+}
+
 stoptime_after = Sys.time()
 
 # save files
@@ -238,9 +240,8 @@ if (save_files) {
         rand_age = rand_age,
         R.hat = R.hat,
         n.eff = n.eff,
-        Vprior = Vprior
+        WAIC = {if (do_waic) WAIC else NULL}
       )), file.path(out_dir, meta_name))
-  
 }
 stoptime_all = Sys.time()
 

@@ -22,6 +22,10 @@ Contains the code for the full model: all trends included and use of Dirichlet-d
 
 Contains a function to generate reasonable initial values for the MCMC sampler.
 
+### `get_WAIC.R`
+
+Contains a function to calculate WAIC from any model. In order to use this function, ensure that the option `do_waic` is set to `TRUE` in `2-model-fit/2-fit-model-any.R`, otherwise the necessary information will not be calculated in the JAGS model.
+
 ### `id_model.R`
 
 Contains a function that creates a model id (e.g., E-ASL) based on the meta data exported when fitting the model. Options exist to include the reproductive unit (N, E, EM), trends (A, S, L), fecundity data source, and whether Dirichlet ages were used.
