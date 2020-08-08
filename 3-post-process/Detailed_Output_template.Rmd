@@ -79,26 +79,26 @@ math_key = c(
   "phi"            = "$\\phi$",
   "mean_R0"        = "$\\dot{R}_0$",
   "log_mean_R0"    = "$\\log(\\dot{R}_0)$",
-  "b0_mat[1,1]"    = "$\\gamma_{0,1,1}$",
-  "b0_mat[1,2]"    = "$\\gamma_{0,2,1}$",
-  "b0_mat[1,3]"    = "$\\gamma_{0,3,1}$",
-  "b0_mat[1,4]"    = "$\\gamma_{0,4,1}$",
-  "b1_mat[1,1]"    = "$\\gamma_{1,1,1}$",
-  "b1_mat[1,2]"    = "$\\gamma_{1,2,1}$",
-  "b1_mat[1,3]"    = "$\\gamma_{1,3,1}$",
-  "b1_mat[1,4]"    = "$\\gamma_{1,4,1}$",
-  "b0_mat[2,1]"    = "$\\gamma_{0,1,2}$",
-  "b0_mat[2,2]"    = "$\\gamma_{0,2,2}$",
-  "b0_mat[2,3]"    = "$\\gamma_{0,3,2}$",
-  "b0_mat[2,4]"    = "$\\gamma_{0,4,2}$",
-  "b1_mat[2,1]"    = "$\\gamma_{1,1,2}$",
-  "b1_mat[2,2]"    = "$\\gamma_{1,2,2}$",
-  "b1_mat[2,3]"    = "$\\gamma_{1,3,2}$",
-  "b1_mat[2,4]"    = "$\\gamma_{1,4,2}$",
-  "b0_mat"         = "$\\gamma_{0,a,s}$",
-  "b1_mat"         = "$\\gamma_{1,a,s}$",
-  "b0_sex"         = "$\\delta_{0}$",
-  "b1_sex"         = "$\\delta_{1}$",
+  "gamma_0[1,1]"    = "$\\gamma_{0,1,1}$",
+  "gamma_0[1,2]"    = "$\\gamma_{0,2,1}$",
+  "gamma_0[1,3]"    = "$\\gamma_{0,3,1}$",
+  "gamma_0[1,4]"    = "$\\gamma_{0,4,1}$",
+  "gamma_1[1,1]"    = "$\\gamma_{1,1,1}$",
+  "gamma_1[1,2]"    = "$\\gamma_{1,2,1}$",
+  "gamma_1[1,3]"    = "$\\gamma_{1,3,1}$",
+  "gamma_1[1,4]"    = "$\\gamma_{1,4,1}$",
+  "gamma_0[2,1]"    = "$\\gamma_{0,1,2}$",
+  "gamma_0[2,2]"    = "$\\gamma_{0,2,2}$",
+  "gamma_0[2,3]"    = "$\\gamma_{0,3,2}$",
+  "gamma_0[2,4]"    = "$\\gamma_{0,4,2}$",
+  "gamma_1[2,1]"    = "$\\gamma_{1,1,2}$",
+  "gamma_1[2,2]"    = "$\\gamma_{1,2,2}$",
+  "gamma_1[2,3]"    = "$\\gamma_{1,3,2}$",
+  "gamma_1[2,4]"    = "$\\gamma_{1,4,2}$",
+  "gamma_0"         = "$\\gamma_{0,a,s}$",
+  "gamma_1"         = "$\\gamma_{1,a,s}$",
+  "delta_0"         = "$\\delta_{0}$",
+  "delta_1"         = "$\\delta_{1}$",
   "Vtau"           = "$\\tau$",
   "Vsig"           = "$\\sigma$",
   "Vtha"           = "$\\theta$",
@@ -107,7 +107,7 @@ math_key = c(
   "D_sum"          = "$D$",
   "Fcom"           = "$F_{\\text{com},t}$",
   "Fsub"           = "$F_{\\text{sub},t}$",
-  "p"              = "$p$"
+  "pi"              = "$\\pi$"
 )
 ```
 
@@ -245,9 +245,6 @@ kable(round(tab), caption = "Model fit statistics.", row.names = F) %>%
 ```{r Rhat-info, eval = mcmc_info}
 Rhat = meta$R.hat
 params = rownames(Rhat)
-if (!meta$rand_age) {
-  params = params[-which(params %in% c("p", "D_sum"))]
-}
 Rhat = Rhat[params,]
 Rhat = round(Rhat, 3)
 
@@ -270,9 +267,6 @@ kable(
 ```{r ess-info, eval = mcmc_info}
 ess = meta$n.eff
 params = rownames(ess)
-if (!meta$rand_age) {
-  params = params[-which(params %in% c("p", "D_sum"))]
-}
 params = params[-which(params == "beta")]
 ess = ess[params,]
 ess = apply(round(ess, -2), 2, prettify)
@@ -350,13 +344,13 @@ diag_plots(post, "^R[", show_diags = "never", thin_percent = diag_plot_thin)
 `r create_label("Figure", cntr, F, level = 4, sub = "h", subb = "1", text = "$\\delta_0$", tabset = F, mcmc_info)`
 
 ```{r b0-sex-diag-plots, fig.height = 6, fig.width = 9, eval = mcmc_info}
-diag_plots(post, "b0_sex", show_diags = "never", thin_percent = diag_plot_thin)
+diag_plots(post, "delta_0", show_diags = "never", thin_percent = diag_plot_thin)
 ```
 
 `r create_label("Figure", cntr, F, level = 4, sub = "h", subb = "2", text = "$\\delta_1$", tabset = F, mcmc_info)`
 
 ```{r b1-sex-diag-plots, fig.height = 6, fig.width = 9, eval = mcmc_info}
-diag_plots(post, "b1_sex", show_diags = "never", thin_percent = diag_plot_thin)
+diag_plots(post, "delta_1", show_diags = "never", thin_percent = diag_plot_thin)
 ```
 
 `r create_label("Figure", cntr, F, level = 3, sub = "i", subb = "", text = "$\\gamma$", tabset = T, mcmc_info)`
@@ -364,13 +358,13 @@ diag_plots(post, "b1_sex", show_diags = "never", thin_percent = diag_plot_thin)
 `r create_label("Figure", cntr, F, level = 4, sub = "i", subb = "1", text = "$\\gamma_{0,a,s}$", tabset = F, mcmc_info)`
 
 ```{r b0-mat-diag-plots, fig.height = 7, eval = mcmc_info}
-diag_plots(post, "b0_mat", show_diags = "never", thin_percent = diag_plot_thin)
+diag_plots(post, "gamma_0", show_diags = "never", thin_percent = diag_plot_thin)
 ```
 
 `r create_label("Figure", cntr, F, level = 4, sub = "i", subb = "2", text = "$\\gamma_{1,a,s}$", tabset = F, mcmc_info)`
 
 ```{r b1-mat-diag-plots, fig.height = 7, eval = mcmc_info}
-diag_plots(post, "b1_mat", show_diags = "never", thin_percent = diag_plot_thin)
+diag_plots(post, "gamma_1", show_diags = "never", thin_percent = diag_plot_thin)
 ```
 
 `r create_label("Figure", cntr, T, level = 3, sub = "j", subb = "", text = "D_sum", tabset = F, mcmc_info & meta$rand_age)`
@@ -412,7 +406,7 @@ for (as in 1:8) {
 
 `r create_label("Figure", cntr, F, level = 4, sub = "a", subb = "2", text = "Commercial", tabset = F, fit)`
 
-`r if (fit) "_Vertical dashed lines represent the year the fishery switched from unrestricted mesh to restricted mesh._"`
+`r if (fit) "_Vertical dashed lines represent the year the fishery switched from mostly 8 inch mesh to mostly 6 inch mesh._"`
 
 ```{r com-age-sex-fit, fig.height = 8, fig.width = 6, eval = fit}
 q_fit = array_format(post_summ(post, "q_com")[3,])
@@ -437,7 +431,7 @@ for (as in 1:8) {
 
 `r create_label("Figure", cntr, F, level = 4, sub = "a", subb = "3", text = "Subsistence", tabset = F, fit)`
 
-`r if (fit) "_Vertical dashed lines represent the year the fishery switched from unrestricted mesh to restricted mesh._"`
+`r if (fit) "_Vertical dashed lines represent the year the fishery switched from mostly 8 inch mesh to mostly 6 inch mesh._"`
 
 ```{r sub-age-sex-fit, fig.height = 8, fig.width = 6, eval = fit}
 q_fit = array_format(post_summ(post, "q_sub")[3,])
@@ -482,7 +476,7 @@ points(pf_esc ~ years, pch = 21, cex = 1.2, col = "red", bg = alpha("salmon", 0.
 
 `r create_label("Figure", cntr, F, level = 4, sub = "b", subb = "2", text = "Commercial", tabset = F, fit)`
 
-`r if (fit) "_Vertical dashed line represents the year the fishery switched from unrestricted mesh to restricted mesh._"`
+`r if (fit) "_Vertical dashed lines represent the year the fishery switched from mostly 8 inch mesh to mostly 6 inch mesh._"`
 
 ```{r com-sex-fit, eval = fit}
 pf_fit_com = rowSums(array_format(post_summ(post, "q_com")[3,])[,1:4])
@@ -501,7 +495,7 @@ abline(v = years[min(which(com_mesh == 2))] - 0.5, lty = 2)
 
 `r create_label("Figure", cntr, F, level = 4, sub = "b", subb = "3", text = "Subsistence", tabset = F, fit)`
 
-`r if (fit) "_Vertical dashed line represents the year the fishery switched from unrestricted mesh to restricted mesh._"`
+`r if (fit) "_Vertical dashed lines represent the year the fishery switched from mostly 8 inch mesh to mostly 6 inch mesh._"`
 
 ```{r sub-sex-fit, eval = fit}
 pf_fit_sub = rowSums(array_format(post_summ(post, "q_sub")[3,])[,1:4])
@@ -699,22 +693,22 @@ lines(V_med ~ rlm_seq, col = "blue", lwd = 4)
 
 v = array_format(post_summ(post, "v[")[3,])
 
-unr_fit = apply(v[,,,1], 3, function(x) apply(x, 2, mean))
-unr_lwr = apply(v[,,,1], 3, function(x) apply(x, 2, function(z) quantile(z, 0.025)))
-unr_upr = apply(v[,,,1], 3, function(x) apply(x, 2, function(z) quantile(z, 0.975)))
+mesh8_fit = apply(v[,,,1], 3, function(x) apply(x, 2, mean))
+mesh8_lwr = apply(v[,,,1], 3, function(x) apply(x, 2, function(z) quantile(z, 0.025)))
+mesh8_upr = apply(v[,,,1], 3, function(x) apply(x, 2, function(z) quantile(z, 0.975)))
 v = array_format(post_summ(post, "v[")[3,])
 
 xf = a_min:a_max - 0.05
 xm = a_min:a_max + 0.05
 
 par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
-plot(unr_fit[,1] ~ xf, ylim = c(0,1), xlim = range(xf, xm),
+plot(mesh8_fit[,1] ~ xf, ylim = c(0,1), xlim = range(xf, xm),
      type = "n", xaxt = "n", las = 2,
      xlab = "Age", ylab = "Selectivity", cex = 1.2)
-segments(xf, unr_lwr[,1], xf, unr_upr[,1], col = "red")
-segments(xm, unr_lwr[,2], xm, unr_upr[,2], col = "blue")
-points(unr_fit[,2] ~ xm,  col = "blue", bg = "skyblue", pch = 21, type = "o", cex = 1.2)
-points(unr_fit[,1] ~ xf,  col = "red", bg = "salmon", pch = 21, type = "o", cex = 1.2)
+segments(xf, mesh8_lwr[,1], xf, mesh8_upr[,1], col = "red")
+segments(xm, mesh8_lwr[,2], xm, mesh8_upr[,2], col = "blue")
+points(mesh8_fit[,2] ~ xm,  col = "blue", bg = "skyblue", pch = 21, type = "o", cex = 1.2)
+points(mesh8_fit[,1] ~ xf,  col = "red", bg = "salmon", pch = 21, type = "o", cex = 1.2)
 legend("bottomright", legend = c("Males", "Females"), pch = 21,
        col = c("blue", "red"), pt.bg = c("skyblue", "salmon"), lty = 1, pt.cex = 1.2, cex = 0.8)
 axis(side = 1, at = 4:7, labels = 4:7)
@@ -727,22 +721,22 @@ axis(side = 1, at = 4:7, labels = 4:7)
 
 v = array_format(post_summ(post, "v[")[3,])
 
-res_fit = apply(v[,,,2], 3, function(x) apply(x, 2, mean))
-res_lwr = apply(v[,,,2], 3, function(x) apply(x, 2, function(z) quantile(z, 0.025)))
-res_upr = apply(v[,,,2], 3, function(x) apply(x, 2, function(z) quantile(z, 0.975)))
+mesh6_fit = apply(v[,,,2], 3, function(x) apply(x, 2, mean))
+mesh6_lwr = apply(v[,,,2], 3, function(x) apply(x, 2, function(z) quantile(z, 0.025)))
+mesh6_upr = apply(v[,,,2], 3, function(x) apply(x, 2, function(z) quantile(z, 0.975)))
 
 xf = a_min:a_max - 0.05
 xm = a_min:a_max + 0.05
 
 
 par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
-plot(res_fit[,1] ~ xf, ylim = c(0,1), xlim = range(xf, xm),
+plot(mesh6_fit[,1] ~ xf, ylim = c(0,1), xlim = range(xf, xm),
      type = "n", xaxt = "n", las = 2,
      xlab = "Age", ylab = "Selectivity", cex = 1.2)
-segments(xf, res_lwr[,1], xf, res_upr[,1], col = "red")
-segments(xm, res_lwr[,2], xm, res_upr[,2], col = "blue")
-points(res_fit[,2] ~ xm,  col = "blue", bg = "skyblue", pch = 21, type = "o", cex = 1.2)
-points(res_fit[,1] ~ xf,  col = "red", bg = "salmon", pch = 21, type = "o", cex = 1.2)
+segments(xf, mesh6_lwr[,1], xf, mesh6_upr[,1], col = "red")
+segments(xm, mesh6_lwr[,2], xm, mesh6_upr[,2], col = "blue")
+points(mesh6_fit[,2] ~ xm,  col = "blue", bg = "skyblue", pch = 21, type = "o", cex = 1.2)
+points(mesh6_fit[,1] ~ xf,  col = "red", bg = "salmon", pch = 21, type = "o", cex = 1.2)
 legend("bottomright", legend = c("Males", "Females"), pch = 21,
        col = c("blue", "red"), pt.bg = c("skyblue", "salmon"), lty = 1, pt.cex = 1.2, cex = 0.8)
 axis(side = 1, at = 4:7, labels = 4:7)
@@ -850,7 +844,7 @@ v_prior_plot("lam")
 `r create_label("Figure", cntr, F, level = 3, sub = "a", subb = "1", text = "Expected", tabset = F, return_comp & meta$rand_age)`
 
 ```{r mat-age-sex-expected, fig.width = 8, fig.height = 4, eval = return_comp}
-pi = array_format(post_summ(post, "mu_pi_mat")[1,])
+pi = array_format(post_summ(post, "pi")[1,])
 
 layout(matrix(1:3, 1, 3), widths = c(1,1,0.2))
 par(mar = c(2,2,2,2), oma = c(2,3,0,0), xaxs = "i", yaxs = "i",
@@ -917,15 +911,15 @@ legend("center", title = "Age", legend = rev(c(4:7)), pch = 22, pt.bg = rev(fill
 `r create_label("Figure", cntr, T, level = 2, sub = "b", subb = "", text = "By Sex", tabset = F, return_comp)`
 
 ```{r mat-sex, eval = return_comp}
-pi_f = post_summ(post, "mu_pi_f")
+psi = post_summ(post, "psi")
 # p_f = summ_post(post, "p_f")
 by = (min(years) - a_max):(max(years) - a_min)
 par(mar = c(3.5,3.5,1,1), mgp = c(2.3, 0.4, 0), tcl = -0.25)
-plot(pi_f[3,] ~ by, type = "l", xlab = "Brood Year", ylab = "Probability of Return-as-Female", las = 1, ylim = c(0.2, 0.5))
-polygon(x = c(by, rev(by)), y = c(pi_f[4,], rev(pi_f[5,])), col = "skyblue", border = NA)
-lines(pi_f[4,] ~ by, col = "skyblue3")
-lines(pi_f[5,] ~ by, col = "skyblue3")
-lines(pi_f[3,] ~ by, col = "blue", lwd = 2)
+plot(psi[3,] ~ by, type = "l", xlab = "Brood Year", ylab = "Probability of Return-as-Female", las = 1, ylim = c(0.2, 0.5))
+polygon(x = c(by, rev(by)), y = c(psi[4,], rev(psi[5,])), col = "skyblue", border = NA)
+lines(psi[4,] ~ by, col = "skyblue3")
+lines(psi[5,] ~ by, col = "skyblue3")
+lines(psi[3,] ~ by, col = "blue", lwd = 2)
 ```
 
 `r cntr = up_cntr("Section", cntr, u_rates); create_label("Section", cntr, T, level = 1, sub = "", subb = "", text = "Exploitation Rates", tabset = T, u_rates)`
@@ -1164,7 +1158,7 @@ legend("topright", legend = c("Z/max(Z)", "S/max(S)"),
 
 `r cntr = up_cntr("Section", cntr, per_cap); create_label("Section", cntr, T, level = 1, sub = "", subb = "", text = "Per Capita Reproductive Potential", tabset = T, per_cap)`
 
-`r if (per_cap) "Black bars show the mean of the posterior medians for each third of the time series (14 years each). Black dashed line shows the mean of the posterior medians across all years; the secondary _y_-axis shows the percent change from this mean."`
+`r if (per_cap) "Black bars show the mean of the posterior medians for each third of the time series (~14 years each). Black dashed line shows the mean of the posterior medians across all years; the secondary _y_-axis shows the percent change from this mean."`
 
 `r cntr = up_cntr("Figure", cntr, per_cap); create_label("Figure", cntr, T, level = 2, sub = ifelse(meta$z_unit == "fish_count", "", "a"), subb = "", text = "Per Spawner", tabset = F, per_cap)`
 
@@ -1234,9 +1228,9 @@ param_names = list(
     ifelse(meta$z_unit == "fish_count","beta_e5", "beta_e10"),
     "sigma_R", "phi", "^mean_R0"
     ),
-  age_f = c("b._mat[1,"),
-  age_m = c("b._mat[2,"),
-  sex = c("b._sex"),
+  age_f = c("gamma_.[1,"),
+  age_m = c("gamma_.[2,"),
+  sex = c("delta_."),
   sel = c("^V...$")
 )
 
@@ -1342,9 +1336,9 @@ build_name = function(x) {
   j_key = c(paste0("f", a_min:a_max), paste0("m", a_min:a_max))
   j_num = 1:8
   j = unname(sapply(x, function(j) j_num[str_detect(j_key, str_extract(j, "^[:alnum:]+"))]))
-  m = ifelse(str_detect(x, "v_unr"), ",1", 
-             ifelse(str_detect(x, "v_res"), ",2", ""))
-  group = ifelse(m == ",1", "v_unr", ifelse(m == ",2", "v_res", group))
+  m = ifelse(str_detect(x, "v_mesh8"), ",1", 
+             ifelse(str_detect(x, "v_mesh6"), ",2", ""))
+  group = ifelse(m == ",1", "v_mesh8", ifelse(m == ",2", "v_mesh6", group))
   data.frame(
     group = group,
     latex = paste0("$", symbol, "_{", "i,", j, m, "}$"),
@@ -1403,11 +1397,11 @@ make_table = function(grp) {
 
 `r create_label("Table", cntr, F, level = 4, sub = "c", subb = "1", text = "8-inch", tabset = F, big_tables)`
 
-`r if (big_tables) make_table("v_unr")`
+`r if (big_tables) make_table("v_mesh8")`
 
 `r create_label("Table", cntr, F, level = 4, sub = "c", subb = "2", text = "6-inch", tabset = F, big_tables)`
 
-`r if (big_tables) make_table("v_res")`
+`r if (big_tables) make_table("v_mesh6")`
 
 ```{r msc-table-prep, eval = big_tables}
 make_table = function(v) {
@@ -1439,11 +1433,11 @@ make_table = function(v) {
 
 `r create_label("Table", cntr, F, level = 4, sub = "d", subb = "1", text = "8-inch", tabset = F, big_tables)`
 
-`r if (big_tables) make_table("unr")`
+`r if (big_tables) make_table("mesh8")`
 
 `r create_label("Table", cntr, F, level = 4, sub = "d", subb = "2", text = "6-inch", tabset = F, big_tables)`
 
-`r if (big_tables) make_table("res")`
+`r if (big_tables) make_table("mesh6")`
 
 `r create_label("Table", cntr, F, level = 4, sub = "d", subb = "3", text = "Flat", tabset = F, big_tables)`
 
@@ -1479,11 +1473,11 @@ make_table = function(v) {
 
 `r create_label("Table", cntr, F, level = 4, sub = "e", subb = "1", text = "8-inch", tabset = F, big_tables)`
 
-`r if (big_tables) make_table("unr")`
+`r if (big_tables) make_table("mesh8")`
 
 `r create_label("Table", cntr, F, level = 4, sub = "e", subb = "2", text = "6-inch", tabset = F, big_tables)`
 
-`r if (big_tables) make_table("res")`
+`r if (big_tables) make_table("mesh6")`
 
 `r create_label("Table", cntr, F, level = 4, sub = "e", subb = "3", text = "Flat", tabset = F, big_tables)`
 

@@ -11,8 +11,8 @@ gen_inits = function(z_unit, sex_trend, age_trend, rand_age) {
     Vsig = runif(1, 0.175, 0.225),
     Vtha = runif(1, 0.55, 0.65),
     Vlam = runif(1, -0.6, -0.4),
-    b0_mat = matrix(c(runif(3, c(-1.5, 1.5, 1.5), c(-0.5, 2.5, 2.5)), NA), 2, na, byrow = T),
-    b0_sex = runif(1, -0.1, 0.1)
+    gamma_0 = matrix(c(runif(3, c(-1.5, 1.5, 1.5), c(-0.5, 2.5, 2.5)), NA), 2, na, byrow = T),
+    delta_0 = runif(1, -0.1, 0.1)
   )
   
   if (rand_age) {
@@ -32,13 +32,13 @@ gen_inits = function(z_unit, sex_trend, age_trend, rand_age) {
   inits_list = append(inits_list, alpha)
   
   if (age_trend) {
-    b1_mat = list(b1_mat = matrix(c(runif(3, c(0, 0, 0.05), c(0.1, 0.1, 0.15)), NA), 2, na, byrow = T))
-    inits_list = append(inits_list, b1_mat)
+    gamma_1 = list(gamma_1 = matrix(c(runif(3, c(0, 0, 0.05), c(0.1, 0.1, 0.15)), NA), 2, na, byrow = T))
+    inits_list = append(inits_list, gamma_1)
   }
   
   if (sex_trend) {
-    b1_sex = list(b1_sex = runif(1, -0.1, 0.1))
-    inits_list = append(inits_list, b1_sex)
+    delta_1 = list(delta_1 = runif(1, -0.1, 0.1))
+    inits_list = append(inits_list, delta_1)
   }
   
   inits_list

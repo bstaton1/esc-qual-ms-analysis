@@ -84,8 +84,7 @@ jags_params = c(
   "N_t", "S_t", "Z_t", "R", "log_mean_R0", "Hcom", "Hsub",
   
   # demographic parameters
-  "b0_sex", "b1_sex", "b0_mat", "b1_mat", "p", "mu_pi_f",
-  "mu_pi_mat",
+  "delta_0", "delta_1", "gamma_0", "gamma_1", "psi", "pi",
   
   # derived quantities
   "q_sub", "q_com", "q_esc", "q_run", 
@@ -95,15 +94,15 @@ jags_params = c(
   # fishery/selectivity parameters
   "Fcom", "Fsub", "v", "Vtau", "Vsig", "Vtha", "Vlam"
 )
-if (rand_age) jags_params = c(jags_params, "D_sum")
+if (rand_age) jags_params = c(jags_params, c("D_sum", "p"))
 
 # set nodes to monitor diagnostics for
-diag_nodes = c("alpha", "beta", "beta_e10", "R", "b0_sex", 
-               "b1_sex", "b0_mat", "b1_mat", "p",
+diag_nodes = c("alpha", "beta", "beta_e10", "R", "delta_0", 
+               "delta_1", "gamma_0", "gamma_1", "pi",
                "phi", "sigma_R_white", "sigma_R0", 
                "Fcom", "Fsub", "Vtau", "Vsig", "Vtha", "Vlam", "log_mean_R0"
 )
-if (rand_age) diag_nodes = c(jags_params, "D_sum")
+if (rand_age) diag_nodes = c(jags_params, c("D_sum", "p"))
 
 ## write the model file
 # the full model - this one gets simplified based on the specific trend assumptions

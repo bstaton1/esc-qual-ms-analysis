@@ -57,15 +57,15 @@ ldat = read.csv(file.path(data_dir, "esc-mean-length.csv"))
 ldat = as.matrix(round(ldat[,-1]))
 
 # calculate perimeter of net types
-unr_perim = 8 * 2 * 25.4  
-res_perim = 6 * 2 * 25.4
+mesh8_perim = 8 * 2 * 25.4  
+mesh6_perim = 6 * 2 * 25.4
 
 # calculate rlm (ratio of length to net perimeter)
 rlm = array(NA, dim = c(nt, na, 2, 2))
-rlm[,,1,1] = ldat[,f_ind]/unr_perim  # females unr
-rlm[,,1,2] = ldat[,f_ind]/res_perim  # females res
-rlm[,,2,1] = ldat[,m_ind]/unr_perim  # males unr
-rlm[,,2,2] = ldat[,m_ind]/res_perim  # males res
+rlm[,,1,1] = ldat[,f_ind]/mesh8_perim  # females mesh8
+rlm[,,1,2] = ldat[,f_ind]/mesh6_perim  # females mesh6
+rlm[,,2,1] = ldat[,m_ind]/mesh8_perim  # males mesh8
+rlm[,,2,2] = ldat[,m_ind]/mesh6_perim  # males mesh6
 
 ## gear types
 mesh = read.csv(file.path(data_dir, "mesh-types.csv"))
@@ -193,12 +193,12 @@ jags_dat = list(
   # commerical harvest estimates
   Hcom_obs = states$H_com_tot_obs,
   Hcom_obs_sig = StatonMisc::cv2sig(states$H_com_tot_obs_cv),
-  com_mesh = ifelse(mesh$com == "unr", 1, 2),
+  com_mesh = ifelse(mesh$com == "mesh8", 1, 2),
   
   # subsistence harvest estimates
   Hsub_obs = states$H_sub_tot_obs,
   Hsub_obs_sig = StatonMisc::cv2sig(states$H_sub_tot_obs_cv),
-  sub_mesh = ifelse(mesh$sub == "unr", 1, 2),
+  sub_mesh = ifelse(mesh$sub == "mesh8", 1, 2),
   
   # ratio of fish length to mesh perimeter
   rlm = rlm,

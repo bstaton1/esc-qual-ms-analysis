@@ -32,9 +32,9 @@ edit_full_model = function(model_lines, outfile, z_unit, sex_trend, age_trend, r
   # sex_trend == T: logistic sex composition regardless of age, time trend for brood year
   # sex_trend == F: time invariant sex composition (slope not estimated but fixed at zero)
   if (!sex_trend) {
-    match = model_lines[stringr::str_detect(model_lines, "b1_sex ~ ")]
+    match = model_lines[stringr::str_detect(model_lines, "delta_1 ~ ")]
     white_space =  unlist(stringr::str_extract_all(match, "  +"))
-    replace = "b1_sex <- 0"
+    replace = "delta_1 <- 0"
     model_lines[which(model_lines == match)] = paste(white_space, replace, sep = "")
   }
   
@@ -42,20 +42,20 @@ edit_full_model = function(model_lines, outfile, z_unit, sex_trend, age_trend, r
   # age_trend == T: baseline category logit maturation for each sex, time trend for brood year
   # age_trend == F: time invariant maturation (slopes not estimated but fixed at zero)
   if (!age_trend) {
-    match = model_lines[stringr::str_detect(model_lines, "b1_mat\\[s,a\\] ~ ")]
+    match = model_lines[stringr::str_detect(model_lines, "gamma_1\\[s,a\\] ~ ")]
     white_space = unlist(stringr::str_extract_all(match, "  +"))
-    replace = "b1_mat[s,a] <- 0"
+    replace = "gamma_1[s,a] <- 0"
     model_lines[which(model_lines == match)] = paste(white_space, replace, sep = "")
   }
   
   # handle brood year random age variability
   # cuts the random link at the p node assignment
-  # if rand_age == T: p[y,,] are dirichlet distributed around mu_pi_mat
-  # if rand_age == F: p[y,,] are are set to mu_pi_mat[y,]
+  # if rand_age == T: p[y,,] are dirichlet distributed around pi
+  # if rand_age == F: p[y,,] are are set to pi[y,]
   if (!rand_age) {
     match = model_lines[stringr::str_detect(model_lines, "p\\[y,a,s\\] <- ")]
     white_space = unlist(stringr::str_extract_all(match, "  +"))
-    replace = "p[y,a,s] <- mu_pi_mat[y,a,s]"
+    replace = "p[y,a,s] <- pi[y,a,s]"
     model_lines[which(model_lines == match)] = paste(white_space, replace, sep = "")
     
     # remove D_scale, D_sum, gamma, and g
