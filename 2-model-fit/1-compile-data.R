@@ -37,7 +37,7 @@ f_ind = which(stringr::str_detect(A, "f"))
 m_ind = which(stringr::str_detect(A, "m"))
 
 ## abundance-related states
-states = read.csv(file.path(data_dir, "esc-harv-ests-cv.csv"))
+states = read.csv(file.path(data_dir, "run-harv-ests-cv.csv"))
 
 # calculate escapement
 states$S_tot_obs = states$N_tot_obs - states$H_com_tot_obs - states$H_sub_tot_obs

@@ -9,9 +9,9 @@ To streamline the fitting process, this code was built to be ran on a high perfo
 Contains several input files that contain the data the model is fitted to. 
 
 * `com-age-sex-comp.csv` contains the commercial harvest age/sex composition, obtained by running the code in the `1-data-prep/a-age-data/3-com` directory
-* `esc-age-sex-comp.csv` contains the escapement  age/sex composition, obtained by running the code in the `1-data-prep/a-age-data/1-esc` directory
+* `esc-age-sex-comp.csv` contains the escapement age/sex composition, obtained by running the code in the `1-data-prep/a-age-data/1-esc` directory
 * `sub-age-sex-comp.csv` contains the subsistence harvest age/sex composition, obtained by running the code in the `1-data-prep/a-age-data/2-sub` directory
-* `esc-harv-ests-cv.csv` contains the estimated abundance states of escapement, commerical harvest, and subsistence harvest (aggregated across age/sex) and their associated observation coefficients of variation. Harvest data pulled from Appendix C2 of Liller et al. ([2018](http://www.adfg.alaska.gov/FedAidPDFs/RIR.3A.2018.04.pdf)); escapement estimates pulled from Table 4 in that same report
+* `run-harv-ests-cv.csv` contains the estimated abundance states of total run, commerical harvest, and subsistence harvest (aggregated across age/sex) and their associated observation coefficients of variation. Harvest data pulled from Appendix C2 of Larson ([2020](http://www.adfg.alaska.gov/FedAidPDFs/RIR.3A.2020.02.pdf)); total run estimates pulled from Table 2 in that same report
 * `esc-mean-length.csv` contains the mean length at age and sex of fish in the escapement, obtained by running the code in `1-data-prep/b-length-data
 * `mesh-types.csv` contains identifiers that indicate which mesh size was used by each fishery in each year. "unr" represents "unrestricted" and corresponds to 8 inch mesh, "res" represents "restricted" and corresponds to 6 inch mesh.
 
