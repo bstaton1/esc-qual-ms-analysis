@@ -71,7 +71,7 @@ cd esc-qual-ms-analysis
 and run
 
 ```bash
-sh make-esc-bundle.sh
+sh make-bundle.sh
 ```
 
 You will be prompted to enter several model numbers separated by spaces. You shouldn't enter more than 3 models at a time, as this is run on the local node and takes a fair amount of time. Long-running commands that are ran on the local node are automatically cancelled. You will next be prompted to enter a file name for the output. Say you entered models 1, 2, and 3, the name might be something like `eq-bundle_1-3.tar.gz`
