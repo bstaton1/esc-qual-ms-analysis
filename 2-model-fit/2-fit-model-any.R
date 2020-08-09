@@ -245,7 +245,8 @@ if (save_files) {
         rand_age = rand_age,
         R.hat = R.hat,
         n.eff = n.eff,
-        WAIC = {if (do_waic) WAIC else NULL}
+        WAIC = {if (do_waic) WAIC else NULL},
+        Vprior = Vprior
       )), file.path(out_dir, meta_name))
 }
 stoptime_all = Sys.time()
