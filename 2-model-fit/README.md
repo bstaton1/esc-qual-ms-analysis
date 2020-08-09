@@ -2,7 +2,7 @@
 
 This subdirectory contains the code used to actually perform the state-space model fitting.
 
-To streamline the fitting process, this code was built to be ran on a high performance computer (HPC) system. The scripts `0-job-template.sh`, `0-queue-model.sh`, `create-job.R`, and `rm-jobs.sh` are used in that process. These are tailored to the specific HPC used to run the models for our study, and will not work for HPCs other than the Hopper cluster at Auburn University. Most users can ignore these files.
+To streamline the fitting process, this code was built to be ran on a high performance computer (HPC) system. The scripts `0-job-template.sh`, `0-queue-model.sh`, `create-job.R`, and `cleanup-jobs.sh` are used in that process. These are tailored to the specific HPC used to run the models for our study, and will not work for HPCs other than the Hopper cluster at Auburn University. Most users can ignore these files.
 
 ### `inputs`
 
