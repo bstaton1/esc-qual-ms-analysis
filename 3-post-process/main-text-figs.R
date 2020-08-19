@@ -21,8 +21,8 @@ out_dir = "model-output/permanent"
 out_files = dir(out_dir, full.names = T)
 
 # HOW DO YOU WANT TO SAVE THE OUTPUT
-file_type = "pdf"
-# file_type = "jpg"
+# file_type = "pdf"
+file_type = "png"
 fig_dir = "3-post-process/ms-figs"
 
 # create directory to store output figures if it doesn't exist
@@ -105,7 +105,7 @@ x_t = seq(0.15,0.05, -0.05)
 xf = a_min:a_max - 0.01
 xm = a_min:a_max + 0.01
 
-file_device(file.path(fig_dir, paste0("v-age.", file_type)), h = 6, w = 3.4)
+file_device(file.path(fig_dir, paste0("v-age.", file_type)), h = 6, w = 3.5)
 par(mfrow = c(2,1), mar = c(1,2,0.5,0.5),  oma = c(1.5,1,0,0), tcl = -0.25, mgp = c(2,0.4,0))
 plot(1,1, ylim = c(0,1), xlim = range(min(xf) - max(x_t), max(xm) + max(x_t)),
      col = "red", pch = 16, type = "o",xaxt = "n", las = 2)
@@ -175,7 +175,7 @@ v_ssm = apply(out, 2, summ)
 v_kusko = pearson(rlm_seq, Vlam_kusko[1], Vtha_kusko[1], Vsig_kusko[1], Vtau_kusko[1])
 v_yukon = pearson(rlm_seq, Vlam_yukon[1], Vtha_yukon[1], Vsig_yukon[1], Vtau_yukon[1])
 
-file_device(file.path(fig_dir, paste0("v-length.", file_type)), h = 3.4, w = 3.4)
+file_device(file.path(fig_dir, paste0("v-length.", file_type)), h = 3.5, w = 3.5)
 par(mar = c(2,2.25,2,0.5), mgp = c(1.25,0.2,0), tcl = -0.15, cex.axis = 0.75, lend = "square", cex.lab = 0.8)
 plot(1,1, xlim = range(rlm_seq), ylim = c(min(v_ssm[4,]), 1), type = "n", ylab = "Selectivity", las = 2, xaxt = "n", xlab = "", lwd = 2, lty = 1)
 polygon(x = c(rlm_seq, rev(rlm_seq)), y = c(v_ssm[4,], rev(v_ssm[5,])),
@@ -190,13 +190,14 @@ lines(v_kusko ~ rlm_seq, lty = 3, lwd = 1.4)
 keep_t = 1:nt
 
 at_rlm1 = sapply(colMeans(rlm[keep_t,,1,1]), function(a) which_closest(rlm_seq, a))
+at_rlm2 = sapply(colMeans(rlm[keep_t,,1,2]), function(a) which_closest(rlm_seq, a))
+
 points(v_ssm[3,at_rlm1] ~ colMeans(rlm[keep_t,,1,1]),
+       pch = 21, bg = "grey90", col = "grey90", cex = 1.5)
+points(v_ssm[3,at_rlm2] ~ colMeans(rlm[keep_t,,1,2]),
        pch = 21, bg = "grey90", col = "grey90", cex = 1.5)
 points(v_ssm[3,at_rlm1] ~ colMeans(rlm[keep_t,,1,1]),
        pch = c("4", "5", "6", "7"), col = "black", cex = 0.8)
-at_rlm2 = sapply(colMeans(rlm[keep_t,,1,2]), function(a) which_closest(rlm_seq, a))
-points(v_ssm[3,at_rlm2] ~ colMeans(rlm[keep_t,,1,2]),
-       pch = 21, bg = "grey90", col = "grey90", cex = 1.5)
 points(v_ssm[3,at_rlm2] ~ colMeans(rlm[keep_t,,1,2]),
        pch = c("4", "5", "6", "7"), col = "grey60", cex = 0.8)
 
@@ -212,7 +213,7 @@ axis(side = 3, at = rlm_seq[axis_i], labels = round(rlm_seq[axis_i] * mesh6_peri
 mtext(side = 3, "METF (mm) w/6 in. Mesh", line = 1, col = "grey60", font = 2, cex = 0.8)
 segments(par("usr")[1], par("usr")[4], par("usr")[2], par("usr")[4],col = "grey60", xpd = T)
 mtext(side = 1, "METF (mm) w/8 in. Mesh", line = 1, font = 2, cex = 0.8)
-legend("topright", legend = c("SSM", "Yukon R.", "Kuskokwim R."), lty = c(1,2,3), lwd = c(4,1,1.4), bty = "n", cex = 0.75)
+legend("topright", legend = c("SSM", "Yukon R. Sonar", "Kuskokwim R. Sonar"), lty = c(1,2,3), lwd = c(4,1,1.4), bty = "n", cex = 0.75)
 dev.off()
 
 
@@ -222,7 +223,7 @@ q_esc = array_format(post_summ(post_list[["E-ASL"]], "q_esc")["50%",])
 q_com = array_format(post_summ(post_list[["E-ASL"]], "q_com")["50%",])
 q_sub = array_format(post_summ(post_list[["E-ASL"]], "q_sub")["50%",])
 
-file_device(file.path(fig_dir, paste0("age-comp.", file_type)), h = 5.75, w = 3.4)
+file_device(file.path(fig_dir, paste0("age-comp.", file_type)), h = 5.75, w = 3.5)
 par(mfcol = c(4,2), mar = c(0.25,0.25,0.25,0.25), oma = c(3,4.5,1.5,2),
     tcl = -0.20, mgp = c(2,0.25,0), lend = "square", ljoin = "mitre")
 yaxis_side = rep(c(2,4), each = 4)
@@ -304,7 +305,7 @@ for (s in 1:2) {
     mtext(line = 0.25, side = 3, "Female")
   }
   axis(side = 1, at = seq(1970, 2010, 10), labels = substr(seq(1970, 2010, 10), 3, 4), tcl = -0.4)
-  axis(side = 1, at = seq(1970, 2012, 2), labels = F, tcl = -0.2)
+  axis(side = 1, at = seq(1970, 2014, 2), labels = F, tcl = -0.2)
   
   box()
 }
@@ -319,7 +320,7 @@ ldat = rlm[,,1,1] * 8 * 2* 25.4
 
 f10 = 1:10
 l10 = (nt - 9):nt
-
+set.seed(1234)
 out = replicate(100, {
   lkeep = sample(l10, replace = T)
   fkeep = sample(f10, replace = T)
@@ -345,7 +346,7 @@ med = rbind(
   (mass_fun(colMeans(ldat[l10,])) - mass_fun(colMeans(ldat[f10,])))/mass_fun(colMeans(ldat[f10,]))
 )
 
-file_device(file.path(fig_dir, paste0("z-figure.", file_type)), h = 6, w = 3.4)
+file_device(file.path(fig_dir, paste0("z-figure.", file_type)), h = 6, w = 3.5)
 
 par(mfrow = c(2,1), mar = c(2.5,3.75,0.5,0.5), mgp = c(1.5,0.35,0), tcl = -0.25, lend = "square")
 
@@ -388,7 +389,7 @@ legend(x = usr[1], y = usr[4] - ydiff * 0.075, seg.len = c(2.5), legend = c("Egg
        lty = c(1,2,NA,NA), pch = c(22, 24, NA, NA), pt.cex = 1.1, pt.bg = c("white", "white", NA, NA), text.col = c("black", "black", "grey60", "black"), bty = "n", cex = 0.8)
 
 
-mp = barplot(med, beside = T, ylim = c(-0.5,1), col = "white",
+mp = barplot(med, beside = T, ylim = c(-0.5,0.8), col = "white",
              border = "white", yaxt = "n", xlab = "Age")
 abline(h = 0, lty = 1)
 segments(mp, lwr, mp, upr)
@@ -449,7 +450,7 @@ uprs2 = sapply(out, function(x) x["75%",])
 round((meds[3,] - meds[1,])/meds[1,], 2)
 
 
-file_device(file.path(fig_dir, paste0("z-percapita.", file_type)), h = 3.75, w = 3.4)
+file_device(file.path(fig_dir, paste0("z-percapita.", file_type)), h = 3.75, w = 3.5)
 par(xaxs = "i", yaxs = "i", mar = c(4,3,0.5,0.5), tcl = -0.25, mgp = c(2,0.35,0))
 mp = barplot(meds, las = 2,
              # ylim = 1 + (max(abs(rbind(lwrs1, uprs1))) - 1) * c(-1,1),
@@ -493,7 +494,7 @@ round((meds[3,"E-S"] - meds[1,"E-S"])/meds[1,"E-S"], 2)
 round((meds[3,"E-L"] - meds[1,"E-L"])/meds[1,"E-L"], 2)
 round((meds[3,"E-A"] - meds[1,"E-A"])/meds[1,"E-A"], 2)
 
-##### MSY FIGURE #####
+##### MSC FIGURE #####
 
 # function to create the plot comparing time periods and models for a given eq. quantity and vuln type
 msy_plot = function(keep_val = "S", keep_vuln = "mesh8", keep_mods, xticklabs = F, legend = F, letter) {
@@ -505,7 +506,7 @@ msy_plot = function(keep_val = "S", keep_vuln = "mesh8", keep_mods, xticklabs = 
   # create the basic plot: dimensions and spacing
   mp = barplot(keep["50%",,keep_mods], yaxt = "n", xaxt = "n", col = "white", border = "white", las = 2,
                beside = T, 
-               ylim = range(msy[c("10%", "90%"),keep_val,,,keep_mods]) * c(0.85, 1.2),
+               ylim = range(msy[c("10%", "90%"),keep_val,,,keep_mods]) * c(0.95, 1.1),
                xlim = c(0.5, 20.5) 
                # , ylim = c(ylwr, yupr)
   )
@@ -556,8 +557,8 @@ msy_plot = function(keep_val = "S", keep_vuln = "mesh8", keep_mods, xticklabs = 
   
   # add a legend if requested
   if (legend) {
-    legend("topleft", y.intersp = 0.75, legend = c("First 10 years", "All years", "Last 10 years"), title = "Demography",
-           pch = c(21,22,24), pt.bg = "grey60", pt.cex = 1, cex = 0.75, bg = "white", box.col = "black")
+    legend("topright", y.intersp = 0.75, legend = c("First 10 years", "All years", "Last 10 years"), title = "Demography",
+           pch = c(21,22,24), pt.bg = "grey60", pt.cex = 1, cex = 0.7, bg = "white", box.col = "white")
   }
   
   # draw x-axis
@@ -568,10 +569,10 @@ msy_plot = function(keep_val = "S", keep_vuln = "mesh8", keep_mods, xticklabs = 
   }
   
   # draw the label identifying each plot
-  rect(usr[2] - xdiff * 0.23, usr[4] - ydiff * 0.22, usr[2] - xdiff * 0.17, usr[4], border = "white", col = "white")
-  text(x = usr[2] + xdiff * 0.025, y = usr[4] - ydiff * 0.12,
-       labels = ifelse(keep_vuln == "mesh8", paste0("(", letter, ")\n8 in. mesh"),
-                       ifelse(keep_vuln == "flat", paste0("(", letter, ")\nNo Selectivity"), paste0("(", letter, ")\n6 in. mesh"))), pos = 2, cex = 0.7, font = 2)
+  rect(usr[1], usr[4] - ydiff * 0.11, usr[1] + xdiff * 0.35, usr[4], border = "white", col = "white")
+  text(x = usr[1] + xdiff * -0.025, y = usr[4] - ydiff * 0.065,
+       labels = ifelse(keep_vuln == "mesh8", paste0("(", letter, ") 8 in. mesh"),
+                       ifelse(keep_vuln == "flat", paste0("(", letter, ") No selectivity"), paste0("(", letter, ") 6 in. mesh"))), pos = 4, cex = 0.7, font = 2)
   
   # add a main title over top panel
   mtext(side = 3, ifelse(keep_vuln == "mesh8", latex2exp::TeX(paste0(keep_val, "_{MSC}")), ""), line = 0, font = 2)
@@ -592,16 +593,15 @@ keep_mods = c(
 file_device(file.path(fig_dir, paste0("msc.", file_type)), h = 5.5, w = 7.2)
 par(mfcol = c(3,2), xaxs = "i", yaxs = "i", cex = 1, lend = "square", mar = c(0,1.75,0.75,2.25),
     oma = c(3.5,0.75,0.5,2), tcl = -0.25, mgp = c(2,0.35,0), cex.axis = 0.9)
-msy_plot("S", "mesh8", keep_mods, legend = T, letter = "a")
+msy_plot("S", "mesh8", keep_mods, legend = F, letter = "a")
 msy_plot("S", "flat", keep_mods, legend = F, letter = "c")
-msy_plot("S", "mesh6", keep_mods, xticklabs = T, letter = "e"); par(mar = c(0,2.25,0.75,1.75))
+msy_plot("S", "mesh6", keep_mods, legend = T, xticklabs = T, letter = "e"); par(mar = c(0,2.25,0.75,1.75))
 msy_plot("H", "mesh8", keep_mods, legend = F, letter = "b")
 msy_plot("H", "flat", keep_mods, legend = F, letter = "d")
 msy_plot("H", "mesh6", keep_mods, xticklabs = T, letter = "f")
 mtext(side = 2, outer = T, "Escapement or Harvest (1000s)", line = -0.2)
 mtext(side = 4, outer = T, "% Change from Model N-0", line = 0.75)
 dev.off()
-
 
 keep_val = "H"
 keep_vuln = "mesh8"
