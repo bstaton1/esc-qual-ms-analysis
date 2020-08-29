@@ -621,46 +621,46 @@ range(p[-1])
 #                "Fcom", "Fsub", "^Vtau$", "^Vsig$", "^Vtha$", "^Vlam$", "log_mean_R0"
 # )
 # 
-# match_p(post_list[["E-ASL"]], diag_nodes)
+# match_params(post_list[["E-ASL"]], diag_nodes)
 # 
 # f = function(post) {
-#   out = t(post_summ(post, diag_nodes, ess = T, Rhat = T)[c("Rhat", "ess"),])
+#   out = t(post_summ(post, diag_nodes, neff = T, Rhat = T)[c("Rhat", "neff"),])
 #   out = out[order(out[,1], decreasing = T),]
 #   out = data.frame(out)
 #   out = cbind(param = rownames(out), out); rownames(out) = NULL
 #   out
 # }
 # 
-# # out = lapply(post_list, f)
+# out = lapply(post_list, f)
 # min_bound = 5000
 # max_bound = 20000
 # f = function(z) {
-#   z$base_name = stringr::str_remove(z$param, "\\[.+\\]")
+#   z$base_name = postpack:::drop_index(z$param)
 #   z$ess[is.na(z$Rhat)] = NA
-#   tapply(z$ess, z$base_name, function(x) sum(x < max_bound & x > min_bound, na.rm = T))
+#   tapply(z$neff, z$base_name, function(x) sum(x < max_bound & x > min_bound, na.rm = T))
 # }
 # 
 # z = sapply(out, f)
 # z[z %in% c("-Inf", "Inf")] = NA
 # z
 # 
-# 
+# out
 # above_min = z > 0
 # below_max = z < 10
 # 
-# bad_ess = apply(above_min & below_max, 2, function(x) names(which(x)))
-# bad_ess = unique(unlist(bad_ess)); bad_ess
+# bad_neff = apply(above_min & below_max, 2, function(x) names(which(x)))
+# bad_neff = unique(unlist(bad_neff)); bad_neff
 # 
-# apply(z[bad_ess,], 2, max, na.rm = T)
+# apply(z[bad_neff,], 2, max, na.rm = T)
 # 
 # f = function(z) {
-#   z$base_name = stringr::str_remove(z$param, "\\[.+\\]")
+#   z$base_name = postpack:::drop_index(z$param)
 #   # z$Rhat[is.na(z$Rhat)] = NA
 #   tapply(z$Rhat, z$base_name, max, na.rm = T)
 # }
 # z = sapply(out, f)
 # z[z %in% c("-Inf", "Inf")] = NA
-# z < 2000
+# z > 1.1
 # 
 # bad_alpha = z["alpha",] > 1.1
 # sort(colnames(z)[bad_alpha])
@@ -731,8 +731,7 @@ range(p[-1])
 ##### NUMBERS FOR IN-TEXT #####
 
 # extract tau: RLM of fully selected fish
-tau_est = mean(sapply(post_list, function(post) post_summ(post, "^Vtau$", rnd = 2)["mean",]))
-Ytau_est = mean(sapply(post_list, function(post) post_summ(post, "^Vtau_yukon$", rnd = 2)["mean",]))
+tau_est = mean(sapply(post_list, function(post) post_summ(post, "^Vtau$", digits = 2)["mean",]))
 
 mesh8_perim = 8 * 2 * 25.4  
 mesh6_perim = 6 * 2 * 25.4
@@ -755,17 +754,17 @@ sapply(post_list["E-0"], function(post) {
 
 # probability of returning as female in first year under sex trend models
 sapply(post_list[keep_mod], function(post) {
-  post_samps = post_summ(post, "psi[1]", rnd = 2)
+  post_samps = post_summ(post, "psi[1]", digits = 2)
 })
 
 # probability of returning as female in last year under sex trend models
 sapply(post_list[keep_mod], function(post) {
-  post_samps = post_summ(post, "psi[45]", rnd = 2)
+  post_samps = post_summ(post, "psi[47]", digits = 2)
 })
 
 # median coefficient of delta_1
 sapply(post_list[keep_mod], function(post) {
-  post_samps = post_summ(post, "delta_1", rnd = 3)
+  post_samps = post_summ(post, "delta_1", digits = 3)
 })
 
 # odds ratio of female
@@ -775,18 +774,18 @@ sapply(post_list[keep_mod], function(post) {
 })
 
 # female return probability at age 6 in first and last brood years
-post_summ(post_list[[keep_mod]], c("pi[1,3,1]", "pi[45,3,1]"), rnd = 2)
+post_summ(post_list[[keep_mod]], c("pi[1,3,1]", "pi[47,3,1]"), digits = 2)
 
 # female return probability at age 5 in first and last brood years
-post_summ(post_list[[keep_mod]], c("pi[1,2,1]", "pi[45,2,1]"), rnd = 2)
+post_summ(post_list[[keep_mod]], c("pi[1,2,1]", "pi[47,2,1]"), digits = 2)
 
 # male return probability at age 4 in first and last brood years
-post_summ(post_list[[keep_mod]], c("pi[1,1,2]", "pi[45,1,2]"), rnd = 2)
+post_summ(post_list[[keep_mod]], c("pi[1,1,2]", "pi[47,1,2]"), digits = 2)
 
 # male return probability at age 6 in first and last brood years
-post_summ(post_list[[keep_mod]], c("pi[1,3,2]", "pi[45,3,2]"), rnd = 2)
+post_summ(post_list[[keep_mod]], c("pi[1,3,2]", "pi[47,3,2]"), digits = 2)
 
-gamma_1 = post_summ(post_list[[keep_mod]], "gamma_1", rnd = 3)
+gamma_1 = post_summ(post_list[[keep_mod]], "gamma_1", digits = 3)
 array_format(gamma_1[4,])
 array_format(gamma_1[5,])
 
