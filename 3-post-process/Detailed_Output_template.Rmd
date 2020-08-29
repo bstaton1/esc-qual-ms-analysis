@@ -36,7 +36,7 @@ source("2-model-fit/1-compile-data.R")
 source("load-functions.R")
 
 # location of output files
-out_dir = "model-output"
+out_dir = "model-output/permanent"
 
 # names of output files
 post_name = paste("post-", model, ".rds", sep = "")
