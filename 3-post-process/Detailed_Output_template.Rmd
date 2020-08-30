@@ -152,7 +152,9 @@ model_ids = c("N-0", "N-ASL", "E-0", "E-L", "E-S", "E-A", "E-SL", "E-AL", "E-AS"
 
 ```
 
-`r cntr = up_cntr("Section", cntr, T); create_label("Section", cntr, F, level = 1, sub = "", subb = "", text = paste0("Model Description: ", model_ids[model]), tabset = F)`
+`r cntr = up_cntr("Section", cntr, T); create_label("Section", cntr, F, level = 1, sub = "", subb = "", text = paste0("Model Description: ", model_ids[model]), tabset = T)`
+
+`r cntr = up_cntr("Table", cntr, T); create_label("Table", cntr, T, level = 2, sub = "a", subb = "", text = "Attributes", tabset = F)`
 
 ```{r model-description-table}
 pretty_z_unit = paste(capitalize(str_split(z_unit, "_")[[1]]), collapse = " ")
@@ -175,8 +177,31 @@ if (!meta$rand_age) tab = tab[-nrow(tab),]
 colnames(tab) = c("Option", "Setting")
 
 kable(tab, caption = "Assumptions regarding trends and reproductive units in this model.") %>%
-  kable_styling(full_width = F) %>%
+  kable_styling(full_width = F, bootstrap_options = "condensed") %>%
   group_rows("Trends", 3, 5, italic = T, bold = F)
+```
+
+`r create_label("Table", cntr, T, level = 2, sub = "b", subb = "", text = "Parameter Counts", tabset = F)`
+
+```{r}
+param_counts = suppressWarnings(count_params_in_model(age_trend = meta$age_trend, sex_trend = meta$sex_trend))
+
+tab = data.frame(Type = names(param_counts), Count = unname(param_counts))
+
+kable(tab, caption = "Number of estimated parameters/states in this model.") %>%
+  kable_styling(full_width = F, bootstrap_options = "condensed") %>%
+  row_spec(nrow(tab), bold = T)
+```
+
+`r create_label("Table", cntr, T, level = 2, sub = "c", subb = "", text = "WAIC", tabset = F)`
+
+Estimated Watanabe–Akaike information criterion (WAIC) and effective number of parameters (pD) for this model.
+
+```{r}
+tab = data.frame(pD = round(meta$WAIC["pD"]), WAIC = round(meta$WAIC["WAIC"], 1))
+rownames(tab) = NULL
+kable(tab) %>%
+  kable_styling(full_width = F, bootstrap_options = "condensed")
 ```
 
 `r cntr = up_cntr("Section", cntr, mcmc_info); create_label("Section", cntr, F, level = 1, sub = "", subb = "", text = "MCMC", tabset = T, mcmc_info)`
@@ -209,7 +234,7 @@ tab = data.frame(
 colnames(tab) = c("Option", "Setting")
 
 kable(tab, caption = "The MCMC settings used in this run.") %>%
-  kable_styling(full_width = F) %>%
+  kable_styling(full_width = F, bootstrap_options = "condensed") %>%
   group_rows("Per Chain", 1, 4) %>%
   row_spec(row = 7, bold = T)
 ```
@@ -224,18 +249,9 @@ elapse = paste(round(abs(as.numeric(elapse[1])), 3), capitalize(elapse[2]), sep 
 tab = t(data.frame(Started = meta$starttime, Stopped = meta$stoptime, Elapsed = elapse))
 
 kable(tab,caption = "Model run time information.") %>%
-  kable_styling(full_width = F, position = "center") %>%
+  kable_styling(full_width = F, position = "center", bootstrap_options = "condensed") %>%
   row_spec(3, bold = T)
   
-```
-
-```{r model-fit-info, eval = F}
-## Deviance Statistics
-tab = data.frame(
-  deviance = post_summ(post, "deviance")["mean",],
-  pD = meta$pD, DIC = meta$DIC)
-kable(round(tab), caption = "Model fit statistics.", row.names = F) %>%
-  kable_styling(full_width = F)
 ```
 
 `r cntr = cntr = up_cntr("Table", cntr, mcmc_info); create_label("Table", cntr, T, level = 2, sub = "", subb = "", text = "Diagnostic Summaries", tabset = T, mcmc_info)`
@@ -298,7 +314,7 @@ par(oma = c(0,0,2,0)); diag_plots(post, "alpha", show_diags = "never", keep_perc
 `r create_label("Figure", cntr, F, level = 3, sub = "b", subb = "", text = "$\\beta$", tabset = F, mcmc_info)`
 
 ```{r beta-diag-plot, eval = mcmc_info}
-par(oma = c(0,0,2,0)); diag_plots(post, "beta$", show_diags = "never", thin_percent = diag_plot_thin)
+par(oma = c(0,0,2,0)); diag_plots(post, "beta$", show_diags = "never", keep_percent = diag_plot_thin)
 ```
 
 `r create_label("Figure", cntr, F, level = 3, sub = "c", subb = "", text = "$\\phi$", tabset = F, mcmc_info)`
