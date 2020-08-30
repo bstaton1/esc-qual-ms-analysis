@@ -229,7 +229,7 @@ axis(side = 1, at = at_x, labels = by[at_x])
 
 ```{r sex-coef, fig.width = 8, fig.height = 4}
 par(mfrow = c(1,2), mar = c(0,1,1,1), oma = c(2.5,2,0,0), mgp = c(2,0.5,0), tcl = -0.25)
-x = sapply(post_list, function(post) post_summ(post, "delta_0", p_summ = c(0.5, 0.25, 0.75, 0.025, 0.975)))
+x = sapply(post_list, function(post) post_summ(post, "delta_0", probs = c(0.5, 0.25, 0.75, 0.025, 0.975)))
 rownames(x) = c("mean", "sd", "50%", "25%", "75%", "2.5%", "97.5%")
 mp = barplot(x["50%",], names.arg = 1:length(ids),
              ylim = range(0, x[c("2.5%", "97.5%"),]) * 1.05,
@@ -241,7 +241,7 @@ axis(side = 1, at = mp, labels = F); box()
 usr = par("usr"); xdiff = diff(usr[1:2]); ydiff = diff(usr[3:4])
 text(usr[1], usr[4] - ydiff * 0.05, labels = "(a)", pos = 4, font = 2)
 
-x = sapply(post_list, function(post) post_summ(post, "delta_1", p_summ = c(0.5, 0.25, 0.75, 0.025, 0.975)))
+x = sapply(post_list, function(post) post_summ(post, "delta_1", probs = c(0.5, 0.25, 0.75, 0.025, 0.975)))
 rownames(x) = c("mean", "sd", "50%", "25%", "75%", "2.5%", "97.5%")
 mp = barplot(x["50%",], names.arg = 1:length(ids), ylim = range(0, x[c("2.5%", "97.5%"),]) * 1.05, col = "white", border = "white")
 segments(mp, x["2.5%",], mp, x["97.5%",], col = col)
@@ -299,7 +299,7 @@ age = 4:7
 for (s in 1:2) {
   for (a in 1:4) {
     p_sub = str_replace("gamma_0[s,a]", "s,a", paste0(s, ",", a))
-    x = sapply(post_list, function(post) post_summ(post, p_sub, p_summ = c(0.5, 0.25, 0.75, 0.025, 0.975)))
+    x = sapply(post_list, function(post) post_summ(post, p_sub, probs = c(0.5, 0.25, 0.75, 0.025, 0.975)))
     rownames(x) = c("mean", "sd", "50%", "25%", "75%", "2.5%", "97.5%")
     mp = barplot(x["50%",], names.arg = 1:length(ids),
                  ylim = range(0, x[c("2.5%", "97.5%"),]) * 1.05,
@@ -335,7 +335,7 @@ age = 4:7
 for (s in 1:2) {
   for (a in 1:4) {
     p_sub = str_replace("gamma_1[s,a]", "s,a", paste0(s, ",", a))
-    x = sapply(post_list, function(post) post_summ(post, p_sub, p_summ = c(0.5, 0.25, 0.75, 0.025, 0.975)))
+    x = sapply(post_list, function(post) post_summ(post, p_sub, probs = c(0.5, 0.25, 0.75, 0.025, 0.975)))
     rownames(x) = c("mean", "sd", "50%", "25%", "75%", "2.5%", "97.5%")
     mp = barplot(x["50%",], names.arg = 1:length(ids),
                  ylim = range(0, x[c("2.5%", "97.5%"),]) * 1.05,
@@ -794,10 +794,10 @@ mod_coefs = lapply(mod_nums, function(m) unlist(mod_key[mod_key$model == m,c("a_
 f800 = unlist(lapply(mod_coefs, function(m) power_f(800, m["a_coef"], m["b_coef"])))
 
 alpha_m = unlist(lapply(post_list[1:7], function(m) post_summ(m, "alpha")[3,]))
-alpha_l1 = unlist(lapply(post_list[1:7], function(m) post_summ(m, "alpha", p_summ = 0.025)[3,]))
-alpha_l2 = unlist(lapply(post_list[1:7], function(m) post_summ(m, "alpha", p_summ = 0.1)[3,]))
-alpha_u1 = unlist(lapply(post_list[1:7], function(m) post_summ(m, "alpha", p_summ = 0.975)[3,]))
-alpha_u2 = unlist(lapply(post_list[1:7], function(m) post_summ(m, "alpha", p_summ = 0.75)[3,]))
+alpha_l1 = unlist(lapply(post_list[1:7], function(m) post_summ(m, "alpha", probs = 0.025)[3,]))
+alpha_l2 = unlist(lapply(post_list[1:7], function(m) post_summ(m, "alpha", probs = 0.1)[3,]))
+alpha_u1 = unlist(lapply(post_list[1:7], function(m) post_summ(m, "alpha", probs = 0.975)[3,]))
+alpha_u2 = unlist(lapply(post_list[1:7], function(m) post_summ(m, "alpha", probs = 0.75)[3,]))
 
 par(mar = c(3,3,1,1), tcl = -0.25, mgp = c(2,0.5,0))
 plot(alpha_m ~ seq(1,7), xaxt = "n", xlab = "Fecundity Data set", type = "n", ylim = range(alpha_l1, alpha_u1), ylab = "alpha")

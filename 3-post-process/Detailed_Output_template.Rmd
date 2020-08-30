@@ -64,7 +64,7 @@ big_tables  = T  # display tables for posterior summaries?
 jags_code   = T  # display jags code?
 jags_data   = T  # display jags data?
 thin_post   = F  # use postpack::post_thin to reduce the size of the calculations?
-diag_plot_thin = 0.5  # proportion of samples to thin before traceplotting
+diag_plot_thin = 0.5  # proportion of samples to keep when traceplotting
 ```
 
 ```{r math-key}
@@ -113,7 +113,7 @@ math_key = c(
 
 ```{r cntr}
 # thin the posterior if requested
-if (thin_post) post = post_thin(post, thin_percent = 0.9)
+if (thin_post) post = post_thin(post, keep_percent = 0.1)
 
 # set up a counter
 cntr = c(
@@ -292,7 +292,7 @@ kable(
 `r create_label("Figure", cntr, F, level = 3, sub = "a", subb = "", text = "$\\alpha$", tabset = F, mcmc_info)`
 
 ```{r alpha-diag-plot, eval = mcmc_info}
-par(oma = c(0,0,2,0)); diag_plots(post, "alpha", show_diags = "never", thin_percent = diag_plot_thin)
+par(oma = c(0,0,2,0)); diag_plots(post, "alpha", show_diags = "never", keep_percent = diag_plot_thin)
 ```
 
 `r create_label("Figure", cntr, F, level = 3, sub = "b", subb = "", text = "$\\beta$", tabset = F, mcmc_info)`
@@ -304,19 +304,19 @@ par(oma = c(0,0,2,0)); diag_plots(post, "beta$", show_diags = "never", thin_perc
 `r create_label("Figure", cntr, F, level = 3, sub = "c", subb = "", text = "$\\phi$", tabset = F, mcmc_info)`
 
 ```{r phi-diag-plot, eval = mcmc_info}
-par(oma = c(0,0,2,0)); diag_plots(post, "phi", show_diags = "never", thin_percent = diag_plot_thin)
+par(oma = c(0,0,2,0)); diag_plots(post, "phi", show_diags = "never", keep_percent = diag_plot_thin)
 ```
 
 `r create_label("Figure", cntr, F, level = 3, sub = "d", subb = "", text = "$\\sigma_R$", tabset = F, mcmc_info)`
 
 ```{r sigmaR-diag-plot, eval = mcmc_info}
-par(oma = c(0,0,2,0)); diag_plots(post, "sigma_R", show_diags = "never", thin_percent = diag_plot_thin)
+par(oma = c(0,0,2,0)); diag_plots(post, "sigma_R", show_diags = "never", keep_percent = diag_plot_thin)
 ```
 
 `r create_label("Figure", cntr, F, level = 3, sub = "e", subb = "", text = "Selectivity", tabset = F, mcmc_info)`
 
 ```{r V-params-diag-plots, eval = mcmc_info, fig.height = 7}
-diag_plots(post, c("^Vtau$", "^Vsig$", "^Vtha$", "^Vlam$"), show_diags = "never", thin_percent = diag_plot_thin)
+diag_plots(post, c("^Vtau$", "^Vsig$", "^Vtha$", "^Vlam$"), show_diags = "never", keep_percent = diag_plot_thin)
 ```
 
 `r create_label("Figure", cntr, F, level = 3, sub = "f", subb = "", text = "Fishing Mortality", tabset = T, mcmc_info)`
@@ -324,19 +324,19 @@ diag_plots(post, c("^Vtau$", "^Vsig$", "^Vtha$", "^Vlam$"), show_diags = "never"
 `r create_label("Figure", cntr, F, level = 4, sub = "f", subb = "1", text = "Commercial", tabset = F, mcmc_info)`
 
 ```{r Fcom-diag-plots, fig.height = 6, fig.width = 9, eval = mcmc_info}
-diag_plots(post, "Fcom", show_diags = "never", thin_percent = diag_plot_thin)
+diag_plots(post, "Fcom", show_diags = "never", keep_percent = diag_plot_thin)
 ```
 
 `r create_label("Figure", cntr, F, level = 4, sub = "f", subb = "2", text = "Subsistence", tabset = F, mcmc_info)`
 
 ```{r Fsub-diag-plots, fig.height = 6, fig.width = 9, eval = mcmc_info}
-diag_plots(post, "Fsub", show_diags = "never", thin_percent = diag_plot_thin)
+diag_plots(post, "Fsub", show_diags = "never", keep_percent = diag_plot_thin)
 ```
 
 `r create_label("Figure", cntr, F, level = 3, sub = "g", subb = "", text = "$R_y$", tabset = F, mcmc_info)`
 
 ```{r R-diag-plots, fig.height = 6, fig.width = 9, eval = mcmc_info}
-diag_plots(post, "^R[", show_diags = "never", thin_percent = diag_plot_thin)
+diag_plots(post, "^R[", show_diags = "never", keep_percent = diag_plot_thin)
 ```
 
 `r create_label("Figure", cntr, F, level = 3, sub = "h", subb = "", text = "$\\delta$", tabset = T, mcmc_info)`
@@ -344,13 +344,13 @@ diag_plots(post, "^R[", show_diags = "never", thin_percent = diag_plot_thin)
 `r create_label("Figure", cntr, F, level = 4, sub = "h", subb = "1", text = "$\\delta_0$", tabset = F, mcmc_info)`
 
 ```{r b0-sex-diag-plots, fig.height = 6, fig.width = 9, eval = mcmc_info}
-diag_plots(post, "delta_0", show_diags = "never", thin_percent = diag_plot_thin)
+diag_plots(post, "delta_0", show_diags = "never", keep_percent = diag_plot_thin)
 ```
 
 `r create_label("Figure", cntr, F, level = 4, sub = "h", subb = "2", text = "$\\delta_1$", tabset = F, mcmc_info)`
 
 ```{r b1-sex-diag-plots, fig.height = 6, fig.width = 9, eval = mcmc_info}
-diag_plots(post, "delta_1", show_diags = "never", thin_percent = diag_plot_thin)
+diag_plots(post, "delta_1", show_diags = "never", keep_percent = diag_plot_thin)
 ```
 
 `r create_label("Figure", cntr, F, level = 3, sub = "i", subb = "", text = "$\\gamma$", tabset = T, mcmc_info)`
@@ -358,19 +358,19 @@ diag_plots(post, "delta_1", show_diags = "never", thin_percent = diag_plot_thin)
 `r create_label("Figure", cntr, F, level = 4, sub = "i", subb = "1", text = "$\\gamma_{0,a,s}$", tabset = F, mcmc_info)`
 
 ```{r b0-mat-diag-plots, fig.height = 7, eval = mcmc_info}
-diag_plots(post, "gamma_0", show_diags = "never", thin_percent = diag_plot_thin)
+diag_plots(post, "gamma_0", show_diags = "never", keep_percent = diag_plot_thin)
 ```
 
 `r create_label("Figure", cntr, F, level = 4, sub = "i", subb = "2", text = "$\\gamma_{1,a,s}$", tabset = F, mcmc_info)`
 
 ```{r b1-mat-diag-plots, fig.height = 7, eval = mcmc_info}
-diag_plots(post, "gamma_1", show_diags = "never", thin_percent = diag_plot_thin)
+diag_plots(post, "gamma_1", show_diags = "never", keep_percent = diag_plot_thin)
 ```
 
 `r create_label("Figure", cntr, T, level = 3, sub = "j", subb = "", text = "D_sum", tabset = F, mcmc_info & meta$rand_age)`
 
 ```{r D-sum-diag-plot, eval = mcmc_info & meta$rand_age}
-par(oma = c(0,0,2,0)); diag_plots(post, "D_sum", show_diags = "never", thin_percent = diag_plot_thin)
+par(oma = c(0,0,2,0)); diag_plots(post, "D_sum", show_diags = "never", keep_percent = diag_plot_thin)
 ```
 
 `r cntr = up_cntr("Section", cntr, fit); create_label("Section", cntr, F, level = 1, sub = "", subb = "", text = "Fit to Data", tabset = T, fit)`
@@ -1234,7 +1234,7 @@ param_names = list(
   sel = c("^V...$")
 )
 
-# lapply(param_names, function(x) match_p(post, x, ubase = T))
+# lapply(param_names, function(x) match_params(post, x, type = "base_only"))
 
 # summarize and format the requested posteriors
 # starttime = Sys.time()
@@ -1244,7 +1244,7 @@ est_params = as.data.frame(t(post_summ(post,unname(unlist(param_names)))[c(3,1,2
 # stoptime - starttime
 
 # add a parameter type category
-n_matches = unlist(lapply(param_names, function(x) length(match_p(post, x))))
+n_matches = unlist(lapply(param_names, function(x) length(match_params(post, x))))
 est_params = cbind(group = unlist(sapply(1:length(n_matches), function(x) rep(names(n_matches)[x], n_matches[x]))), est_params)
 
 # make the node name a variable
@@ -1308,9 +1308,9 @@ samps_late = prep_samples(post, keep_t = late_keep_t, keep_y = late_keep_y, sile
 samps_all = prep_samples(post, keep_t = all_keep_t, keep_y = all_keep_y, silent = T)
 
 samps = list(
-  early = matrix2mcmclist(cbind(postpack:::id_mat(post), samps_early)),
-  all = matrix2mcmclist(cbind(postpack:::id_mat(post), samps_all)),
-  late = matrix2mcmclist(cbind(postpack:::id_mat(post), samps_late))
+  early = post_convert(cbind(postpack:::id_mat(post), samps_early)),
+  all = post_convert(cbind(postpack:::id_mat(post), samps_all)),
+  late = post_convert(cbind(postpack:::id_mat(post), samps_late))
 )
 
 samps = lapply(samps, function(x) post_subset(x, c("v", "pi", "z")))
@@ -1321,7 +1321,7 @@ f = function(post) {
 
 out = as.data.frame(lapply(samps, f))
 
-x = get_p(samps[[1]])
+x = get_params(samps[[1]])
 
 build_name = function(x) {
   symbol = ifelse(str_detect(x, "pi"), "\\bar{\\pi}", 
