@@ -13,7 +13,8 @@ models = c(1,3,6,5,4,9,10,12)
 n_models = length(models)
 model_ids = c("N-0", "N-ASL", "E-0", "E-L", "E-S", "E-A", "E-SL", "E-AL", "E-AS", "E-ASL", "EM-0", "EM-ASL")
 for (m in 1:n_models) {
-  models = c(1,3,6,5,4,10,12)
+  models = c(1,3,6,5,4,9,10,12)
+  models = 10
   model = models[m]
   html_dir = "os-detailed"
   
