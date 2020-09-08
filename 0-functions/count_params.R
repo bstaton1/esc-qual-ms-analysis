@@ -9,8 +9,8 @@ count_params_in_model = function(age_trend, sex_trend) {
     model_lines = readLines(file.path("2-model-fit", "model-files", "full-model.txt")),
     outfile = "tmp.txt",
     z_unit = "fish_count",
-    age_trend = F, 
-    sex_trend = F,
+    age_trend = age_trend, 
+    sex_trend = sex_trend,
     rand_age = F,
     ppd = F
   )
