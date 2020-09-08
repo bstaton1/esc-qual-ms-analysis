@@ -45,11 +45,34 @@ yield = function(log_F_max, i, post.samp, vuln) {
   H_as = N_as * U_as
   H = sum(H_as)
   
+  # proportion of run at age/sex
+  names(pi_as) = paste0("pi_", rep(c("F", "M"), each = 4), rep(4:7, 2))
+  
+  # proportion of spawners at age/sex
+  p_as = S_as/sum(S_as)
+  names(p_as) = paste0("p_", rep(c("F", "M"), each = 4), rep(4:7, 2))
+  
+  # exploitation rate of spawners at age/sex
+  U_as = H_as/N_as
+  names(U_as) = paste0("U_", rep(c("F", "M"), each = 4), rep(4:7, 2))
+  
+  # overall exploitation rate
+  U_tot = H/sum(N_as)
+  
+  # exploitation rate by sex
+  U_s = c(U_F = sum(H_as[1:4])/sum(N_as[1:4]), U_M = sum(H_as[5:8])/sum(N_as[5:8]))
+  
   output = c(
     H = H,
     S = S,
     R = RF,
     p_female = sum(S_as[1:4])/S,
+    U_tot = U_tot,
+    U_s,
+    pi_as,
+    p_as,
+    U_as,
+    F_max = F_max,
     Z_million = Z/1e6
     )
 
