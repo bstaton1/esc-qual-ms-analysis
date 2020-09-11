@@ -35,7 +35,7 @@ library(scales)
 library(abind)
 ```
 
-# Analysis #1: Imputation of Missing Length-at-Age data
+# Section #1: Imputation of Missing Length-at-Age data
 
 For mean length-at-age data (mid-eye to tail-fork; METF, mm), we used individual fish records sampled at weirs distributed throughout the Kuskokwim drainage dating back to 1976. These data were used for two purposes in our analysis: 
 
@@ -48,7 +48,7 @@ The output of this rule is shown in Figure 1.1, below. In general, most interpol
 
 **Figure 1.1**: Time series (1976 -- 2017) of escapement average METF by age class including observed (blue) and imputed (red) values. Vertical lines represent the break points of the time series split into thirds (14 years each); the percentages denote the percent of all values that were imputed for that time block by age/sex.
 
-```{r, fig.width = 5, fig.height = 7}
+```{r workspace1, fig.width = 5, fig.height = 7}
 dat = read.csv("1-data-prep/b-length-data/outputs/esc-mean-length-no-interp.csv")
 dat_all = read.csv("1-data-prep/b-length-data/outputs/esc-mean-length.csv")
 
@@ -89,490 +89,7 @@ mtext(side = 2, outer = T, line = 2.5, "Average Escapement METF (mm)")
 
 ```
 
-# Analysis #2: Alternative Composition Data Weighting
-
-```{r workspace1}
-model = 1  # just needed to build the data
-source("2-model-fit/1-compile-data.R")
-source("load-functions.R")
-rm(model) # clear out the model object 
-
-out_dir = "model-output/permanent"
-out_files = dir(out_dir, full.names = T)
-
-# select the models to read in models
-
-# main text E-ASL model
-keep_mods = 10
-
-# altered age comp data weighting model
-altered_ess_mods = mod_key$model[mod_key$supplementary == 1]
-
-keep_mods = c(keep_mods, altered_ess_mods)
-
-keep_mods = paste(paste0("-", keep_mods, "\\."), collapse = "|")
-out_files = out_files[str_detect(out_files, keep_mods)]
-
-# the file names of the output files
-postfiles = out_files[str_detect(out_files, "post")]
-mods = str_extract(postfiles, "[0-9]+")
-metafiles = out_files[str_detect(out_files, "meta")]
-msyfiles = out_files[str_detect(out_files, "msy")]
-
-# create empty objects to store the output from each model
-meta = list()
-post_list = list()
-msy = NULL
-
-# read in the posterior samples and meta data
-for (i in 1:length(mods)) {
-  post_list[[i]] = readRDS(postfiles[i])
-  meta[[i]] = readRDS(metafiles[i])
-}
-
-# create the ids for each model
-ids = unlist(lapply(meta, id_model, unit = F, trends = F, src = F, rand_age = F, ess = T))
-
-# read in the msy equilibrium quantities
-msy = readRDS(msyfiles[1])
-for (i in 2:length(mods)) {
-  msy = abind(msy, readRDS(msyfiles[i]), along = 5)
-}
-
-# give the objects model identifiers
-names(meta) = ids
-names(post_list) = ids
-dimnames(msy)[[5]] = ids
-```
-
-```{r model-identifers}
-col = character(length(ids))
-col[str_detect(ids, "s")] = "skyblue"
-col[str_detect(ids, "m")] = "tomato"
-lty = rep(1:4, 2)
-lwd = c(3, rep(1, length(ids) - 1))
-```
-
-## Motivation and Methods
-
-The use of multinomial likelihoods as a description of the observation process of age/sex composition by year and fate (escapement and fishery harvests) inserts a difficult problem related to the weight each data set receives. It is well-documented that the actual sample size (i.e., number of fish sampled) is not an appropriate measure of the amount of information contained in the sample because sampled fish are often not independent [@maunder-2011; @mcallister-ianelli-1997; @hulson-etal-2011]. This requires the use of an "effective multinomial sample size" (ESS), which is generally lower than the observed sample size. To address this issue for the analysis presented in the main text, we used a method where the effective sample size for each data set each year was rescaled such that the year with the maximum number of fish sampled for a data set received a ESS value of 100, and the rest of the years were scaled proportionately, i.e.:
-
-$$ESS_{i,t} = \frac{n_{i,t}}{\text{max}(n_{i})} \times 100$$  
-
-where $i$ indexes the fate (escapement, commercial, or subsistence harvest) and $t$ indexes the calendar year, and $n$ is the number of fish sampled for age and sex composition. This method places more weight on years in which more fish were aged, however the value of 100 is arbitrary and places relatively equal weight on each of the fate-specific data sets. We refer to this scheme as the "scale" method.
-
-We wished to evaluate whether the method we used to assign weight to these data sets is likely to have influenced our inference in the main text analysis. For this sensitivity analysis, we assessed the influence of placing more weight on some data sets over others by replacing the value of 100 with 200 for each data set sequentially (i.e., refitting the model with different weights for each data set).  Additionally, we assessed an alternative scheme where the value of $ESS_{i,t}$ was obtained as:
-
-$$ESS_{i,t} = \text{min}(n_{i,t}, X)$$
-
-where $X$ took on the value of 100 or 200 depending on the scenario. We refer to this scheme as the "min" method, and it assumes that any additional fish beyond $X$ does not contribute any additional information to the multinomial sample. However, because the vast majority of years had greater than 200 fish for a given sampled fate, it has the tendency to weight all years equally within a data set. Table \@ref(tab:table) below summarizes the data weighting scenarios investigated in this sensitivity analysis:
-
-```{r table}
-tab = data.frame(
-  scenario = 1:8,
-  method = rep(c("scale", "min"), each = 4),
-  esc = c(100, 200, 100, 100, 100, 200, 100, 100),
-  com = c(100, 100, 200, 100, 100, 100, 200, 100),
-  sub = c(100, 100, 100, 200, 100, 100, 100, 200),
-  color = rep(c("blue", "red"), each = 4),
-  lty = rep(c("solid", "dashed", "dotted", "dotdash"), 2),
-  thick = c("thick", rep("thin", 7))
-)
-
-colnames(tab) = c("Scenario", "Method", "Escapement", "Commercial", "Subsistence", "Color", "Line Type<sup>b,c</sup>", "Line Thickness<sup>b</sup>")
-
-tab$Scenario[1] = "1<sup>a</sup>"
-tab %>%
-  kable(align = "c", escape = F, caption = "Data weighting scenarios and their notation in the figures that follow.") %>%
-  kable_styling(full_width = F, bootstrap_options = c("condensed")) %>%
-  add_header_above(c(" " = 2, "Fate Data Set Scaler" = 3, "Symbology in Figures" = 3)) %>%
-  footnote(alphabet = c(
-    "This is the model E-ASL presented in the main text",
-    "Only applicable in time series figures",
-    "We recognize that it is difficult to identify the difference between these line types in the figures below, however that is part of the inference - the lines are similar so it does not matter which is which."))
-```
-
-All analyses were conducted using model structure E-ASL (egg count per female spawner as the reproductive unit, with time trends allowed for age-at-return, sex-at-return, and length-at-return).
-
-### Results
-
-As shown in the figures below, the influence of alternative composition weighting schemes was relatively minimal. There were several quantitative differences (estimates differed in their values), but rarely did the qualitative inference change (direction of trends, overall patterns). In general, we found:
-
-*  Similar temporal declines in the probability of returning as a female regardless of age (Figure 2.1) and consistent agreement that the slope governing this pattern has at least 97.5% credibility of being negative (Figure 2.2b).
-*  Similar temporal trends in the probability of returning at age by sex, with the exception of age 4 females -- models fitted using the "scale" method indicated slightly negative trends and models fitted with the "min" method indicated stronger positive trends, though both methods indicated age 4 fish make up 5% or less of all female recruits (Figure 2.3).
-*  Similar calendar year age composition estimates, which reflect the fit to the available data (Figure 2.6a,b,c). 
-*  Similar selectivity functions, though there was a tendency for the "min" models to have a less steep decline following peak selectivity as fish size increased (Figure 2.7).
-*  Similar estimates of $S_{\text{MSC}}$, as well as the effect of time period and mesh size (Figure 2.8a,b). However, there was a tendency for the "min" models to suggest $S_{\text{MSC}}$ values that were approximately 10% larger than the "scale" models -- this is likely related to the flatter selectivity function obtained from these models given the high degree of similarity in other model outputs.
-*  The use of the "min" weighting scheme resulted in narrower credible intervals for estimated and derived quantities -- this stems from the assumed greater information content of the data under these scheme relative to the "scale" method.
-
-Although there are many other weighting schemes that we could have evaluated, we interpret these results as evidence that our choice of weighting scheme for the main analysis did not drive the results we obtained.
-
-#### Return Composition {.tabset .tabset-pills .tabset-fade}
-
-##### Sex
-
-**Figure 2.1:** Variability in the probability of returning as a female across composition data weighting scenarios. Blue lines represent the "scale" ESS method, red lines represent the "min" method. The thick blue line is the scenario used in  main text analyses.
-
-```{r sex-p, fig.width = 6, fig.height = 4}
-by = (min(years) - a_max):(max(years) - a_min)
-at_x = seq(1, length(by), 10)
-
-par(mar = c(3,3,1,1), tcl = -0.25, mgp = c(2,0.45,0))
-x = sapply(post_list, function(post) post_summ(post, "psi")[3,])
-matplot(x, type = "l", ylim = c(0.25, 0.45), 
-        lty = lty, col = col, lwd = lwd, xaxt = "n",
-        xlab = "Brood Year", ylab = "Probability of Returning as Female")
-axis(side = 1, at = at_x, labels = by[at_x])
-```
-
-**Figure 2.2:** Variability in (a) the intercept ($\delta_0$) and (b) the slope ($\delta_1$) of the logit-linear model governing the probability of returning as a female over time across composition data weighting scenarios. Points represent the posterior median and error bars represent the central 50% (thick lines) and 95% (thin lines) posterior credible regions. Blue represents weighting scenarios using the "scale" ESS method, red represents weighting scenarios using the "min" method.
-
-```{r sex-coef, fig.width = 8, fig.height = 4}
-par(mfrow = c(1,2), mar = c(0,1,1,1), oma = c(2.5,2,0,0), mgp = c(2,0.5,0), tcl = -0.25)
-x = sapply(post_list, function(post) post_summ(post, "delta_0", probs = c(0.5, 0.25, 0.75, 0.025, 0.975)))
-rownames(x) = c("mean", "sd", "50%", "25%", "75%", "2.5%", "97.5%")
-mp = barplot(x["50%",], names.arg = 1:length(ids),
-             ylim = range(0, x[c("2.5%", "97.5%"),]) * 1.05,
-             col = "white", border = "white")
-segments(mp, x["2.5%",], mp, x["97.5%",], col = col)
-segments(mp, x["25%",], mp, x["75%",], lwd = 3, col = col)
-points(mp, x["50%",], pch = 16, cex = 1.2, col = col)
-axis(side = 1, at = mp, labels = F); box()
-usr = par("usr"); xdiff = diff(usr[1:2]); ydiff = diff(usr[3:4])
-text(usr[1], usr[4] - ydiff * 0.05, labels = "(a)", pos = 4, font = 2)
-
-x = sapply(post_list, function(post) post_summ(post, "delta_1", probs = c(0.5, 0.25, 0.75, 0.025, 0.975)))
-rownames(x) = c("mean", "sd", "50%", "25%", "75%", "2.5%", "97.5%")
-mp = barplot(x["50%",], names.arg = 1:length(ids), ylim = range(0, x[c("2.5%", "97.5%"),]) * 1.05, col = "white", border = "white")
-segments(mp, x["2.5%",], mp, x["97.5%",], col = col)
-segments(mp, x["25%",], mp, x["75%",], lwd = 3, col = col)
-points(mp, x["50%",], pch = 16, cex = 1.2, col = col)
-axis(side = 1, at = mp, labels = F); box()
-usr = par("usr"); xdiff = diff(usr[1:2]); ydiff = diff(usr[3:4])
-text(usr[1], usr[4] - ydiff * 0.05, labels = "(b)", pos = 4, font = 2)
-
-mtext(side = 1, outer = T, line = 1.5, "Data Weight Scenario")
-mtext(side = 2, outer = T, line = 1, "Coefficient Value")
-```
-
-##### Age-by-Sex
-
-**Figure 2.3:** Variability in the brood year-specific probability of returning at each age by sex across composition data weighting scenarios. Lines are posterior medians. Blue lines represent the weighting scenarios using the "scale" ESS method, red lines represent the weighting scenarios using the "min" method. The thick blue line is the scenario used in  main text analyses.
-
-```{r age-p, fig.width = 5, fig.height = 7}
-a = 1; s = 1
-by = (min(years) - a_max):(max(years) - a_min)
-at_x = seq(1, length(by), 10)
-par(mfcol = c(4,2), mar = c(0.5,0.5,1.5,0.5), oma = c(3,4,0,2),
-    tcl = -0.25, mgp = c(2,0.45,0))
-
-sex = c("Female", "Male")
-age = 4:7
-for (s in 1:2) {
-  for (a in 1:4) {
-    p_sub = str_replace("pi[.+,a,s]", "a,s", paste0(a, ",", s))
-    x = sapply(post_list, function(post) post_summ(post, p_sub)[3,])
-    matplot(x, type = "l", lty = lty, col = col, lwd = lwd,
-            ylim = c(0, max(max(x), 0.1)), xaxt = "n", yaxt = "n",
-            main = paste(sex[s], "Age", age[a]))
-    if (s == 1) axis(side = 2, las = 2) else axis(side = 4, las = 1)
-    if (a == 4) {
-      axis(side = 1, at = at_x, labels = by[at_x])
-    } else {
-      axis(side = 1, at = at_x, labels = F)
-    }
-  }
-}
-mtext(side = 1, outer = T, line = 1.5, "Brood Year")
-mtext(side = 2, outer = T, line = 2, "Probability of Return-at-Age by Sex")
-
-```
-
-**Figure 2.4:** Variability in the intercepts ($\gamma_{0,a,s}$) of the baseline category logit-linear model governing the probability of returning at each age by sex over time across composition data weighting scenarios. Points represent the posterior median and error bars represent the central 50% (thick lines) and 95% (thin lines) posterior credible regions. Blue represents the weighting scenarios using the "scale" ESS method, red represents the weighting scenarios using the "min" method.
-
-```{r age-coef-0, fig.width = 5, fig.height = 7}
-par(mfcol = c(4,2), mar = c(0.5,0.5,1.5,0.5), oma = c(3,4,0,2),
-    tcl = -0.25, mgp = c(2,0.45,0))
-
-sex = c("Female", "Male")
-age = 4:7
-for (s in 1:2) {
-  for (a in 1:4) {
-    p_sub = str_replace("gamma_0[s,a]", "s,a", paste0(s, ",", a))
-    x = sapply(post_list, function(post) post_summ(post, p_sub, probs = c(0.5, 0.25, 0.75, 0.025, 0.975)))
-    rownames(x) = c("mean", "sd", "50%", "25%", "75%", "2.5%", "97.5%")
-    mp = barplot(x["50%",], names.arg = 1:length(ids),
-                 ylim = range(0, x[c("2.5%", "97.5%"),]) * 1.05,
-                 col = "white", border = "white", xaxt = "n", yaxt = "n",
-                 main = paste(sex[s], "Age", age[a]))
-    segments(mp, x["2.5%",], mp, x["97.5%",], col = col)
-    segments(mp, x["25%",], mp, x["75%",], lwd = 3, col = col)
-    points(mp, x["50%",], pch = 16, cex = 1.2, col = col)
-    if (s == 1) axis(side = 2, las = 2) else axis(side = 4, las = 1)
-    if (a == 4) {
-      axis(side = 1, at = mp, labels = 1:8)
-    } else {
-      axis(side = 1, at = mp, labels = F)
-    }
-    box()
-  }
-}
-
-mtext(side = 1, outer = T, line = 1.5, "Data Weight Scenario")
-mtext(side = 2, outer = T, line = 2, "Coefficient Value")
-
-
-```
-
-**Figure 2.5:** Variability in the slopes ($\gamma_{1,a,s}$) of the baseline category logit-linear model governing the probability of returning at each age by sex over time across composition data weighting scenarios. Points represent the posterior median and error bars represent the central 50% (thick lines) and 95% (thin lines) posterior credible regions. Blue represents the weighting scenarios using the "scale" ESS method, red represents the weighting scenarios using the "min" method.
-
-```{r age-coef-1, fig.width = 5, fig.height = 7}
-par(mfcol = c(4,2), mar = c(0.5,0.5,1.5,0.5), oma = c(3,4,0,2),
-    tcl = -0.25, mgp = c(2,0.45,0))
-
-sex = c("Female", "Male")
-age = 4:7
-for (s in 1:2) {
-  for (a in 1:4) {
-    p_sub = str_replace("gamma_1[s,a]", "s,a", paste0(s, ",", a))
-    x = sapply(post_list, function(post) post_summ(post, p_sub, probs = c(0.5, 0.25, 0.75, 0.025, 0.975)))
-    rownames(x) = c("mean", "sd", "50%", "25%", "75%", "2.5%", "97.5%")
-    mp = barplot(x["50%",], names.arg = 1:length(ids),
-                 ylim = range(0, x[c("2.5%", "97.5%"),]) * 1.05,
-                 col = "white", border = "white", xaxt = "n", yaxt = "n",
-                 main = paste(sex[s], "Age", age[a]))
-    segments(mp, x["2.5%",], mp, x["97.5%",], col = col)
-    segments(mp, x["25%",], mp, x["75%",], lwd = 3, col = col)
-    points(mp, x["50%",], pch = 16, cex = 1.2, col = col)
-    if (s == 1) axis(side = 2, las = 2) else axis(side = 4, las = 1)
-    if (a == 4) {
-      axis(side = 1, at = mp, labels = 1:8)
-    } else {
-      axis(side = 1, at = mp, labels = F)
-    }
-    box()
-  }
-}
-
-mtext(side = 1, outer = T, line = 1.5, "Data Weight Scenario")
-mtext(side = 2, outer = T, line = 2, "Coefficient Value")
-
-
-```
-
-#### Calendar Year Composition {.tabset .tabset-pills .tabset-fade}
-
-**Figure 2.6:** Variability in the calendar year age/sex composition by fate (a - escapement; b - commercial; c - subsistence) across data weighting scenarios. Lines represent posterior medians. Blue lines represent the weighting scenarios using the "scale" ESS method, red lines represents the weighting scenarios using the "min" method. The thick blue line is the scenario used in main text analyses.
-
-##### (a) Escapement
-
-```{r q-esc, fig.width = 5, fig.height = 7}
-type = "esc"
-at_x = seq(1, nt, 10)
-par(mfcol = c(4,2), mar = c(0.5,0.5,1.5,0.5), oma = c(3,4,0,2),
-    tcl = -0.25, mgp = c(2,0.45,0))
-sex = rep(c("Female", "Male"), each = 4)
-age = rep(4:7, 2)
-for (as in 1:8) {
-    p_sub = str_replace("q_type[.+,as]", "as", as.character(as))
-    p_sub = str_replace(p_sub, "type", type)
-    x = sapply(post_list, function(post) post_summ(post, p_sub)[3,])
-    matplot(x, type = "l", lty = lty, col = col, lwd = lwd,
-            ylim = c(0, max(max(x), 0.05)), xaxt = "n", yaxt = "n",
-            main = paste(sex[as], "Age", age[as]))
-    if (as < 5) axis(side = 2, las = 2) else axis(side = 4, las = 1)
-    if (as %in% c(4,8)) {
-      axis(side = 1, at = at_x, labels = years[at_x])
-    } else {
-      axis(side = 1, at = at_x, labels = F)
-    }
-  }
-mtext(side = 1, outer = T, line = 1.5, "Calendar Year")
-mtext(side = 2, outer = T, line = 2, "Proportional Contribution")
-```
-
-##### (b) Commercial
-
-```{r q-com, fig.width = 5, fig.height = 7}
-type = "com"
-at_x = seq(1, nt, 10)
-par(mfcol = c(4,2), mar = c(0.5,0.5,1.5,0.5), oma = c(3,4,0,2),
-    tcl = -0.25, mgp = c(2,0.45,0))
-sex = rep(c("Female", "Male"), each = 4)
-age = rep(4:7, 2)
-for (as in 1:8) {
-    p_sub = str_replace("q_type[.+,as]", "as", as.character(as))
-    p_sub = str_replace(p_sub, "type", type)
-    x = sapply(post_list, function(post) post_summ(post, p_sub)[3,])
-    matplot(x, type = "l", lty = lty, col = col, lwd = lwd,
-            ylim = c(0, max(max(x), 0.05)), xaxt = "n", yaxt = "n",
-            main = paste(sex[as], "Age", age[as]))
-    if (as < 5) axis(side = 2, las = 2) else axis(side = 4, las = 1)
-    if (as %in% c(4,8)) {
-      axis(side = 1, at = at_x, labels = years[at_x])
-    } else {
-      axis(side = 1, at = at_x, labels = F)
-    }
-  }
-mtext(side = 1, outer = T, line = 1.5, "Calendar Year")
-mtext(side = 2, outer = T, line = 2, "Proportional Contribution")
-```
-
-##### (c) Subsistence
-
-```{r q-sub, fig.width = 5, fig.height = 7}
-type = "sub"
-at_x = seq(1, nt, 10)
-par(mfcol = c(4,2), mar = c(0.5,0.5,1.5,0.5), oma = c(3,4,0,2),
-    tcl = -0.25, mgp = c(2,0.45,0))
-sex = rep(c("Female", "Male"), each = 4)
-age = rep(4:7, 2)
-for (as in 1:8) {
-    p_sub = str_replace("q_type[.+,as]", "as", as.character(as))
-    p_sub = str_replace(p_sub, "type", type)
-    x = sapply(post_list, function(post) post_summ(post, p_sub)[3,])
-    matplot(x, type = "l", lty = lty, col = col, lwd = lwd,
-            ylim = c(0, max(max(x), 0.05)), xaxt = "n", yaxt = "n",
-            main = paste(sex[as], "Age", age[as]))
-    if (as < 5) axis(side = 2, las = 2) else axis(side = 4, las = 1)
-    if (as %in% c(4,8)) {
-      axis(side = 1, at = at_x, labels = years[at_x])
-    } else {
-      axis(side = 1, at = at_x, labels = F)
-    }
-  }
-mtext(side = 1, outer = T, line = 1.5, "Calendar Year")
-mtext(side = 2, outer = T, line = 2, "Proportional Contribution")
-```
-
-#### Selectivity Function
-
-**Figure 2.7:** Variability in the estimated selectivity function across data weighting scenarios. Lines were obtained using the posterior medians of the selectivity parameters ($\tau$, $\sigma$, $\theta$, and $\lambda$). Blue lines represent the weighting scenarios using the "scale" ESS method, red lines represents the weighting scenarios using the "min" method. The thick blue line is the scenario used in  main text analyses.
-
-```{r sel, fig.width = 6, fig.height = 4}
-x = t(sapply(post_list, function(post) post_summ(post, "^V...$")[3,]))
-
-pearson = function(rlm, params) {
-  
-  tau = params["Vtau"]
-  sigma = params["Vsig"]
-  theta = params["Vtha"]
-  lambda = params["Vlam"]
-  
-  # separate calculation into 5 steps
-  t1 = (1 + lambda^2/(4 * theta^2))^theta
-  t2 = rlm - (sigma * lambda)/(2 * theta) - tau
-  t3 = (1 + t2^2/sigma^2)^-theta
-  t4 = exp(-lambda * (atan(t2/sigma) + atan(lambda/(2 * theta))))
-  
-  v = t1 * t3 * t4
-  
-  # standardize the output so only one age/sex is fully vuln for a gear
-  v/max(v)
-}
-
-rlm_seq = seq(1.25, 3.25, length = 100)
-
-out = apply(x, 1, function(z) pearson(rlm_seq, z))
-par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
-matplot(x = rlm_seq, y = out, type = "l", col = col, lwd = lwd, lty = lty,
-        xlab = "Ratio of Fish Length to Mesh Perimeter (RLM)",
-        ylab = "Selectivity", las = 1)
-
-
-```
-
-
-#### $S_{\text{MSC}}$ {.tabset .tabset-pills .tabset-fade}
-
-**Figure 2.8:** Variability in the estimated value of $S_{\text{MSC}}$ across data weighting scenarios for (a) 8-inch mesh, (b) 6-inch mesh, and (c) non-selective mesh. Points represent posterior medians and error bars represent the central 50% (thick lines) and 80% (thin lines) posterior credible regions. Blue represents the weighting scenarios using the "scale" ESS method, red represent the weighting scenarios using the "min" method. 
-
-##### (a) 8-inch
-
-```{r S-msy-8, fig.width = 7, fig.height = 4}
-x = msy["50%","S","mesh8",,]
-upr1 = msy["90%","S","mesh8",,]
-lwr1 = msy["10%","S","mesh8",,]
-upr2 = msy["75%","S","mesh8",,]
-lwr2 = msy["25%","S","mesh8",,]
-
-col_mat = cbind(
-  matrix(unique(col)[1], 3,4),
-  matrix(unique(col)[2], 3,4)
-)
-
-par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
-mp = barplot(x, beside = T, names.arg = 1:8, yaxt = "n",
-             ylim = range(msy[c("10%", "90%"),"S",,,]) * c(0.95,1.05), col = "white", border = "white", xlab = "Data Weight Scenario", ylab = "SMSC")
-segments(mp, lwr1, mp, upr1, col = col_mat)
-segments(mp, lwr2, mp, upr2, col = col_mat, lwd = 3)
-points(mp, x, col = "white", bg = col_mat, pch = c(21, 22, 24), cex = 1.5)
-box()
-axis(side = 1, at = mp[2,], labels = F)
-axis(side = 2, at = seq(0, 200000, 20000), labels = seq(0, 200, 20), las = 2)
-legend("bottomright", legend = c("First 10", "All", "Last 10"), 
-       title = "Time Period", bty = "n", pch = c(21, 22, 24), col = "white", pt.bg = "grey80",
-       pt.cex = 1.5)
-
-```
-
-##### (b) 6-inch
-
-```{r S-msy-6, fig.width = 7, fig.height = 4}
-x = msy["50%","S","mesh6",,]
-upr1 = msy["90%","S","mesh6",,]
-lwr1 = msy["10%","S","mesh6",,]
-upr2 = msy["75%","S","mesh6",,]
-lwr2 = msy["25%","S","mesh6",,]
-
-col_mat = cbind(
-  matrix(unique(col)[1], 3,4),
-  matrix(unique(col)[2], 3,4)
-)
-
-par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
-mp = barplot(x, beside = T, names.arg = 1:8, yaxt = "n",
-             ylim = range(msy[c("10%", "90%"),"S",,,]) * c(0.95,1.05), col = "white", border = "white", xlab = "Data Weight Scenario", ylab = "SMSC")
-segments(mp, lwr1, mp, upr1, col = col_mat)
-segments(mp, lwr2, mp, upr2, col = col_mat, lwd = 3)
-points(mp, x, col = "white", bg = col_mat, pch = c(21, 22, 24), cex = 1.5)
-box()
-axis(side = 1, at = mp[2,], labels = F)
-axis(side = 2, at = seq(0, 200000, 20000), labels = seq(0, 200, 20), las = 2)
-legend("topleft", legend = c("First 10", "All", "Last 10"), 
-       title = "Time Period", bty = "n", pch = c(21, 22, 24), col = "white", pt.bg = "grey80",
-       pt.cex = 1.5)
-```
-
-##### (c) Flat
-
-```{r S-msy-flat, fig.width = 7, fig.height = 4}
-x = msy["50%","S","flat",,]
-upr1 = msy["90%","S","flat",,]
-lwr1 = msy["10%","S","flat",,]
-upr2 = msy["75%","S","flat",,]
-lwr2 = msy["25%","S","flat",,]
-
-col_mat = cbind(
-  matrix(unique(col)[1], 3,4),
-  matrix(unique(col)[2], 3,4)
-)
-
-par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
-mp = barplot(x, beside = T, names.arg = 1:8, yaxt = "n",
-             ylim = range(msy[c("10%", "90%"),"S",,,]) * c(0.95,1.05), col = "white", border = "white", xlab = "Data Weight Scenario", ylab = "SMSC")
-segments(mp, lwr1, mp, upr1, col = col_mat)
-segments(mp, lwr2, mp, upr2, col = col_mat, lwd = 3)
-points(mp, x, col = "white", bg = col_mat, pch = c(21, 22, 24), cex = 1.5)
-box()
-axis(side = 1, at = mp[2,], labels = F)
-axis(side = 2, at = seq(0, 200000, 20000), labels = seq(0, 200, 20), las = 2)
-legend("topleft", legend = c("First 10", "All", "Last 10"), 
-       title = "Time Period", bty = "n", pch = c(21, 22, 24), col = "white", pt.bg = "grey80",
-       pt.cex = 1.5)
-```
-
-# Analysis #3: Alternative Length-Fecundity Relationships
+# Section #2: Alternative Length-Fecundity Relationships
 
 ```{r workspace2}
 model = 1  # just needed to build the data
@@ -662,9 +179,9 @@ lwd = c(3, rep(1, length(ids) - 1))
 
 ## Motivation and Methods
 
-The conclusions from our analysis may depend on the shape of the assumed relationship between female spawner size (METF) and reproductive contribution (e.g., fecundity). As described in the main-text, no length-fecundity data sets were available for the Kuskokwim River Chinook salmon population, so we used a relationship obtained from the Yukon River Chinook salmon population, sampled at Eagle, AK in the years 2008 -- 2010. However, we wished to evaluate whether our conclusions would have changed had we used other assumed relationships. Table \@ref(tab:table2) below shows the sources of 6 additional length-fecundity data sets we found for Chinook salmon populations in Alaska:
+The conclusions from our analysis may depend on the shape of the assumed relationship between female spawner size (METF) and reproductive contribution (e.g., fecundity). As described in the main-text, no length-fecundity data sets were available for the Kuskokwim River Chinook salmon population, so we used a relationship obtained from the Yukon River Chinook salmon population, sampled at Eagle, AK in the years 2008 -- 2010. However, we wished to evaluate whether our conclusions would have changed had we used other assumed relationships. Table \@ref(tab:table1) below shows the sources of 6 additional length-fecundity data sets we found for Chinook salmon populations in Alaska:
 
-```{r table2}
+```{r table1}
 
 mods = unlist(lapply(meta[1:7], function(m) m$model))
 
@@ -733,15 +250,15 @@ tab %>%
 
 ```
 
-For this sensitivity analysis, we recalculated $z_{t,a,s}$ (mean reproductive contribution per spawner of age $a$ and sex $s$ in calendar year $t$) using the power function coefficients shown in Table \@ref(tab:table2). For each of the 7 data sets (6 additional to the main text analysis), we fitted model E-0 (no trends allowed for age-, sex-, or length-at-return) and model E-ASL (all trends allowed). We then compared the output to that obtained when using data set **a**.
+For this sensitivity analysis, we recalculated $z_{t,a,s}$ (mean reproductive contribution per spawner of age $a$ and sex $s$ in calendar year $t$) using the power function coefficients shown in Table \@ref(tab:table1). For each of the 7 data sets (6 additional to the main text analysis), we fitted model E-0 (no trends allowed for age-, sex-, or length-at-return) and model E-ASL (all trends allowed). We then compared the output to that obtained when using data set **a**.
 
 ### Results
 
-There was some variability in the expected fecundity at size between the different data sets we used, both in a absolute sense (Figure 3.1a) and a relative sense (Figure 3.1b). When standardized to the maximum point for each curve, the relative contribution of different sized females showed variable increases with fish size between data sources (Figure 3.1b). This is a result of the different values of the $b$ coefficient as shown in Table \@ref(tab:table2): steeper increases are associated with higher $b$ coefficients. Because of the vertical difference in the absolute relationships (Figure 3.1a), the expected fecundity per female spawner varied between model fits, requiring that the $\alpha$ parameter to scale accordingly to maintain similar recruitment time series (Figure 3.2a). We found that the value of the $\alpha$ parameter (representing maximum adults produced per egg) was inversely related to the scale of fecundity (Figure 3.2b). Because the spawner-recruit parameters could scale to fecundity, the estimated values and temporal trends of $S_{\text{MSC}}$ were essentially identical between the model fits using different assumed fecundity relationships (Figure 3.3a,b).
+There was some variability in the expected fecundity at size between the different data sets we used, both in a absolute sense (Figure 2.1a) and a relative sense (Figure 2.1b). When standardized to the maximum point for each curve, the relative contribution of different sized females showed variable increases with fish size between data sources (Figure 2.1b). This is a result of the different values of the $b$ coefficient as shown in Table \@ref(tab:table1): steeper increases are associated with higher $b$ coefficients. Because of the vertical difference in the absolute relationships (Figure 2.1a), the expected fecundity per female spawner varied between model fits, requiring that the $\alpha$ parameter to scale accordingly to maintain similar recruitment time series (Figure 2.2a). We found that the value of the $\alpha$ parameter (representing maximum adults produced per egg) was inversely related to the scale of fecundity (Figure 2.2b). Because the spawner-recruit parameters could scale to fecundity, the estimated values and temporal trends of $S_{\text{MSC}}$ were essentially identical between the model fits using different assumed fecundity relationships (Figure 2.3a,b).
 
 #### Fecundity Relationships {.tabset .tabset-pills .tabset-fade}
 
-**Figure 3.1:** Relationship between female length (METF in mm) and fecundity, obtained using the coefficients presented in Table \@ref(tab:table2). (a) raw fecundity values, (b) fecundity scaled to that produced by the largest mean length-at-age value in the Kuskokwim River data set.
+**Figure 2.1:** Relationship between female length (METF in mm) and fecundity, obtained using the coefficients presented in Table \@ref(tab:table1). (a) raw fecundity values, (b) fecundity scaled to that produced by the largest mean length-at-age value in the Kuskokwim River data set.
 
 ##### (a) Raw
 
@@ -779,7 +296,7 @@ axis(side = 1, at = seq(500, 1000, 100))
 
 #### Estimates of $\alpha$ {.tabset .tabset-pills .tabset-fade}
 
-**Figure 3.2:** (a) The posterior distribution of the $\alpha$ parameter estimated from model E-0 under each fecundity data set (median with thick and thin error bars representing the 50% and 95% credible regions, respectively), in arbitrary order (that presented in Table \@ref(tab:table2). (b) Same as (a), but with $\alpha$ plotted against the the expected fecundity of a female with METF of 800 mm from each data set.
+**Figure 2.2:** (a) The posterior distribution of the $\alpha$ parameter estimated from model E-0 under each fecundity data set (median with thick and thin error bars representing the 50% and 95% credible regions, respectively), in arbitrary order (that presented in Table \@ref(tab:table1). (b) Same as (a), but with $\alpha$ plotted against the the expected fecundity of a female with METF of 800 mm from each data set.
 
 ##### (a)
 
@@ -821,7 +338,7 @@ text(alpha_m ~ f800, labels = letters[1:7], font = c(2,1,1,1,1,1,1))
 
 #### $S_{\text{MSC}}$ {.tabset .tabset-pills .tabset-fade}
 
-**Figure 3.3:** Consistency in the estimated value of $S_{\text{MSC}}$ across assumed fecundity data sources and models for (a) 8-inch mesh, (b) 6-inch mesh, and (c) non-selective mesh. Points represent posterior medians and error bars represent the central 50% (thick lines) and 80% (thin lines) posterior credible regions.
+**Figure 2.3:** Consistency in the estimated value of $S_{\text{MSC}}$ across assumed fecundity data sources and models for (a) 8-inch mesh, (b) 6-inch mesh, and (c) non-selective mesh. Points represent posterior medians and error bars represent the central 50% (thick lines) and 80% (thin lines) posterior credible regions.
 
 ##### (a) 8-inch
 
@@ -975,9 +492,494 @@ mtext(side = 1, "Fecundity Data Set", line = 1.75)
 mtext(side = 3, "All Trends (Model E-ASL)", line = 0.25, font = 2)
 ```
 
-# Analysis #4: Between-Model Fit to Composition Data
+# Section #3: Years Map
 
-```{r workspace3}
+# Section #4: Alternative Composition Data Weighting
+
+```{r workspace4}
+model = 1  # just needed to build the data
+source("2-model-fit/1-compile-data.R")
+source("load-functions.R")
+rm(model) # clear out the model object 
+
+out_dir = "model-output/permanent"
+out_files = dir(out_dir, full.names = T)
+
+# select the models to read in models
+
+# main text E-ASL model
+keep_mods = 10
+
+# altered age comp data weighting model
+altered_ess_mods = mod_key$model[mod_key$supplementary == 1]
+
+keep_mods = c(keep_mods, altered_ess_mods)
+
+keep_mods = paste(paste0("-", keep_mods, "\\."), collapse = "|")
+out_files = out_files[str_detect(out_files, keep_mods)]
+
+# the file names of the output files
+postfiles = out_files[str_detect(out_files, "post")]
+mods = str_extract(postfiles, "[0-9]+")
+metafiles = out_files[str_detect(out_files, "meta")]
+msyfiles = out_files[str_detect(out_files, "msy")]
+
+# create empty objects to store the output from each model
+meta = list()
+post_list = list()
+msy = NULL
+
+# read in the posterior samples and meta data
+for (i in 1:length(mods)) {
+  post_list[[i]] = readRDS(postfiles[i])
+  meta[[i]] = readRDS(metafiles[i])
+}
+
+# create the ids for each model
+ids = unlist(lapply(meta, id_model, unit = F, trends = F, src = F, rand_age = F, ess = T))
+
+# read in the msy equilibrium quantities
+msy = readRDS(msyfiles[1])
+for (i in 2:length(mods)) {
+  msy = abind(msy, readRDS(msyfiles[i]), along = 5)
+}
+
+# give the objects model identifiers
+names(meta) = ids
+names(post_list) = ids
+dimnames(msy)[[5]] = ids
+```
+
+```{r model-identifers}
+col = character(length(ids))
+col[str_detect(ids, "s")] = "skyblue"
+col[str_detect(ids, "m")] = "tomato"
+lty = rep(1:4, 2)
+lwd = c(3, rep(1, length(ids) - 1))
+```
+
+## Motivation and Methods
+
+The use of multinomial likelihoods as a description of the observation process of age/sex composition by year and fate (escapement and fishery harvests) inserts a difficult problem related to the weight each data set receives. It is well-documented that the actual sample size (i.e., number of fish sampled) is not an appropriate measure of the amount of information contained in the sample because sampled fish are often not independent [@maunder-2011; @mcallister-ianelli-1997; @hulson-etal-2011]. This requires the use of an "effective multinomial sample size" (ESS), which is generally lower than the observed sample size. To address this issue for the analysis presented in the main text, we used a method where the effective sample size for each data set each year was rescaled such that the year with the maximum number of fish sampled for a data set received a ESS value of 100, and the rest of the years were scaled proportionately, i.e.:
+
+$$ESS_{i,t} = \frac{n_{i,t}}{\text{max}(n_{i})} \times 100$$  
+
+where $i$ indexes the fate (escapement, commercial, or subsistence harvest) and $t$ indexes the calendar year, and $n$ is the number of fish sampled for age and sex composition. This method places more weight on years in which more fish were aged, however the value of 100 is arbitrary and places relatively equal weight on each of the fate-specific data sets. We refer to this scheme as the "scale" method.
+
+We wished to evaluate whether the method we used to assign weight to these data sets is likely to have influenced our inference in the main text analysis. For this sensitivity analysis, we assessed the influence of placing more weight on some data sets over others by replacing the value of 100 with 200 for each data set sequentially (i.e., refitting the model with different weights for each data set).  Additionally, we assessed an alternative scheme where the value of $ESS_{i,t}$ was obtained as:
+
+$$ESS_{i,t} = \text{min}(n_{i,t}, X)$$
+
+where $X$ took on the value of 100 or 200 depending on the scenario. We refer to this scheme as the "min" method, and it assumes that any additional fish beyond $X$ does not contribute any additional information to the multinomial sample. However, because the vast majority of years had greater than 200 fish for a given sampled fate, it has the tendency to weight all years equally within a data set. Table \@ref(tab:table2) below summarizes the data weighting scenarios investigated in this sensitivity analysis:
+
+```{r table2}
+tab = data.frame(
+  scenario = 1:8,
+  method = rep(c("scale", "min"), each = 4),
+  esc = c(100, 200, 100, 100, 100, 200, 100, 100),
+  com = c(100, 100, 200, 100, 100, 100, 200, 100),
+  sub = c(100, 100, 100, 200, 100, 100, 100, 200),
+  color = rep(c("blue", "red"), each = 4),
+  lty = rep(c("solid", "dashed", "dotted", "dotdash"), 2),
+  thick = c("thick", rep("thin", 7))
+)
+
+colnames(tab) = c("Scenario", "Method", "Escapement", "Commercial", "Subsistence", "Color", "Line Type<sup>b,c</sup>", "Line Thickness<sup>b</sup>")
+
+tab$Scenario[1] = "1<sup>a</sup>"
+tab %>%
+  kable(align = "c", escape = F, caption = "Data weighting scenarios and their notation in the figures that follow.") %>%
+  kable_styling(full_width = F, bootstrap_options = c("condensed")) %>%
+  add_header_above(c(" " = 2, "Fate Data Set Scaler" = 3, "Symbology in Figures" = 3)) %>%
+  footnote(alphabet = c(
+    "This is the model E-ASL presented in the main text",
+    "Only applicable in time series figures",
+    "We recognize that it is difficult to identify the difference between these line types in the figures below, however that is part of the inference - the lines are similar so it does not matter which is which."))
+```
+
+All analyses were conducted using model structure E-ASL (egg count per female spawner as the reproductive unit, with time trends allowed for age-at-return, sex-at-return, and length-at-return).
+
+### Results
+
+As shown in the figures below, the influence of alternative composition weighting schemes was relatively minimal. There were several quantitative differences (estimates differed in their values), but rarely did the qualitative inference change (direction of trends, overall patterns). In general, we found:
+
+*  Similar temporal declines in the probability of returning as a female regardless of age (Figure 4.1) and consistent agreement that the slope governing this pattern has at least 97.5% credibility of being negative (Figure 4.2b).
+*  Similar temporal trends in the probability of returning at age by sex, with the exception of age 4 females -- models fitted using the "scale" method indicated slightly negative trends and models fitted with the "min" method indicated stronger positive trends, though both methods indicated age 4 fish make up 5% or less of all female recruits (Figure 4.3).
+*  Similar calendar year age composition estimates, which reflect the fit to the available data (Figure 4.6a,b,c). 
+*  Similar selectivity functions, though there was a tendency for the "min" models to have a less steep decline following peak selectivity as fish size increased (Figure 4.7).
+*  Similar estimates of $S_{\text{MSC}}$, as well as the effect of time period and mesh size (Figure 4.8a,b). However, there was a tendency for the "min" models to suggest $S_{\text{MSC}}$ values that were approximately 10% larger than the "scale" models -- this is likely related to the flatter selectivity function obtained from these models given the high degree of similarity in other model outputs.
+*  The use of the "min" weighting scheme resulted in narrower credible intervals for estimated and derived quantities -- this stems from the assumed greater information content of the data under these scheme relative to the "scale" method.
+
+Although there are many other weighting schemes that we could have evaluated, we interpret these results as evidence that our choice of weighting scheme for the main analysis did not drive the results we obtained.
+
+#### Return Composition {.tabset .tabset-pills .tabset-fade}
+
+##### Sex
+
+**Figure 4.1:** Variability in the probability of returning as a female across composition data weighting scenarios. Blue lines represent the "scale" ESS method, red lines represent the "min" method. The thick blue line is the scenario used in  main text analyses.
+
+```{r sex-p, fig.width = 6, fig.height = 4}
+by = (min(years) - a_max):(max(years) - a_min)
+at_x = seq(1, length(by), 10)
+
+par(mar = c(3,3,1,1), tcl = -0.25, mgp = c(2,0.45,0))
+x = sapply(post_list, function(post) post_summ(post, "psi")[3,])
+matplot(x, type = "l", ylim = c(0.25, 0.45), 
+        lty = lty, col = col, lwd = lwd, xaxt = "n",
+        xlab = "Brood Year", ylab = "Probability of Returning as Female")
+axis(side = 1, at = at_x, labels = by[at_x])
+```
+
+**Figure 4.2:** Variability in (a) the intercept ($\delta_0$) and (b) the slope ($\delta_1$) of the logit-linear model governing the probability of returning as a female over time across composition data weighting scenarios. Points represent the posterior median and error bars represent the central 50% (thick lines) and 95% (thin lines) posterior credible regions. Blue represents weighting scenarios using the "scale" ESS method, red represents weighting scenarios using the "min" method.
+
+```{r sex-coef, fig.width = 8, fig.height = 4}
+par(mfrow = c(1,2), mar = c(0,1,1,1), oma = c(2.5,2,0,0), mgp = c(2,0.5,0), tcl = -0.25)
+x = sapply(post_list, function(post) post_summ(post, "delta_0", probs = c(0.5, 0.25, 0.75, 0.025, 0.975)))
+rownames(x) = c("mean", "sd", "50%", "25%", "75%", "2.5%", "97.5%")
+mp = barplot(x["50%",], names.arg = 1:length(ids),
+             ylim = range(0, x[c("2.5%", "97.5%"),]) * 1.05,
+             col = "white", border = "white")
+segments(mp, x["2.5%",], mp, x["97.5%",], col = col)
+segments(mp, x["25%",], mp, x["75%",], lwd = 3, col = col)
+points(mp, x["50%",], pch = 16, cex = 1.2, col = col)
+axis(side = 1, at = mp, labels = F); box()
+usr = par("usr"); xdiff = diff(usr[1:2]); ydiff = diff(usr[3:4])
+text(usr[1], usr[4] - ydiff * 0.05, labels = "(a)", pos = 4, font = 2)
+
+x = sapply(post_list, function(post) post_summ(post, "delta_1", probs = c(0.5, 0.25, 0.75, 0.025, 0.975)))
+rownames(x) = c("mean", "sd", "50%", "25%", "75%", "2.5%", "97.5%")
+mp = barplot(x["50%",], names.arg = 1:length(ids), ylim = range(0, x[c("2.5%", "97.5%"),]) * 1.05, col = "white", border = "white")
+segments(mp, x["2.5%",], mp, x["97.5%",], col = col)
+segments(mp, x["25%",], mp, x["75%",], lwd = 3, col = col)
+points(mp, x["50%",], pch = 16, cex = 1.2, col = col)
+axis(side = 1, at = mp, labels = F); box()
+usr = par("usr"); xdiff = diff(usr[1:2]); ydiff = diff(usr[3:4])
+text(usr[1], usr[4] - ydiff * 0.05, labels = "(b)", pos = 4, font = 2)
+
+mtext(side = 1, outer = T, line = 1.5, "Data Weight Scenario")
+mtext(side = 2, outer = T, line = 1, "Coefficient Value")
+```
+
+##### Age-by-Sex
+
+**Figure 4.3:** Variability in the brood year-specific probability of returning at each age by sex across composition data weighting scenarios. Lines are posterior medians. Blue lines represent the weighting scenarios using the "scale" ESS method, red lines represent the weighting scenarios using the "min" method. The thick blue line is the scenario used in  main text analyses.
+
+```{r age-p, fig.width = 5, fig.height = 7}
+a = 1; s = 1
+by = (min(years) - a_max):(max(years) - a_min)
+at_x = seq(1, length(by), 10)
+par(mfcol = c(4,2), mar = c(0.5,0.5,1.5,0.5), oma = c(3,4,0,2),
+    tcl = -0.25, mgp = c(2,0.45,0))
+
+sex = c("Female", "Male")
+age = 4:7
+for (s in 1:2) {
+  for (a in 1:4) {
+    p_sub = str_replace("pi[.+,a,s]", "a,s", paste0(a, ",", s))
+    x = sapply(post_list, function(post) post_summ(post, p_sub)[3,])
+    matplot(x, type = "l", lty = lty, col = col, lwd = lwd,
+            ylim = c(0, max(max(x), 0.1)), xaxt = "n", yaxt = "n",
+            main = paste(sex[s], "Age", age[a]))
+    if (s == 1) axis(side = 2, las = 2) else axis(side = 4, las = 1)
+    if (a == 4) {
+      axis(side = 1, at = at_x, labels = by[at_x])
+    } else {
+      axis(side = 1, at = at_x, labels = F)
+    }
+  }
+}
+mtext(side = 1, outer = T, line = 1.5, "Brood Year")
+mtext(side = 2, outer = T, line = 2, "Probability of Return-at-Age by Sex")
+
+```
+
+**Figure 4.4:** Variability in the intercepts ($\gamma_{0,a,s}$) of the baseline category logit-linear model governing the probability of returning at each age by sex over time across composition data weighting scenarios. Points represent the posterior median and error bars represent the central 50% (thick lines) and 95% (thin lines) posterior credible regions. Blue represents the weighting scenarios using the "scale" ESS method, red represents the weighting scenarios using the "min" method.
+
+```{r age-coef-0, fig.width = 5, fig.height = 7}
+par(mfcol = c(4,2), mar = c(0.5,0.5,1.5,0.5), oma = c(3,4,0,2),
+    tcl = -0.25, mgp = c(2,0.45,0))
+
+sex = c("Female", "Male")
+age = 4:7
+for (s in 1:2) {
+  for (a in 1:4) {
+    p_sub = str_replace("gamma_0[s,a]", "s,a", paste0(s, ",", a))
+    x = sapply(post_list, function(post) post_summ(post, p_sub, probs = c(0.5, 0.25, 0.75, 0.025, 0.975)))
+    rownames(x) = c("mean", "sd", "50%", "25%", "75%", "2.5%", "97.5%")
+    mp = barplot(x["50%",], names.arg = 1:length(ids),
+                 ylim = range(0, x[c("2.5%", "97.5%"),]) * 1.05,
+                 col = "white", border = "white", xaxt = "n", yaxt = "n",
+                 main = paste(sex[s], "Age", age[a]))
+    segments(mp, x["2.5%",], mp, x["97.5%",], col = col)
+    segments(mp, x["25%",], mp, x["75%",], lwd = 3, col = col)
+    points(mp, x["50%",], pch = 16, cex = 1.2, col = col)
+    if (s == 1) axis(side = 2, las = 2) else axis(side = 4, las = 1)
+    if (a == 4) {
+      axis(side = 1, at = mp, labels = 1:8)
+    } else {
+      axis(side = 1, at = mp, labels = F)
+    }
+    box()
+  }
+}
+
+mtext(side = 1, outer = T, line = 1.5, "Data Weight Scenario")
+mtext(side = 2, outer = T, line = 2, "Coefficient Value")
+
+
+```
+
+**Figure 4.5:** Variability in the slopes ($\gamma_{1,a,s}$) of the baseline category logit-linear model governing the probability of returning at each age by sex over time across composition data weighting scenarios. Points represent the posterior median and error bars represent the central 50% (thick lines) and 95% (thin lines) posterior credible regions. Blue represents the weighting scenarios using the "scale" ESS method, red represents the weighting scenarios using the "min" method.
+
+```{r age-coef-1, fig.width = 5, fig.height = 7}
+par(mfcol = c(4,2), mar = c(0.5,0.5,1.5,0.5), oma = c(3,4,0,2),
+    tcl = -0.25, mgp = c(2,0.45,0))
+
+sex = c("Female", "Male")
+age = 4:7
+for (s in 1:2) {
+  for (a in 1:4) {
+    p_sub = str_replace("gamma_1[s,a]", "s,a", paste0(s, ",", a))
+    x = sapply(post_list, function(post) post_summ(post, p_sub, probs = c(0.5, 0.25, 0.75, 0.025, 0.975)))
+    rownames(x) = c("mean", "sd", "50%", "25%", "75%", "2.5%", "97.5%")
+    mp = barplot(x["50%",], names.arg = 1:length(ids),
+                 ylim = range(0, x[c("2.5%", "97.5%"),]) * 1.05,
+                 col = "white", border = "white", xaxt = "n", yaxt = "n",
+                 main = paste(sex[s], "Age", age[a]))
+    segments(mp, x["2.5%",], mp, x["97.5%",], col = col)
+    segments(mp, x["25%",], mp, x["75%",], lwd = 3, col = col)
+    points(mp, x["50%",], pch = 16, cex = 1.2, col = col)
+    if (s == 1) axis(side = 2, las = 2) else axis(side = 4, las = 1)
+    if (a == 4) {
+      axis(side = 1, at = mp, labels = 1:8)
+    } else {
+      axis(side = 1, at = mp, labels = F)
+    }
+    box()
+  }
+}
+
+mtext(side = 1, outer = T, line = 1.5, "Data Weight Scenario")
+mtext(side = 2, outer = T, line = 2, "Coefficient Value")
+
+
+```
+
+#### Calendar Year Composition {.tabset .tabset-pills .tabset-fade}
+
+**Figure 4.6:** Variability in the calendar year age/sex composition by fate (a - escapement; b - commercial; c - subsistence) across data weighting scenarios. Lines represent posterior medians. Blue lines represent the weighting scenarios using the "scale" ESS method, red lines represents the weighting scenarios using the "min" method. The thick blue line is the scenario used in main text analyses.
+
+##### (a) Escapement
+
+```{r q-esc, fig.width = 5, fig.height = 7}
+type = "esc"
+at_x = seq(1, nt, 10)
+par(mfcol = c(4,2), mar = c(0.5,0.5,1.5,0.5), oma = c(3,4,0,2),
+    tcl = -0.25, mgp = c(2,0.45,0))
+sex = rep(c("Female", "Male"), each = 4)
+age = rep(4:7, 2)
+for (as in 1:8) {
+    p_sub = str_replace("q_type[.+,as]", "as", as.character(as))
+    p_sub = str_replace(p_sub, "type", type)
+    x = sapply(post_list, function(post) post_summ(post, p_sub)[3,])
+    matplot(x, type = "l", lty = lty, col = col, lwd = lwd,
+            ylim = c(0, max(max(x), 0.05)), xaxt = "n", yaxt = "n",
+            main = paste(sex[as], "Age", age[as]))
+    if (as < 5) axis(side = 2, las = 2) else axis(side = 4, las = 1)
+    if (as %in% c(4,8)) {
+      axis(side = 1, at = at_x, labels = years[at_x])
+    } else {
+      axis(side = 1, at = at_x, labels = F)
+    }
+  }
+mtext(side = 1, outer = T, line = 1.5, "Calendar Year")
+mtext(side = 2, outer = T, line = 2, "Proportional Contribution")
+```
+
+##### (b) Commercial
+
+```{r q-com, fig.width = 5, fig.height = 7}
+type = "com"
+at_x = seq(1, nt, 10)
+par(mfcol = c(4,2), mar = c(0.5,0.5,1.5,0.5), oma = c(3,4,0,2),
+    tcl = -0.25, mgp = c(2,0.45,0))
+sex = rep(c("Female", "Male"), each = 4)
+age = rep(4:7, 2)
+for (as in 1:8) {
+    p_sub = str_replace("q_type[.+,as]", "as", as.character(as))
+    p_sub = str_replace(p_sub, "type", type)
+    x = sapply(post_list, function(post) post_summ(post, p_sub)[3,])
+    matplot(x, type = "l", lty = lty, col = col, lwd = lwd,
+            ylim = c(0, max(max(x), 0.05)), xaxt = "n", yaxt = "n",
+            main = paste(sex[as], "Age", age[as]))
+    if (as < 5) axis(side = 2, las = 2) else axis(side = 4, las = 1)
+    if (as %in% c(4,8)) {
+      axis(side = 1, at = at_x, labels = years[at_x])
+    } else {
+      axis(side = 1, at = at_x, labels = F)
+    }
+  }
+mtext(side = 1, outer = T, line = 1.5, "Calendar Year")
+mtext(side = 2, outer = T, line = 2, "Proportional Contribution")
+```
+
+##### (c) Subsistence
+
+```{r q-sub, fig.width = 5, fig.height = 7}
+type = "sub"
+at_x = seq(1, nt, 10)
+par(mfcol = c(4,2), mar = c(0.5,0.5,1.5,0.5), oma = c(3,4,0,2),
+    tcl = -0.25, mgp = c(2,0.45,0))
+sex = rep(c("Female", "Male"), each = 4)
+age = rep(4:7, 2)
+for (as in 1:8) {
+    p_sub = str_replace("q_type[.+,as]", "as", as.character(as))
+    p_sub = str_replace(p_sub, "type", type)
+    x = sapply(post_list, function(post) post_summ(post, p_sub)[3,])
+    matplot(x, type = "l", lty = lty, col = col, lwd = lwd,
+            ylim = c(0, max(max(x), 0.05)), xaxt = "n", yaxt = "n",
+            main = paste(sex[as], "Age", age[as]))
+    if (as < 5) axis(side = 2, las = 2) else axis(side = 4, las = 1)
+    if (as %in% c(4,8)) {
+      axis(side = 1, at = at_x, labels = years[at_x])
+    } else {
+      axis(side = 1, at = at_x, labels = F)
+    }
+  }
+mtext(side = 1, outer = T, line = 1.5, "Calendar Year")
+mtext(side = 2, outer = T, line = 2, "Proportional Contribution")
+```
+
+#### Selectivity Function
+
+**Figure 4.7:** Variability in the estimated selectivity function across data weighting scenarios. Lines were obtained using the posterior medians of the selectivity parameters ($\tau$, $\sigma$, $\theta$, and $\lambda$). Blue lines represent the weighting scenarios using the "scale" ESS method, red lines represents the weighting scenarios using the "min" method. The thick blue line is the scenario used in  main text analyses.
+
+```{r sel, fig.width = 6, fig.height = 4}
+x = t(sapply(post_list, function(post) post_summ(post, "^V...$")[3,]))
+
+pearson = function(rlm, params) {
+  
+  tau = params["Vtau"]
+  sigma = params["Vsig"]
+  theta = params["Vtha"]
+  lambda = params["Vlam"]
+  
+  # separate calculation into 5 steps
+  t1 = (1 + lambda^2/(4 * theta^2))^theta
+  t2 = rlm - (sigma * lambda)/(2 * theta) - tau
+  t3 = (1 + t2^2/sigma^2)^-theta
+  t4 = exp(-lambda * (atan(t2/sigma) + atan(lambda/(2 * theta))))
+  
+  v = t1 * t3 * t4
+  
+  # standardize the output so only one age/sex is fully vuln for a gear
+  v/max(v)
+}
+
+rlm_seq = seq(1.25, 3.25, length = 100)
+
+out = apply(x, 1, function(z) pearson(rlm_seq, z))
+par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
+matplot(x = rlm_seq, y = out, type = "l", col = col, lwd = lwd, lty = lty,
+        xlab = "Ratio of Fish Length to Mesh Perimeter (RLM)",
+        ylab = "Selectivity", las = 1)
+
+
+```
+
+
+#### $S_{\text{MSC}}$ {.tabset .tabset-pills .tabset-fade}
+
+**Figure 4.8:** Variability in the estimated value of $S_{\text{MSC}}$ across data weighting scenarios for (a) 8-inch mesh, (b) 6-inch mesh, and (c) non-selective mesh. Points represent posterior medians and error bars represent the central 50% (thick lines) and 80% (thin lines) posterior credible regions. Blue represents the weighting scenarios using the "scale" ESS method, red represent the weighting scenarios using the "min" method. 
+
+##### (a) 8-inch
+
+```{r S-msy-8, fig.width = 7, fig.height = 4}
+x = msy["50%","S","mesh8",,]
+upr1 = msy["90%","S","mesh8",,]
+lwr1 = msy["10%","S","mesh8",,]
+upr2 = msy["75%","S","mesh8",,]
+lwr2 = msy["25%","S","mesh8",,]
+
+col_mat = cbind(
+  matrix(unique(col)[1], 3,4),
+  matrix(unique(col)[2], 3,4)
+)
+
+par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
+mp = barplot(x, beside = T, names.arg = 1:8, yaxt = "n",
+             ylim = range(msy[c("10%", "90%"),"S",,,]) * c(0.95,1.05), col = "white", border = "white", xlab = "Data Weight Scenario", ylab = "SMSC")
+segments(mp, lwr1, mp, upr1, col = col_mat)
+segments(mp, lwr2, mp, upr2, col = col_mat, lwd = 3)
+points(mp, x, col = "white", bg = col_mat, pch = c(21, 22, 24), cex = 1.5)
+box()
+axis(side = 1, at = mp[2,], labels = F)
+axis(side = 2, at = seq(0, 200000, 20000), labels = seq(0, 200, 20), las = 2)
+legend("bottomright", legend = c("First 10", "All", "Last 10"), 
+       title = "Time Period", bty = "n", pch = c(21, 22, 24), col = "white", pt.bg = "grey80",
+       pt.cex = 1.5)
+
+```
+
+##### (b) 6-inch
+
+```{r S-msy-6, fig.width = 7, fig.height = 4}
+x = msy["50%","S","mesh6",,]
+upr1 = msy["90%","S","mesh6",,]
+lwr1 = msy["10%","S","mesh6",,]
+upr2 = msy["75%","S","mesh6",,]
+lwr2 = msy["25%","S","mesh6",,]
+
+col_mat = cbind(
+  matrix(unique(col)[1], 3,4),
+  matrix(unique(col)[2], 3,4)
+)
+
+par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
+mp = barplot(x, beside = T, names.arg = 1:8, yaxt = "n",
+             ylim = range(msy[c("10%", "90%"),"S",,,]) * c(0.95,1.05), col = "white", border = "white", xlab = "Data Weight Scenario", ylab = "SMSC")
+segments(mp, lwr1, mp, upr1, col = col_mat)
+segments(mp, lwr2, mp, upr2, col = col_mat, lwd = 3)
+points(mp, x, col = "white", bg = col_mat, pch = c(21, 22, 24), cex = 1.5)
+box()
+axis(side = 1, at = mp[2,], labels = F)
+axis(side = 2, at = seq(0, 200000, 20000), labels = seq(0, 200, 20), las = 2)
+legend("topleft", legend = c("First 10", "All", "Last 10"), 
+       title = "Time Period", bty = "n", pch = c(21, 22, 24), col = "white", pt.bg = "grey80",
+       pt.cex = 1.5)
+```
+
+##### (c) Flat
+
+```{r S-msy-flat, fig.width = 7, fig.height = 4}
+x = msy["50%","S","flat",,]
+upr1 = msy["90%","S","flat",,]
+lwr1 = msy["10%","S","flat",,]
+upr2 = msy["75%","S","flat",,]
+lwr2 = msy["25%","S","flat",,]
+
+col_mat = cbind(
+  matrix(unique(col)[1], 3,4),
+  matrix(unique(col)[2], 3,4)
+)
+
+par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
+mp = barplot(x, beside = T, names.arg = 1:8, yaxt = "n",
+             ylim = range(msy[c("10%", "90%"),"S",,,]) * c(0.95,1.05), col = "white", border = "white", xlab = "Data Weight Scenario", ylab = "SMSC")
+segments(mp, lwr1, mp, upr1, col = col_mat)
+segments(mp, lwr2, mp, upr2, col = col_mat, lwd = 3)
+points(mp, x, col = "white", bg = col_mat, pch = c(21, 22, 24), cex = 1.5)
+box()
+axis(side = 1, at = mp[2,], labels = F)
+axis(side = 2, at = seq(0, 200000, 20000), labels = seq(0, 200, 20), las = 2)
+legend("topleft", legend = c("First 10", "All", "Last 10"), 
+       title = "Time Period", bty = "n", pch = c(21, 22, 24), col = "white", pt.bg = "grey80",
+       pt.cex = 1.5)
+```
+
+# Section #5: Between-Model Fit to Composition Data
+
+```{r workspace5}
 rm(list = ls(all = T))
 model = 1  # just needed to build the data
 
@@ -1100,7 +1102,7 @@ $$\chi_{k,i}^2 = \sum_t^{n_t} \sum_j^{n_s \cdot n_a} \frac{(x_{k,t,j,i} - \hat{x
 
 where $x$ represents the observed data (counts at age/sex), and $\hat{x}$ represents the model expectation for MCMC iteration $i$. $j$ represents a unique age/sex class, $n_t$ is the number of years in the data set, $n_a$ is the number of ages-at-return, and $n_s$ is the number of sexes-at-return. 
 
-**Figure 4.1** $\chi^2$ goodness of fit statistics from 5 models from the main-text analysis for each fate-specific data set: (a) escapement, (b) subsistence harvest, and (c) commercial harvest. Height of each bar represents the average $\chi^2$ value across posterior samples, error bars represent the 95% credible interval of the fit statistic. Lower values indicated better fits to the data.
+**Figure 5.1** $\chi^2$ goodness of fit statistics from 5 models from the main-text analysis for each fate-specific data set: (a) escapement, (b) subsistence harvest, and (c) commercial harvest. Height of each bar represents the average $\chi^2$ value across posterior samples, error bars represent the 95% credible interval of the fit statistic. Lower values indicated better fits to the data.
 
 ### (a) Escapement 
 
@@ -1124,7 +1126,7 @@ compare_fit("com")
 
 The Bayesian $p$-value is calculated by simulating data from the posterior and comparing the $\chi^2$ statistics between observed and simulated data. The Bayesian $p$-value represents the proportion of MCMC iterations in which the fit statistics for observed data indicated poorer fit than the simulated data.  If observed and simulated data share similar properties (i.e., variability around the expectation), then the Bayesian $p$-value will be near 0.5; values greater than 0.5 indicate the data are over-dispersed relative to the model assumptions.
 
-**Figure 4.2** Bayesian $p$-values for 5 models from the main-text analysis for each fate-specific data set: (a) escapement, (b) subsistence harvest, and (c) commercial harvest. Values close to 0.5 (horizontal dashed line) indicate better model adequacy according to the $\chi^2$ fit measure.
+**Figure 5.2** Bayesian $p$-values for 5 models from the main-text analysis for each fate-specific data set: (a) escapement, (b) subsistence harvest, and (c) commercial harvest. Values close to 0.5 (horizontal dashed line) indicate better model adequacy according to the $\chi^2$ fit measure.
 
 ### (a) Escapement 
 
@@ -1144,13 +1146,13 @@ compare_fit("sub", "bp")
 compare_fit("com", "bp")
 ```
 
-# Analysis #5: $S_{\text{MAX}}$ instead of $S_{\text{MSC}}$
+# Section #6: $S_{\text{MAX}}$ instead of $S_{\text{MSC}}$
 
-Our findings in the main text equilibrium analysis illustrate that $S_{\text{MSC}}$ is sensitive to the specific demographic trends, time periods, and size-selectivity used to derive it. However, here we illustrate that we would have made similar conclusions had we used an alternative biological reference point: $S_{\text{MAX}}$. $S_{\text{MAX}}$ represents the total escapement (regardless of sex or age composition) necessary to maximize recruitment. The yield-per-recruit approach we employed is general enough as to allow maximizing another objective value -- for deriving $S_{\text{MSC}}$ in the main text analysis we set the algorithm to maximize total catch but by replacing this with total recruitment, we can find $S_{\text{MAX}}$ instead. Figure 4.1 below shows the same figure as presented in the main text Figure 7, but for $S_{\text{MAX}}$ and $H_{\text{MAX}}$ (harvest at maximum recruitment). Note the overall similarity between this figure and that for $S_{\text{MSC}}$ as shown in Figure 7 of the main text.
+Our findings in the main text equilibrium analysis illustrate that $S_{\text{MSC}}$ is sensitive to the specific demographic trends, time periods, and size-selectivity used to derive it. However, here we illustrate that we would have made similar conclusions had we used an alternative biological reference point: $S_{\text{MAX}}$. $S_{\text{MAX}}$ represents the total escapement (regardless of sex or age composition) necessary to maximize recruitment. The yield-per-recruit approach we employed is general enough as to allow maximizing another objective value -- for deriving $S_{\text{MSC}}$ in the main text analysis we set the algorithm to maximize total catch but by replacing this with total recruitment, we can find $S_{\text{MAX}}$ instead. Figure 6.1 below shows the same figure as presented in the main text Figure 7, but for $S_{\text{MAX}}$ and $H_{\text{MAX}}$ (harvest at maximum recruitment). Note the overall similarity between this figure and that for $S_{\text{MSC}}$ as shown in Figure 7 of the main text.
 
-**Figure 5.1** Estimated equilibrium values of $S_{\text{MAX}}$ (panels a, c, and e) and $H_{\text{MAX}}$ (panels b, d, and f) using 8-inch (panels a and b), non-selective (panels c and d), and 6-inch (panels e and f) mesh gillnet hear for a subset of models. The time period (symbol type) represents which years were used to calculate the average demographic qualities used in the equilibrium calculations. The percent change from the posterior median for model N-0 is displayed on the secondary $y$-axis for reference. Points are posterior medians, thick lines are the posterior central 50% limits, and thin lines are the posterior central 80% limits.
+**Figure 6.1** Estimated equilibrium values of $S_{\text{MAX}}$ (panels a, c, and e) and $H_{\text{MAX}}$ (panels b, d, and f) using 8-inch (panels a and b), non-selective (panels c and d), and 6-inch (panels e and f) mesh gillnet hear for a subset of models. The time period (symbol type) represents which years were used to calculate the average demographic qualities used in the equilibrium calculations. The percent change from the posterior median for model N-0 is displayed on the secondary $y$-axis for reference. Points are posterior medians, thick lines are the posterior central 50% limits, and thin lines are the posterior central 80% limits.
 
-```{r workspace4, fig.height = 5.5, fig.width = 7.2}
+```{r workspace6, fig.height = 5.5, fig.width = 7.2}
 rm(list = ls(all = T))
 model = 1  # just needed to build the data
 source("2-model-fit/1-compile-data.R")
