@@ -492,7 +492,23 @@ mtext(side = 1, "Fecundity Data Set", line = 1.75)
 mtext(side = 3, "All Trends (Model E-ASL)", line = 0.25, font = 2)
 ```
 
-# Section #3: Years Map
+# Section #3: Map for Year Indices
+
+The indexing of brood and calendar years in the state-space model in somewhat counter-intuitive, thus we have included this section as an additional explanation.
+
+The indexing of brood and calendar years is lagged by $a_{\mathrm{max}}+1$ years. For example, in our model,  $a_{\mathrm{max}}$ is 7, so recruits from the eighth tracked brood year are progeny of the spawners returning in the first tracked calendar year. The reason this lag is necessary is to populate the early years of calendar year abundance with expected adult returns so they can be used in the process model to produce the next recruits and to be fitted to the observations made in these early years. The extent of the lag is dependent on the maximum age of return ($a_{\mathrm{max}}$) because adults of each possible age must be populated in the first calendar year. The table below attempts to illustrate these concepts visually. Grey regions specify years that the model does not consider.
+
+The calendar years ($t$) start counting at the year of first monitoring (1976 for our data set). The run that returned in this year was made up of age-4 fish from brood year 1972 (the fourth tracked brood year $y=4$), age-5 fish from brood year 1971 ($y=3$), age-6 fish from brood year 1970 ($y=2$), and age-7 fish from brood year 1969 ($y=1$) -- this illustrates why $a_{\mathrm{max}}$ brood years prior to data collection are necessary. 
+
+The general expression for finding the brood year index $y$ in which fish returning in year $t$ at the $a^{\mathrm{th}}$ age were spawned is $y=t+n_a-a$, where $n_a$ is the number of ages of return. Our model tracked ages 4, 5, 6, and 7 returns for both sexes, so this calculation was the same for both males and females.
+
+The model tracks recruitment through brood year 2015 only. This is because brood years later than this have not been observed in the data (for brood year 2016, the first possible age of return, age-4, returned in 2020, which is not in our data set). Thus, in order to inform the model expectation to link to observed return abundance and its age/sex structure in 2019 (the last observed calendar year), the age-4 fish from brood year 2015 are necessary but no more are necessary. Brood years 1969 ($y=1$) and 2015 ($y=47$) are the most poorly informed by data, as they are the most partially observed of any brood years (only age-7 and age-4, respectively). The information to estimate the recruitment states in these years comes from the hierarchical sharing of information in the probabilities of return-by-age and return-by-sex with the other brood years.
+
+**Figure 3.1** Visual representation of the apportionment of brood year recruits to calendar year returns at age. Adapted from Figure 1 in @fleischman-etal-2013.
+
+```{r, eval = T}
+knitr::include_graphics(path = file.path(getwd(), "3-post-process/os-sensitivity/years-table/table.png"))
+```
 
 # Section #4: Alternative Composition Data Weighting
 
