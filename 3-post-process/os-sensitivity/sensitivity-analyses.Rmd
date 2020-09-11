@@ -188,7 +188,7 @@ mods = unlist(lapply(meta[1:7], function(m) m$model))
 coefs = mod_key[mod_key$model %in% mods,c("a_coef", "b_coef")]
 
 srcs = c(
-  "YK_eagle" = "@ohlberger-etal-nd",
+  "YK_eagle" = "@ohlberger-etal-2020",
   "Kusko" = "Jim Boersma, unpublished data",
    "Kenai" = "@fleischman-reimer-2017",
    "Ukleet" = "@bell-kent-2012",
