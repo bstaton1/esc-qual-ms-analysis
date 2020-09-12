@@ -1143,11 +1143,11 @@ kable(bp_comp_tab, digits = 3, align = c("lccc")) %>%
   kable_styling(full_width = F, bootstrap_options = "condensed")
 ```
 
-# Section #6: $S_{\text{MAX}}$ instead of $S_{\text{MSC}}$
+# Section #6: $S_{R_{\mathrm{MAX}}}$ instead of $S_{\mathrm{MSC}}$
 
-Our findings in the main text equilibrium analysis illustrate that $S_{\text{MSC}}$ is sensitive to the specific demographic trends, time periods, and size-selectivity used to derive it. However, here we illustrate that we would have made similar conclusions had we used an alternative biological reference point: $S_{\text{MAX}}$. $S_{\text{MAX}}$ represents the total escapement (regardless of sex or age composition) necessary to maximize recruitment. The yield-per-recruit approach we employed is general enough as to allow maximizing another objective value -- for deriving $S_{\text{MSC}}$ in the main text analysis we set the algorithm to maximize total catch but by replacing this with total recruitment, we can find $S_{\text{MAX}}$ instead. Figure 6.1 below shows the same figure as presented in the main text Figure 7, but for $S_{\text{MAX}}$ and $H_{\text{MAX}}$ (harvest at maximum recruitment). Note the overall similarity between this figure and that for $S_{\text{MSC}}$ as shown in Figure 7 of the main text.
+Our findings in the main text equilibrium analysis illustrate that $S_{\mathrm{MSC}}$ is sensitive to the specific demographic trends, time periods, and size-selectivity used to derive it. However, here we illustrate that we would have made similar conclusions had we used an alternative biological reference point: $S_{R_{\mathrm{MAX}}}$. $S_{R_{\mathrm{MAX}}}$ represents the total escapement (regardless of sex or age composition) necessary to maximize recruitment. The yield-per-recruit approach we employed is general enough as to allow maximizing another objective value -- for deriving $S_{\mathrm{MSC}}$ in the main text analysis we set the algorithm to maximize total catch but by replacing this with total recruitment, we can find $S_{R_{\mathrm{MAX}}}$ instead. Figure 6.1 below shows the same figure as presented in the main text Figure 7, but for $S_{R_{\mathrm{MAX}}}$ and $H_{R_{\mathrm{MAX}}}$ (harvest at maximum recruitment). Note the overall similarity between this figure and that for $S_{\mathrm{MSC}}$ as shown in Figure 7 of the main text.
 
-**Figure 6.1** Estimated equilibrium values of $S_{\text{MAX}}$ (panels a, c, and e) and $H_{\text{MAX}}$ (panels b, d, and f) using 8-inch (panels a and b), non-selective (panels c and d), and 6-inch (panels e and f) mesh gillnet hear for a subset of models. The time period (symbol type) represents which years were used to calculate the average demographic qualities used in the equilibrium calculations. The percent change from the posterior median for model N-0 is displayed on the secondary $y$-axis for reference. Points are posterior medians, thick lines are the posterior central 50% limits, and thin lines are the posterior central 80% limits.
+**Figure 6.1** Estimated equilibrium values of $S_{R_{\mathrm{MAX}}}$ (panels a, c, and e) and $H_{R_{\mathrm{MAX}}}$ (panels b, d, and f) using 8-inch (panels a and b), non-selective (panels c and d), and 6-inch (panels e and f) mesh gillnet hear for a subset of models. The time period (symbol type) represents which years were used to calculate the average demographic qualities used in the equilibrium calculations. The percent change from the posterior median for model N-0 is displayed on the secondary $y$-axis for reference. Points are posterior medians, thick lines are the posterior central 50% limits, and thin lines are the posterior central 80% limits.
 
 ```{r workspace6, fig.height = 5.5, fig.width = 7.2}
 rm(list = ls(all = T))
@@ -1190,7 +1190,6 @@ for (i in 2:length(mods)) {
 names(meta) = ids
 dimnames(Rmax)[[5]] = ids
 
-# function to create the plot comparing time periods and models for a given eq. quantity and vuln type
 Rmax_plot = function(keep_val = "S", keep_vuln = "mesh8", keep_mods, xticklabs = F, legend = F, letter) {
   # extract the equilibrium info requested
   keep = Rmax[,keep_val,keep_vuln,,keep_mods]
@@ -1200,7 +1199,7 @@ Rmax_plot = function(keep_val = "S", keep_vuln = "mesh8", keep_mods, xticklabs =
   # create the basic plot: dimensions and spacing
   mp = barplot(keep["50%",,keep_mods], yaxt = "n", xaxt = "n", col = "white", border = "white", las = 2,
                beside = T, 
-               ylim = range(Rmax[c("10%", "90%"),keep_val,,,keep_mods]) * c(0.85, 1.2),
+               ylim = range(Rmax[c("10%", "90%"),keep_val,,,keep_mods]) * c(0.95, 1.1),
                xlim = c(0.5, 20.5) 
                # , ylim = c(ylwr, yupr)
   )
@@ -1251,8 +1250,8 @@ Rmax_plot = function(keep_val = "S", keep_vuln = "mesh8", keep_mods, xticklabs =
   
   # add a legend if requested
   if (legend) {
-    legend("topleft", y.intersp = 0.75, legend = c("First 10 years", "All years", "Last 10 years"), title = "Demography",
-           pch = c(21,22,24), pt.bg = "grey60", pt.cex = 1, cex = 0.75, bg = "white", box.col = "black")
+    legend("topright", y.intersp = 0.75, legend = c("First 10 years", "All years", "Last 10 years"), title = "Demography",
+           pch = c(21,22,24), pt.bg = "grey60", pt.cex = 1, cex = 0.7, bg = "white", box.col = "white")
   }
   
   # draw x-axis
@@ -1263,13 +1262,13 @@ Rmax_plot = function(keep_val = "S", keep_vuln = "mesh8", keep_mods, xticklabs =
   }
   
   # draw the label identifying each plot
-  rect(usr[2] - xdiff * 0.23, usr[4] - ydiff * 0.22, usr[2] - xdiff * 0.17, usr[4], border = "white", col = "white")
-  text(x = usr[2] + xdiff * 0.025, y = usr[4] - ydiff * 0.12,
-       labels = ifelse(keep_vuln == "mesh8", paste0("(", letter, ")\n8 in. mesh"),
-                       ifelse(keep_vuln == "flat", paste0("(", letter, ")\nNo Selectivity"), paste0("(", letter, ")\n6 in. mesh"))), pos = 2, cex = 0.7, font = 2)
+  rect(usr[1], usr[4] - ydiff * 0.11, usr[1] + xdiff * 0.35, usr[4], border = "white", col = "white")
+  text(x = usr[1] + xdiff * -0.025, y = usr[4] - ydiff * 0.065,
+       labels = ifelse(keep_vuln == "mesh8", paste0("(", letter, ") 8 in. mesh"),
+                       ifelse(keep_vuln == "flat", paste0("(", letter, ") No selectivity"), paste0("(", letter, ") 6 in. mesh"))), pos = 4, cex = 0.7, font = 2)
   
   # add a main title over top panel
-  mtext(side = 3, ifelse(keep_vuln == "mesh8", latex2exp::TeX(paste0(keep_val, "_{MAX}")), ""), line = 0, font = 2)
+  mtext(side = 3, ifelse(keep_vuln == "mesh8", latex2exp::TeX(paste0(keep_val, "_{R_{MAX}}")), ""), line = 0, font = 2)
   
   # draw a border
   box()
@@ -1286,9 +1285,9 @@ keep_mods = c(
 # make the plot itself
 par(mfcol = c(3,2), xaxs = "i", yaxs = "i", cex = 1, lend = "square", mar = c(0,1.75,0.75,2.25),
     oma = c(3.5,0.75,0.5,2), tcl = -0.25, mgp = c(2,0.35,0), cex.axis = 0.9)
-Rmax_plot("S", "mesh8", keep_mods, legend = T, letter = "a")
+Rmax_plot("S", "mesh8", keep_mods, legend = F, letter = "a")
 Rmax_plot("S", "flat", keep_mods, legend = F, letter = "c")
-Rmax_plot("S", "mesh6", keep_mods, xticklabs = T, letter = "e"); par(mar = c(0,2.25,0.75,1.75))
+Rmax_plot("S", "mesh6", keep_mods, legend = T, xticklabs = T, letter = "e"); par(mar = c(0,2.25,0.75,1.75))
 Rmax_plot("H", "mesh8", keep_mods, legend = F, letter = "b")
 Rmax_plot("H", "flat", keep_mods, legend = F, letter = "d")
 Rmax_plot("H", "mesh6", keep_mods, xticklabs = T, letter = "f")
