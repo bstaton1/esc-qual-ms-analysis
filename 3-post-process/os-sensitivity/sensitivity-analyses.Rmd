@@ -244,7 +244,7 @@ tab %>%
   add_header_above(c(" " = 2, "Power Function" = 2, "Sample Summary" = 4, " " = 1)) %>%
   footnote(symbol = c(
     "This is the data set used for all analyses in the main text.",
-    "Coefficients of the power function: $a \\cdot \\text{METF}^b$",
+    "Coefficients of the power function: $a \\cdot \\mathrm{METF}^b$",
     "Not necessarily every year in range was sampled."),
     escape = F)
 
@@ -254,7 +254,7 @@ For this sensitivity analysis, we recalculated $z_{t,a,s}$ (mean reproductive co
 
 ### Results
 
-There was some variability in the expected fecundity at size between the different data sets we used, both in a absolute sense (Figure 2.1a) and a relative sense (Figure 2.1b). When standardized to the maximum point for each curve, the relative contribution of different sized females showed variable increases with fish size between data sources (Figure 2.1b). This is a result of the different values of the $b$ coefficient as shown in Table \@ref(tab:table1): steeper increases are associated with higher $b$ coefficients. Because of the vertical difference in the absolute relationships (Figure 2.1a), the expected fecundity per female spawner varied between model fits, requiring that the $\alpha$ parameter to scale accordingly to maintain similar recruitment time series (Figure 2.2a). We found that the value of the $\alpha$ parameter (representing maximum adults produced per egg) was inversely related to the scale of fecundity (Figure 2.2b). Because the spawner-recruit parameters could scale to fecundity, the estimated values and temporal trends of $S_{\text{MSC}}$ were essentially identical between the model fits using different assumed fecundity relationships (Figure 2.3a,b).
+There was some variability in the expected fecundity at size between the different data sets we used, both in a absolute sense (Figure 2.1a) and a relative sense (Figure 2.1b). When standardized to the maximum point for each curve, the relative contribution of different sized females showed variable increases with fish size between data sources (Figure 2.1b). This is a result of the different values of the $b$ coefficient as shown in Table \@ref(tab:table1): steeper increases are associated with higher $b$ coefficients. Because of the vertical difference in the absolute relationships (Figure 2.1a), the expected fecundity per female spawner varied between model fits, requiring that the $\alpha$ parameter to scale accordingly to maintain similar recruitment time series (Figure 2.2a). We found that the value of the $\alpha$ parameter (representing maximum adults produced per egg) was inversely related to the scale of fecundity (Figure 2.2b). Because the spawner-recruit parameters could scale to fecundity, the estimated values and temporal trends of $S_{\mathrm{MSC}}$ were essentially identical between the model fits using different assumed fecundity relationships (Figure 2.3a,b).
 
 #### Fecundity Relationships {.tabset .tabset-pills .tabset-fade}
 
@@ -336,9 +336,9 @@ points(alpha_m ~ f800, pch = 22, bg = "white", cex = 3, lwd = c(2,1,1,1,1,1,1))
 text(alpha_m ~ f800, labels = letters[1:7], font = c(2,1,1,1,1,1,1))
 ```
 
-#### $S_{\text{MSC}}$ {.tabset .tabset-pills .tabset-fade}
+#### $S_{\mathrm{MSC}}$ {.tabset .tabset-pills .tabset-fade}
 
-**Figure 2.3:** Consistency in the estimated value of $S_{\text{MSC}}$ across assumed fecundity data sources and models for (a) 8-inch mesh, (b) 6-inch mesh, and (c) non-selective mesh. Points represent posterior medians and error bars represent the central 50% (thick lines) and 80% (thin lines) posterior credible regions.
+**Figure 2.3:** Consistency in the estimated value of $S_{\mathrm{MSC}}$ across assumed fecundity data sources and models for (a) 8-inch mesh, (b) 6-inch mesh, and (c) non-selective mesh. Points represent posterior medians and error bars represent the central 50% (thick lines) and 80% (thin lines) posterior credible regions.
 
 ##### (a) 8-inch
 
@@ -578,13 +578,13 @@ lwd = c(3, rep(1, length(ids) - 1))
 
 The use of multinomial likelihoods as a description of the observation process of age/sex composition by year and fate (escapement and fishery harvests) inserts a difficult problem related to the weight each data set receives. It is well-documented that the actual sample size (i.e., number of fish sampled) is not an appropriate measure of the amount of information contained in the sample because sampled fish are often not independent [@maunder-2011; @mcallister-ianelli-1997; @hulson-etal-2011]. This requires the use of an "effective multinomial sample size" (ESS), which is generally lower than the observed sample size. To address this issue for the analysis presented in the main text, we used a method where the effective sample size for each data set each year was rescaled such that the year with the maximum number of fish sampled for a data set received a ESS value of 100, and the rest of the years were scaled proportionately, i.e.:
 
-$$ESS_{i,t} = \frac{n_{i,t}}{\text{max}(n_{i})} \times 100$$  
+$$ESS_{i,t} = \frac{n_{i,t}}{\mathrm{max}(n_{i})} \times 100$$  
 
 where $i$ indexes the fate (escapement, commercial, or subsistence harvest) and $t$ indexes the calendar year, and $n$ is the number of fish sampled for age and sex composition. This method places more weight on years in which more fish were aged, however the value of 100 is arbitrary and places relatively equal weight on each of the fate-specific data sets. We refer to this scheme as the "scale" method.
 
 We wished to evaluate whether the method we used to assign weight to these data sets is likely to have influenced our inference in the main text analysis. For this sensitivity analysis, we assessed the influence of placing more weight on some data sets over others by replacing the value of 100 with 200 for each data set sequentially (i.e., refitting the model with different weights for each data set).  Additionally, we assessed an alternative scheme where the value of $ESS_{i,t}$ was obtained as:
 
-$$ESS_{i,t} = \text{min}(n_{i,t}, X)$$
+$$ESS_{i,t} = \mathrm{min}(n_{i,t}, X)$$
 
 where $X$ took on the value of 100 or 200 depending on the scenario. We refer to this scheme as the "min" method, and it assumes that any additional fish beyond $X$ does not contribute any additional information to the multinomial sample. However, because the vast majority of years had greater than 200 fish for a given sampled fate, it has the tendency to weight all years equally within a data set. Table \@ref(tab:table2) below summarizes the data weighting scenarios investigated in this sensitivity analysis:
 
@@ -623,7 +623,7 @@ As shown in the figures below, the influence of alternative composition weightin
 *  Similar temporal trends in the probability of returning at age by sex, with the exception of age 4 females -- models fitted using the "scale" method indicated slightly negative trends and models fitted with the "min" method indicated stronger positive trends, though both methods indicated age 4 fish make up 5% or less of all female recruits (Figure 4.3).
 *  Similar calendar year age composition estimates, which reflect the fit to the available data (Figure 4.6a,b,c). 
 *  Similar selectivity functions, though there was a tendency for the "min" models to have a less steep decline following peak selectivity as fish size increased (Figure 4.7).
-*  Similar estimates of $S_{\text{MSC}}$, as well as the effect of time period and mesh size (Figure 4.8a,b). However, there was a tendency for the "min" models to suggest $S_{\text{MSC}}$ values that were approximately 10% larger than the "scale" models -- this is likely related to the flatter selectivity function obtained from these models given the high degree of similarity in other model outputs.
+*  Similar estimates of $S_{\mathrm{MSC}}$, as well as the effect of time period and mesh size (Figure 4.8a,b). However, there was a tendency for the "min" models to suggest $S_{\mathrm{MSC}}$ values that were approximately 10% larger than the "scale" models -- this is likely related to the flatter selectivity function obtained from these models given the high degree of similarity in other model outputs.
 *  The use of the "min" weighting scheme resulted in narrower credible intervals for estimated and derived quantities -- this stems from the assumed greater information content of the data under these scheme relative to the "scale" method.
 
 Although there are many other weighting schemes that we could have evaluated, we interpret these results as evidence that our choice of weighting scheme for the main analysis did not drive the results we obtained.
@@ -904,9 +904,9 @@ matplot(x = rlm_seq, y = out, type = "l", col = col, lwd = lwd, lty = lty,
 ```
 
 
-#### $S_{\text{MSC}}$ {.tabset .tabset-pills .tabset-fade}
+#### $S_{\mathrm{MSC}}$ {.tabset .tabset-pills .tabset-fade}
 
-**Figure 4.8:** Variability in the estimated value of $S_{\text{MSC}}$ across data weighting scenarios for (a) 8-inch mesh, (b) 6-inch mesh, and (c) non-selective mesh. Points represent posterior medians and error bars represent the central 50% (thick lines) and 80% (thin lines) posterior credible regions. Blue represents the weighting scenarios using the "scale" ESS method, red represent the weighting scenarios using the "min" method. 
+**Figure 4.8:** Variability in the estimated value of $S_{\mathrm{MSC}}$ across data weighting scenarios for (a) 8-inch mesh, (b) 6-inch mesh, and (c) non-selective mesh. Points represent posterior medians and error bars represent the central 50% (thick lines) and 80% (thin lines) posterior credible regions. Blue represents the weighting scenarios using the "scale" ESS method, red represent the weighting scenarios using the "min" method. 
 
 ##### (a) 8-inch
 
@@ -1033,7 +1033,7 @@ post_list = list()
 
 # read in the posterior samples and meta data
 for (i in 1:length(mods)) {
-  post_list[[i]] = post_thin(readRDS(postfiles[i]), keep_iters = 100)
+  post_list[[i]] = post_thin(readRDS(postfiles[i]), keep_iters = 1000)
   meta[[i]] = readRDS(metafiles[i])
 }
 
@@ -1120,8 +1120,6 @@ print_range = function(bp, fate, mods = rep(TRUE, 12)) {
   frx = format(rx, digits = 3, drop0trailing = F)
   paste(frx, collapse = " -- ")
 }
-
-
 ```
 
 
