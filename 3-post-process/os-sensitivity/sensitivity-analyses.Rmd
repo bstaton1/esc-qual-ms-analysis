@@ -993,12 +993,22 @@ legend("topleft", legend = c("First 10", "All", "Last 10"),
        pt.cex = 1.5)
 ```
 
-# Section #5: Between-Model Fit to Composition Data
+# Section #5: MCMC Details, Convergence, and Model Adequacy
+
+## MCMC Attributes Details
+
+MCMC sampling was conducted using long chains (100,000 burn-in samples, 1,000,000 samples following burn-in, thinning by 200 iterations, per each of 4 chains). This retained 20,000 samples for inference per fitted model.
+
+## MCMC Convergence Details
+
+We assessed MCMC simulation convergence was assessed using visual inspection of MCMC sampling behavior and the $\hat{R}$ diagnostic proposed by @brooks-gelman-1998. We also examined the effective Monte Carlo sample size, which provides an estimate of the number of independent MCMC samples obtained from each marginal posterior.
+
+MCMC sampling behavior for these models was good under the specified dimensions, considering the complexity of this estimation problem (Supplements B -- I show summaries and diagnostic plots from select models). The only parameter that showed $\hat{R}$ values greater than 1.05 was $\alpha$ for models E-0, E-A, E-S, and E-AL (average $\hat{R}$ across these four models: 1.09). Given the rarity of these occurances (approximately 150 other estimated parameters, including 47 recruitment states and 88 fishing mortality parameters, across which the average maximum $\hat{R}$ value was 1.008), we were not concerned by this finding and proceeded with inference. The coefficients of the return-at-age model ($\gamma_{0,a,s}$ and $\gamma_{1,a,s}$) and two of the selectivity parameters ($\sigma$ and $\theta$) showed the poorest mixing across models, as evidenced by low effective MCMC samples relative to the other model parameters.
+
+## Model Adequacy for the Data {.tabset .tabset-pills .tabset-fade}
 
 ```{r workspace5}
-rm(list = ls(all = T))
 model = 1  # just needed to build the data
-
 source("2-model-fit/1-compile-data.R")
 source("load-functions.R")
 rm(model) # clear out the model object 
@@ -1006,8 +1016,9 @@ rm(model) # clear out the model object
 out_dir = "model-output/permanent"
 out_files = dir(out_dir, full.names = T)
 
-# reduce the set of models to only main-text models
-keep_mods = c(1,3,5,6,9)
+# main text E-0 and E-ASL models
+keep_mods = 1:12
+
 keep_mods = paste(paste0("-", keep_mods, "\\."), collapse = "|")
 out_files = out_files[str_detect(out_files, keep_mods)]
 
@@ -1015,7 +1026,6 @@ out_files = out_files[str_detect(out_files, keep_mods)]
 postfiles = out_files[str_detect(out_files, "post")]
 mods = str_extract(postfiles, "[0-9]+")
 metafiles = out_files[str_detect(out_files, "meta")]
-msyfiles = out_files[str_detect(out_files, "msy")]
 
 # create empty objects to store the output from each model
 meta = list()
@@ -1023,143 +1033,114 @@ post_list = list()
 
 # read in the posterior samples and meta data
 for (i in 1:length(mods)) {
-  # progress_updater(i, length(mods))
-  # post_list[[i]] = post_thin(readRDS(postfiles[i]), 0.9)
-  post_list[[i]] = readRDS(postfiles[i])
+  post_list[[i]] = post_thin(readRDS(postfiles[i]), keep_iters = 100)
   meta[[i]] = readRDS(metafiles[i])
 }
 
 # create the ids for each model
-ids = unlist(lapply(meta, id_model))
+ids = unlist(lapply(meta, id_model, unit = T, trends = T))
 
 # give the objects model identifiers
 names(meta) = ids
 names(post_list) = ids
 
-get_gof = function(post, type) {
-  post = post_list[[model]]
-  q_name = paste0("q_", type)
-  x_name = paste0("x_", type)
-  
-  q_post = post_subset(post, q_name, T)
-  x_dat = jags_dat[[x_name]]
-  n_samp = nrow(q_post)
-  
-  pp_check = mult_pp_check(q_post, x_dat, progress = F)
-  bp = mean(pp_check$fit_obs > pp_check$fit_new)
-  
-  c(model = model, type = type, c(StatonMisc::summ(pp_check$fit_obs), bp = bp))
-}
-
-gof_out = NULL
-for (model in c("N-0", "E-0", "E-A", "E-S", "E-AS")) {
-  for (type in c("esc", "com", "sub")) {
-    # cat("Model: ", model, "; Type: ", type, "\n", sep = "")
-    gof_out = rbind(gof_out, get_gof(model, type))
-  }
-}
-
-# clean up output
-gof_out = as.data.frame(gof_out, stringsAsFactors = F)
-gof_out$mean = as.numeric(gof_out$mean)
-gof_out$sd = as.numeric(gof_out$sd)
-gof_out$`50%` = as.numeric(gof_out$`50%`)
-gof_out$`2.5%` = as.numeric(gof_out$`2.5%`)
-gof_out$`97.5%` = as.numeric(gof_out$`97.5%`)
-gof_out$bp = as.numeric(gof_out$bp)
-
-# function to create barplot that compares fit stat and bayes p-value among models
-compare_fit = function(the_type, bp_or_chi2 = "chi2") {
-  keep_mods = c("N-0", "E-0", "E-A", "E-S", "E-AS")
-  
-  main = switch(
-    the_type,
-    "esc" = "Escapement Age/Sex Comp",
-    "com" = "Commerical Harvest Age/Sex Comp",
-    "sub" = "Subsistence Harvest Age/Sex Comp"
-  )
-  
-  gof_sub = subset(gof_out, type == the_type & model %in% keep_mods)
-  gof_sub$model = factor(gof_sub$model, levels = keep_mods)
-  gof_sub = gof_sub[order(gof_sub$model),]
-  
-  par(mar = c(3,3,2,1), tcl = -0.15, mgp = c(1.75, 0.35, 0))
-  
-  if (bp_or_chi2 == "chi2") {
-    mp = barplot(gof_sub$mean, names.arg = gof_sub$model, las = 2, ylim = c(0, max(gof_sub$`97.5%`) * 1.1),
-                 ylab = latex2exp::TeX("$\\chi$^2 GOF Statistic"),
-                 col = "skyblue", border = "skyblue3",
-                 main = main)
-    axis(side = 1, at = mp, labels = F)
-    segments(par("usr")[1], 0, par("usr")[2], 0)
-    segments(mp, gof_sub$`2.5%`, mp, gof_sub$`97.5%`, col = "blue")
-  }
-  
-  if (bp_or_chi2 == "bp") {
-    mp = barplot(gof_sub$bp, names.arg = gof_sub$model, las = 2, ylim = c(0, 1),
-                 ylab = "Bayesian p-value",
-                 col = "skyblue", border = "skyblue3",
-                 main = main)
-    abline(h = 0.5, lty = 2)
-    axis(side = 1, at = mp, labels = F)
-    segments(par("usr")[1], 0, par("usr")[2], 0)
-  }
-}
-
+# reorder the models
+ordered_mods = c("N-0", "N-ASL", "E-0", "E-A", "E-S", "E-L", "E-AS", "E-AL", "E-SL", "E-ASL", "EM-0", "EM-ASL")
+meta = meta[ordered_mods]
+post_list = post_list[ordered_mods]
 ```
 
-We were interested in characterizing whether including additional compositional trends (sex- or age-at-return) into the model improved the fit to the age composition data from the three fates (escapement, subsistence harvest, commercial harvest). We calculated a $\chi^2$ fit statistic for observed data and used a posterior predictive check to gauge the similarity between the fit of observed and simulated data [i.e., using Bayesian $p$-values @gelman-etal-2014; @kery-2010]. Here we show this comparison for several models in our analysis: N-0, E-0, E-A, E-S, and E-AS. Models with the length trend are not summarized here as this trend did not affect the fit to composition data.
+```{r bp-abundance}
+f = function(post) {
+  pp = lnorm_pp_check(post_subset(post, "^S_t[", T), S_obs_sig, S_obs)
+  with(pp, mean(fit_obs > fit_new))
+}
+ESC_out = sapply(post_list, f)
 
-## $\chi^2$ Goodness of Fit Statistics {.tabset .tabset-pills .tabset-fade}
+f = function(post) {
+  pp = lnorm_pp_check(post_subset(post, "^Hcom[", T), Hcom_obs_sig, Hcom_obs)
+  with(pp, mean(fit_obs > fit_new))
+}
+COM_out = sapply(post_list, f)
 
-The metric used to summarize the fit of observed composition data from fate $k$ in each posterior sample $i$ was:
+f = function(post) {
+  pp = lnorm_pp_check(post_subset(post, "^Hsub[", T), Hsub_obs_sig, Hsub_obs)
+  with(pp, mean(fit_obs > fit_new))
+}
+SUB_out = sapply(post_list, f)
+
+bp_N_tab = data.frame(Model = ordered_mods, Commercial = COM_out, Escapement = ESC_out, Subsistence = SUB_out)
+rownames(tab) = NULL
+```
+
+```{r bp-composition}
+f = function(post) {
+  pp = mult_pp_check(post_subset(post, "^q_esc[", T), x_esc, progress = F)
+  with(pp, mean(fit_obs > fit_new))
+}
+esc_out = sapply(post_list, f)
+
+f = function(post) {
+  pp = mult_pp_check(post_subset(post, "^q_com[", T), x_com, progress = F)
+  with(pp, mean(fit_obs > fit_new))
+}
+com_out = sapply(post_list, f)
+
+f = function(post) {
+  pp = mult_pp_check(post_subset(post, "^q_sub[", T), x_sub, progress = F)
+  with(pp, mean(fit_obs > fit_new))
+}
+sub_out = sapply(post_list, f)
+
+bp_comp_tab = data.frame(Model = ordered_mods, Commercial = com_out, Escapement = esc_out, Subsistence = sub_out)
+rownames(tab) = NULL
+```
+
+We assessed model adequacy using posterior predictive checks [@kery-2010; @gelman-etal-2014], which compare the consistency of fit statistics between observed and simulated data following model assumptions. For each MCMC sample, we simulated hypothetical data sets from the posterior and calculated a fit criterion separately for the observed and simulated data relative to the model expectation for that iteration. We measured fit for the aggregate abundance data using the log-scale sum of squared error, i.e., 
+
+$$SSQ_{k,i} = \sum_t^{n_t} \left(\log(x_{k,t,i}) - \log(\hat{x}_{k,t,i})\right)^2$$
+where $x_{k,t}$ represents the abundance data (simulated or observed) for fate $k$ in year $t$ and $\hat{x}_{k,t}$ represents the model expectation for MCMC iteration $i$. For the $x_{k,t,i}$, the $i$ index applies only for simulated data as a different set was drawn for each iteration. The metric used to summarize the fit of observed composition data from fate $k$ was the $\chi^2$ statistic:
 
 $$\chi_{k,i}^2 = \sum_t^{n_t} \sum_j^{n_s \cdot n_a} \frac{(x_{k,t,j,i} - \hat{x}_{k,t,j,i})^2}{\hat{x}_{k,t,j,i}}$$
+where $x_{k,t,j}$ represents the observed (or simulated) data (counts at age/sex $j$) for year $t$, and $\hat{x}_{k,t,j}$ represents the model expectation for MCMC iteration $i$. For each model and data set, we summarized these fit criteria as the proportion of MCMC iterations in which the observed data fitted more poorly than the simulated data (i.e., a Bayesian $p$-value), with values approaching 0.5 indicating ideal model fit and values  closer to zero or one indicating under- or over-dispersion, respectively [@kery-2010; @gelman-etal-2014].
 
-where $x$ represents the observed data (counts at age/sex), and $\hat{x}$ represents the model expectation for MCMC iteration $i$. $j$ represents a unique age/sex class, $n_t$ is the number of years in the data set, $n_a$ is the number of ages-at-return, and $n_s$ is the number of sexes-at-return. 
+**Table 5.1**  Bayesian $p$-values by data type (a -- abundance vs. b -- composition) and fate (commercial harvest, escapement, or subsistence harvest). Values close to 0.5 indicate good agreement between model and data, values closer to zero indicate data are under-dispersed relative to the model, and values closer to one indicated data are over-dispersed relative to the model.
 
-**Figure 5.1** $\chi^2$ goodness of fit statistics from 5 models from the main-text analysis for each fate-specific data set: (a) escapement, (b) subsistence harvest, and (c) commercial harvest. Height of each bar represents the average $\chi^2$ value across posterior samples, error bars represent the 95% credible interval of the fit statistic. Lower values indicated better fits to the data.
+```{r}
+N_mods = str_detect(ordered_mods, "^N-")
+E_mods = str_detect(ordered_mods, "^E-")
+EM_mods = str_detect(ordered_mods, "^EM-")
+a_mods = str_detect(ordered_mods, "A")
+s_mods = str_detect(ordered_mods, "S")
+l_mods = str_detect(ordered_mods, "L")
 
-### (a) Escapement 
+print_range = function(bp, fate, mods = rep(TRUE, 12)) {
+  x = bp[mods,fate]
+  rx = range(x)
+  frx = format(rx, digits = 3, drop0trailing = F)
+  paste(frx, collapse = " -- ")
+}
 
-```{r, fig.height = 4, fig.width = 6}
-compare_fit("esc")
+
 ```
 
-### (b) Subsistence 
 
-```{r, fig.height = 4, fig.width = 6}
-compare_fit("sub")
+## (a) Abundance
+
+For aggregate abundance data by fate, Bayesian $p$-values ranged `r print_range(bp_N_tab, "Commercial")` for commercial, `r print_range(bp_N_tab, "Escapement")` for escapement, and `r print_range(bp_N_tab, "Subsistence")` for subsistence. Of these, only the escapement value is of possible concern, and it indicates the observed escapement data showed lack of fit relative to simulated data in some years -- particularly in years with the highest escapements (Online Supplements B -- I; Figure 3a in each document). This may imply that the assumed known observation uncertainty was lower than it perhaps should have been in these years.
+
+```{r}
+kable(bp_N_tab, digits = 3, align = c("lccc")) %>%
+  kable_styling(full_width = F, bootstrap_options = "condensed")
 ```
 
-### (c) Commercial 
+## (b) Composition
 
-```{r, fig.height = 4, fig.width = 6}
-compare_fit("com")
-```
+For composition data by fate, Bayesian $p$-values showed more variability among models: a range of `r print_range(bp_comp_tab, "Commercial")` for commercial, `r print_range(bp_comp_tab, "Escapement")` for escapement, and `r print_range(bp_comp_tab, "Subsistence")` for subsistence. For each composition data set, the models that included time-varying probabilities of return-at-age resulted in the Bayesian $p$-values being closer to the ideal value of 0.5. For these models only (models `r StatonMisc::list_out(ordered_mods[a_mods], final = "and")`), the ranges were `r print_range(bp_comp_tab, "Commercial", a_mods)` for commercial, `r print_range(bp_comp_tab, "Escapement", a_mods)` for escapement, and `r print_range(bp_comp_tab, "Subsistence", a_mods)` for subsistence. This finding suggests the time-trending probability of return-by-age helped improve model adequacy for explaining variability in the data.
 
-## Bayesian $p$-values {.tabset .tabset-pills .tabset-fade}
-
-The Bayesian $p$-value is calculated by simulating data from the posterior and comparing the $\chi^2$ statistics between observed and simulated data. The Bayesian $p$-value represents the proportion of MCMC iterations in which the fit statistics for observed data indicated poorer fit than the simulated data.  If observed and simulated data share similar properties (i.e., variability around the expectation), then the Bayesian $p$-value will be near 0.5; values greater than 0.5 indicate the data are over-dispersed relative to the model assumptions.
-
-**Figure 5.2** Bayesian $p$-values for 5 models from the main-text analysis for each fate-specific data set: (a) escapement, (b) subsistence harvest, and (c) commercial harvest. Values close to 0.5 (horizontal dashed line) indicate better model adequacy according to the $\chi^2$ fit measure.
-
-### (a) Escapement 
-
-```{r, fig.height = 4, fig.width = 6}
-compare_fit("esc", "bp")
-```
-
-### (b) Subsistence 
-
-```{r, fig.height = 4, fig.width = 6}
-compare_fit("sub", "bp")
-```
-
-### (c) Commercial 
-
-```{r, fig.height = 4, fig.width = 6}
-compare_fit("com", "bp")
+```{r}
+kable(bp_comp_tab, digits = 3, align = c("lccc")) %>%
+  kable_styling(full_width = F, bootstrap_options = "condensed")
 ```
 
 # Section #6: $S_{\text{MAX}}$ instead of $S_{\text{MSC}}$
