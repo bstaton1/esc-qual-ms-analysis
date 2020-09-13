@@ -39,14 +39,14 @@ library(abind)
 
 For mean length-at-age data (mid-eye to tail-fork; METF, mm), we used individual fish records sampled at weirs distributed throughout the Kuskokwim drainage dating back to 1976. These data were used for two purposes in our analysis: 
 
-(1)  to inform the relative reproductive output of females of different ages (i.e., $z_{t,a,s}$), by inserting the METF values from the Kuskokwim into fecundity/ovary mass versus METF relationships obtained from other systems and 
-(2)  to inform the relative selectivity of the fisheries using different mesh sizes via the Pearson gillnet selectivity function.
+(1)  To inform the relative reproductive output of females of different ages (i.e., $z_{t,a,s}$), by inserting the METF values from the Kuskokwim into fecundity/ovary mass versus METF relationships obtained from other systems. 
+(2)  To inform the relative selectivity of the fisheries using different mesh sizes via the Pearson gillnet selectivity function.
 
-Both uses required that a value be present for each year, age, and sex given they are essentially independent variables from a JAGS model standpoint. However, there were cases where no fish of a given age/sex class were sampled at any of the weirs operating throughout the basin. To impute values in these cases, we used a linear interpolation rule for missing values between two observations. If the first or last year in the data set was missing, we used the average of the most-recent 5 or 10 years, whichever was lesser that still provided a non-missing value.
+Both uses required that a value be present for each year, age, and sex. However, there were cases where no fish of a given age/sex class were sampled at any of the weirs operating throughout the basin. To impute values in these cases, we used a linear interpolation rule for missing values between two observations. If the first or last year in the data set was missing, we used the average of the most-recent 5 or 10 years, whichever was lesser that still provided a non-missing value.
 
 The output of this rule is shown in Figure 1.1, below. In general, most interpolation occurred (a) in the rare age/sex classes (age-4 females, age-7 of both sexes) and (b) at the beginning of the time series when fewer weirs were operational. No weirs operated in 1998, which explains the missing value for all ages/sexes that year.
 
-**Figure 1.1**: Time series (1976 -- 2017) of escapement average METF by age class including observed (blue) and imputed (red) values. Vertical lines represent the break points of the time series split into thirds (14 years each); the percentages denote the percent of all values that were imputed for that time block by age/sex.
+**Figure 1.1**: Time series (1976 -- 2019) of escapement average METF by age class including observed (blue) and imputed (red) values. Vertical lines represent the break points of the time series split into thirds (~14 years each); the percentages denote the percent of all values that were imputed for that time block by age/sex.
 
 ```{r workspace1, fig.width = 5, fig.height = 7}
 dat = read.csv("1-data-prep/b-length-data/outputs/esc-mean-length-no-interp.csv")
@@ -179,7 +179,7 @@ lwd = c(3, rep(1, length(ids) - 1))
 
 ## Motivation and Methods
 
-The conclusions from our analysis may depend on the shape of the assumed relationship between female spawner size (METF) and reproductive contribution (e.g., fecundity). As described in the main-text, no length-fecundity data sets were available for the Kuskokwim River Chinook salmon population, so we used a relationship obtained from the Yukon River Chinook salmon population, sampled at Eagle, AK in the years 2008 -- 2010. However, we wished to evaluate whether our conclusions would have changed had we used other assumed relationships. Table \@ref(tab:table1) below shows the sources of 6 additional length-fecundity data sets we found for Chinook salmon populations in Alaska:
+The conclusions from our analysis may depend on the shape of the assumed relationship between female spawner size (METF) and reproductive output (e.g., fecundity). As described in the main-text, we deemed the length-fecundity data set available for the Kuskokwim River Chinook salmon population to be unreliable, so we used a relationship obtained from the Yukon River Chinook salmon population, sampled at Eagle, AK in the years 2008 -- 2010 to inform our primary analysis. However, we wished to evaluate whether our conclusions would have changed had we used other assumed relationships. Table \@ref(tab:table1) below shows the sources of 6 additional length-fecundity data sets we found for Chinook salmon populations in Alaska:
 
 ```{r table1}
 
@@ -250,15 +250,15 @@ tab %>%
 
 ```
 
-For this sensitivity analysis, we recalculated $z_{t,a,s}$ (mean reproductive contribution per spawner of age $a$ and sex $s$ in calendar year $t$) using the power function coefficients shown in Table \@ref(tab:table1). For each of the 7 data sets (6 additional to the main text analysis), we fitted model E-0 (no trends allowed for age-, sex-, or length-at-return) and model E-ASL (all trends allowed). We then compared the output to that obtained when using data set **a**.
+For this sensitivity analysis, we recalculated $z_{t,a,s}$ (mean reproductive output per spawner of age $a$ and sex $s$ in calendar year $t$) using the power function coefficients shown in Table \@ref(tab:table1). For each of the 7 data sets (6 additional to the main-text analysis), we fitted model E-0 (no trends allowed for age-, sex-, or length-at-return) and model E-ASL (all trends allowed). We then compared the output to that obtained when using data set **a**.
 
 ### Results
 
-There was some variability in the expected fecundity at size between the different data sets we used, both in a absolute sense (Figure 2.1a) and a relative sense (Figure 2.1b). When standardized to the maximum point for each curve, the relative contribution of different sized females showed variable increases with fish size between data sources (Figure 2.1b). This is a result of the different values of the $b$ coefficient as shown in Table \@ref(tab:table1): steeper increases are associated with higher $b$ coefficients. Because of the vertical difference in the absolute relationships (Figure 2.1a), the expected fecundity per female spawner varied between model fits, requiring that the $\alpha$ parameter to scale accordingly to maintain similar recruitment time series (Figure 2.2a). We found that the value of the $\alpha$ parameter (representing maximum adults produced per egg) was inversely related to the scale of fecundity (Figure 2.2b). Because the spawner-recruit parameters could scale to fecundity, the estimated values and temporal trends of $S_{\mathrm{MSC}}$ were essentially identical between the model fits using different assumed fecundity relationships (Figure 2.3a,b).
+There was some variability in the expected fecundity at size among the different data sets we used, both in a absolute sense (Figure 2.1a) and a relative sense (Figure 2.1b). When standardized to the maximum point for each curve, the relative output of different sized females showed variable increases with fish size among data sources (Figure 2.1b). This is a result of the different values of the $b$ coefficient as shown in Table \@ref(tab:table1): steeper increases are associated with higher $b$ coefficients. Because of the vertical difference in the absolute relationships (Figure 2.1a), the expected fecundity per female spawner varied between model fits, requiring that the $\alpha$ parameter to scale accordingly to maintain similar recruitment time series (Figure 2.2a). We found that the value of the $\alpha$ parameter (representing maximum adults produced per egg) was inversely related to the scale of fecundity (Figure 2.2b). Because the spawner-recruit parameters could scale to fecundity, the estimated values and temporal trends of $S_{\mathrm{MSC}}$ were essentially identical among the model fits using different assumed fecundity relationships (Figure 2.3a,b).
 
 #### Fecundity Relationships {.tabset .tabset-pills .tabset-fade}
 
-**Figure 2.1:** Relationship between female length (METF in mm) and fecundity, obtained using the coefficients presented in Table \@ref(tab:table1). (a) raw fecundity values, (b) fecundity scaled to that produced by the largest mean length-at-age value in the Kuskokwim River data set.
+**Figure 2.1:** Relationship between female length (METF in mm) and fecundity, obtained using the coefficients presented in Table \@ref(tab:table1)). (a) raw fecundity values, (b) fecundity scaled to that produced by the largest mean length-at-age value in the Kuskokwim River data set.
 
 ##### (a) Raw
 
@@ -494,17 +494,17 @@ mtext(side = 3, "All Trends (Model E-ASL)", line = 0.25, font = 2)
 
 # Section #3: Map for Year Indices
 
-The indexing of brood and calendar years in the state-space model in somewhat counter-intuitive, thus we have included this section as an additional explanation.
+The indexing of brood and calendar years in the state-space model is somewhat counter-intuitive, thus we have included this section as an additional explanation.
 
-The indexing of brood and calendar years is lagged by $a_{\mathrm{max}}+1$ years. For example, in our model,  $a_{\mathrm{max}}$ is 7, so recruits from the eighth tracked brood year are progeny of the spawners returning in the first tracked calendar year. The reason this lag is necessary is to populate the early years of calendar year abundance with expected adult returns so they can be used in the process model to produce the next recruits and to be fitted to the observations made in these early years. The extent of the lag is dependent on the maximum age of return ($a_{\mathrm{max}}$) because adults of each possible age must be populated in the first calendar year. The table below attempts to illustrate these concepts visually. Grey regions specify years that the model does not consider.
+The indexing of brood and calendar years is lagged by $a_{\mathrm{max}}+1$ years. For example, in our model,  $a_{\mathrm{max}}$ is 7, so recruits from the eighth tracked brood year are progeny of the spawners returning in the first tracked calendar year. The reason this lag is necessary is to populate the early years of calendar year abundance with expected adult returns so they can be used in the process model to produce the next recruits and to be fitted to the observations made in these early years. The extent of the lag is dependent on the maximum age of return ($a_{\mathrm{max}}$) because adults of each possible age must be populated in the first calendar year. The table below illustrates these concepts visually. Grey regions specify years that the model does not consider.
 
 The calendar years ($t$) start counting at the year of first monitoring (1976 for our data set). The run that returned in this year was made up of age-4 fish from brood year 1972 (the fourth tracked brood year $y=4$), age-5 fish from brood year 1971 ($y=3$), age-6 fish from brood year 1970 ($y=2$), and age-7 fish from brood year 1969 ($y=1$) -- this illustrates why $a_{\mathrm{max}}$ brood years prior to data collection are necessary. 
 
-The general expression for finding the brood year index $y$ in which fish returning in year $t$ at the $a^{\mathrm{th}}$ age were spawned is $y=t+n_a-a$, where $n_a$ is the number of ages of return. Our model tracked ages 4, 5, 6, and 7 returns for both sexes, so this calculation was the same for both males and females.
+The general expression for finding the brood year index $y$ in which fish returning in year $t$ at the $a^{\mathrm{th}}$ age were spawned is $y=t+n_a-a$, where $n_a$ is the number of ages of return and $a$ represents the index of each age of return (e.g., $a = 1$ for age-4). Our model tracked ages 4, 5, 6, and 7 returns for both sexes, so this calculation was the same for both males and females.
 
 The model tracks recruitment through brood year 2015 only. This is because brood years later than this have not been observed in the data (for brood year 2016, the first possible age of return, age-4, returned in 2020, which is not in our data set). Thus, in order to inform the model expectation to link to observed return abundance and its age/sex structure in 2019 (the last observed calendar year), the age-4 fish from brood year 2015 are necessary but no more are necessary. Brood years 1969 ($y=1$) and 2015 ($y=47$) are the most poorly informed by data, as they are the most partially observed of any brood years (only age-7 and age-4, respectively). The information to estimate the recruitment states in these years comes from the hierarchical sharing of information in the probabilities of return-by-age and return-by-sex with the other brood years.
 
-**Figure 3.1** Visual representation of the apportionment of brood year recruits to calendar year returns at age. Adapted from Figure 1 in @fleischman-etal-2013.
+**Figure 3.1** Visual representation of the apportionment of brood year recruits to calendar year returns at age. Adapted from Figure 1 in @fleischman-etal-2013. Grey regions show years the model does not consider.
 
 ```{r, eval = T}
 knitr::include_graphics(path = file.path(getwd(), "3-post-process/os-sensitivity/years-table/table.png"))
@@ -623,7 +623,7 @@ As shown in the figures below, the influence of alternative composition weightin
 *  Similar temporal trends in the probability of returning at age by sex, with the exception of age 4 females -- models fitted using the "scale" method indicated slightly negative trends and models fitted with the "min" method indicated stronger positive trends, though both methods indicated age 4 fish make up 5% or less of all female recruits (Figure 4.3).
 *  Similar calendar year age composition estimates, which reflect the fit to the available data (Figure 4.6a,b,c). 
 *  Similar selectivity functions, though there was a tendency for the "min" models to have a less steep decline following peak selectivity as fish size increased (Figure 4.7).
-*  Similar estimates of $S_{\mathrm{MSC}}$, as well as the effect of time period and mesh size (Figure 4.8a,b). However, there was a tendency for the "min" models to suggest $S_{\mathrm{MSC}}$ values that were approximately 10% larger than the "scale" models -- this is likely related to the flatter selectivity function obtained from these models given the high degree of similarity in other model outputs.
+*  Similar estimates of $S_{\mathrm{MSC}}$, as well as the effect of time period and mesh size (Figure 4.8a,b). However, there was a tendency for the "min" models to suggest $S_{\mathrm{MSC}}$ values that were approximately 10% larger than the "scale" models.
 *  The use of the "min" weighting scheme resulted in narrower credible intervals for estimated and derived quantities -- this stems from the assumed greater information content of the data under these scheme relative to the "scale" method.
 
 Although there are many other weighting schemes that we could have evaluated, we interpret these results as evidence that our choice of weighting scheme for the main analysis did not drive the results we obtained.
@@ -995,15 +995,15 @@ legend("topleft", legend = c("First 10", "All", "Last 10"),
 
 # Section #5: MCMC Details, Convergence, and Model Adequacy
 
-## MCMC Attributes Details
+## MCMC Attributes
 
 MCMC sampling was conducted using long chains (100,000 burn-in samples, 1,000,000 samples following burn-in, thinning by 200 iterations, per each of 4 chains). This retained 20,000 samples for inference per fitted model.
 
-## MCMC Convergence Details
+## MCMC Convergence
 
-We assessed MCMC simulation convergence was assessed using visual inspection of MCMC sampling behavior and the $\hat{R}$ diagnostic proposed by @brooks-gelman-1998. We also examined the effective Monte Carlo sample size, which provides an estimate of the number of independent MCMC samples obtained from each marginal posterior.
+We assessed MCMC simulation convergence using visual inspection of MCMC sampling behavior (i.e., trace plots) and the $\hat{R}$ diagnostic proposed by @brooks-gelman-1998. We also examined the effective Monte Carlo sample size, which provides an estimate of the number of independent MCMC samples obtained from each marginal posterior.
 
-MCMC sampling behavior for these models was good under the specified dimensions, considering the complexity of this estimation problem (Supplements B -- I show summaries and diagnostic plots from select models). The only parameter that showed $\hat{R}$ values greater than 1.05 was $\alpha$ for models E-0, E-A, E-S, and E-AL (average $\hat{R}$ across these four models: 1.09). Given the rarity of these occurances (approximately 150 other estimated parameters, including 47 recruitment states and 88 fishing mortality parameters, across which the average maximum $\hat{R}$ value was 1.008), we were not concerned by this finding and proceeded with inference. The coefficients of the return-at-age model ($\gamma_{0,a,s}$ and $\gamma_{1,a,s}$) and two of the selectivity parameters ($\sigma$ and $\theta$) showed the poorest mixing across models, as evidenced by low effective MCMC samples relative to the other model parameters.
+MCMC sampling behavior for these models was good under the specified dimensions, considering the complexity of this estimation problem (Supplements B -- I show summaries and diagnostic plots from select models). The only parameter that showed $\hat{R}$ values greater than 1.05 was $\alpha$ for models E-0, E-A, E-S, and E-AL (average $\hat{R}$ of $\alpha$ across these four models: 1.09). Given the rarity of these occurances (approximately 150 other estimated parameters, including 47 recruitment states and 88 fishing mortality parameters, across which the average maximum $\hat{R}$ value was 1.008), we were not concerned by this finding and proceeded with inference. The coefficients of the return-at-age model ($\gamma_{0,a,s}$ and $\gamma_{1,a,s}$) and two of the selectivity parameters ($\sigma$ and $\theta$) showed the poorest mixing across models, as evidenced by low effective MCMC samples relative to the other model parameters.
 
 ## Model Adequacy for the Data {.tabset .tabset-pills .tabset-fade}
 
@@ -1033,7 +1033,8 @@ post_list = list()
 
 # read in the posterior samples and meta data
 for (i in 1:length(mods)) {
-  post_list[[i]] = post_thin(readRDS(postfiles[i]), keep_iters = 1000)
+  # post_list[[i]] = post_thin(readRDS(postfiles[i]), keep_iters = 1000)
+  post_list[[i]] = readRDS(postfiles[i])
   meta[[i]] = readRDS(metafiles[i])
 }
 
@@ -1070,7 +1071,7 @@ f = function(post) {
 SUB_out = sapply(post_list, f)
 
 bp_N_tab = data.frame(Model = ordered_mods, Commercial = COM_out, Escapement = ESC_out, Subsistence = SUB_out)
-rownames(tab) = NULL
+rownames(bp_N_tab) = NULL
 ```
 
 ```{r bp-composition}
@@ -1093,18 +1094,20 @@ f = function(post) {
 sub_out = sapply(post_list, f)
 
 bp_comp_tab = data.frame(Model = ordered_mods, Commercial = com_out, Escapement = esc_out, Subsistence = sub_out)
-rownames(tab) = NULL
+rownames(bp_comp_tab) = NULL
 ```
 
 We assessed model adequacy using posterior predictive checks [@kery-2010; @gelman-etal-2014], which compare the consistency of fit statistics between observed and simulated data following model assumptions. For each MCMC sample, we simulated hypothetical data sets from the posterior and calculated a fit criterion separately for the observed and simulated data relative to the model expectation for that iteration. We measured fit for the aggregate abundance data using the log-scale sum of squared error, i.e., 
 
 $$SSQ_{k,i} = \sum_t^{n_t} \left(\log(x_{k,t,i}) - \log(\hat{x}_{k,t,i})\right)^2$$
-where $x_{k,t}$ represents the abundance data (simulated or observed) for fate $k$ in year $t$ and $\hat{x}_{k,t}$ represents the model expectation for MCMC iteration $i$. For the $x_{k,t,i}$, the $i$ index applies only for simulated data as a different set was drawn for each iteration. The metric used to summarize the fit of observed composition data from fate $k$ was the $\chi^2$ statistic:
+where $x_{k,t}$ represents the abundance data (simulated or observed) for fate $k$ in year $t$ and $\hat{x}_{k,t,i}$ represents the model expectation for MCMC iteration $i$. For $x_{k,t,i}$, the $i$ index applies only for simulated data as a different set was drawn for each iteration. We used the $\chi^2$ statistic to summarize the fit of observed composition data from fate $k$:
 
 $$\chi_{k,i}^2 = \sum_t^{n_t} \sum_j^{n_s \cdot n_a} \frac{(x_{k,t,j,i} - \hat{x}_{k,t,j,i})^2}{\hat{x}_{k,t,j,i}}$$
-where $x_{k,t,j}$ represents the observed (or simulated) data (counts at age/sex $j$) for year $t$, and $\hat{x}_{k,t,j}$ represents the model expectation for MCMC iteration $i$. For each model and data set, we summarized these fit criteria as the proportion of MCMC iterations in which the observed data fitted more poorly than the simulated data (i.e., a Bayesian $p$-value), with values approaching 0.5 indicating ideal model fit and values  closer to zero or one indicating under- or over-dispersion, respectively [@kery-2010; @gelman-etal-2014].
+where $x_{k,t,j}$ represents the data (simulated or observed; counts at age/sex $j$) for year $t$, and $\hat{x}_{k,t,j}$ represents the model expectation for MCMC iteration $i$.
 
-**Table 5.1**  Bayesian $p$-values by data type (a -- abundance vs. b -- composition) and fate (commercial harvest, escapement, or subsistence harvest). Values close to 0.5 indicate good agreement between model and data, values closer to zero indicate data are under-dispersed relative to the model, and values closer to one indicated data are over-dispersed relative to the model.
+For each model and data set, we summarized these fit criteria as the proportion of MCMC iterations in which the observed data fitted more poorly than the simulated data (i.e., a Bayesian $p$-value), with values approaching 0.5 indicating ideal model fit and values  closer to zero or one indicating under- or over-dispersion, respectively [@kery-2010; @gelman-etal-2014].
+
+**Table 5.1**  Bayesian $p$-values by data type (a -- abundance vs. b -- composition) and fate (commercial harvest, escapement, or subsistence harvest). Values close to 0.5 indicate good agreement between model and data, values closer to zero indicate data are under-dispersed relative to the model, and values closer to one indicate data are over-dispersed relative to the model.
 
 ```{r}
 N_mods = str_detect(ordered_mods, "^N-")
@@ -1123,7 +1126,7 @@ print_range = function(bp, fate, mods = rep(TRUE, 12)) {
 ```
 
 
-## (a) Abundance
+### (a) Abundance
 
 For aggregate abundance data by fate, Bayesian $p$-values ranged `r print_range(bp_N_tab, "Commercial")` for commercial, `r print_range(bp_N_tab, "Escapement")` for escapement, and `r print_range(bp_N_tab, "Subsistence")` for subsistence. Of these, only the escapement value is of possible concern, and it indicates the observed escapement data showed lack of fit relative to simulated data in some years -- particularly in years with the highest escapements (Online Supplements B -- I; Figure 3a in each document). This may imply that the assumed known observation uncertainty was lower than it perhaps should have been in these years.
 
@@ -1132,7 +1135,7 @@ kable(bp_N_tab, digits = 3, align = c("lccc")) %>%
   kable_styling(full_width = F, bootstrap_options = "condensed")
 ```
 
-## (b) Composition
+### (b) Composition
 
 For composition data by fate, Bayesian $p$-values showed more variability among models: a range of `r print_range(bp_comp_tab, "Commercial")` for commercial, `r print_range(bp_comp_tab, "Escapement")` for escapement, and `r print_range(bp_comp_tab, "Subsistence")` for subsistence. For each composition data set, the models that included time-varying probabilities of return-at-age resulted in the Bayesian $p$-values being closer to the ideal value of 0.5. For these models only (models `r StatonMisc::list_out(ordered_mods[a_mods], final = "and")`), the ranges were `r print_range(bp_comp_tab, "Commercial", a_mods)` for commercial, `r print_range(bp_comp_tab, "Escapement", a_mods)` for escapement, and `r print_range(bp_comp_tab, "Subsistence", a_mods)` for subsistence. This finding suggests the time-trending probability of return-by-age helped improve model adequacy for explaining variability in the data.
 
@@ -1143,7 +1146,7 @@ kable(bp_comp_tab, digits = 3, align = c("lccc")) %>%
 
 # Section #6: $S_{R_{\mathrm{MAX}}}$ instead of $S_{\mathrm{MSC}}$
 
-Our findings in the main text equilibrium analysis illustrate that $S_{\mathrm{MSC}}$ is sensitive to the specific demographic trends, time periods, and size-selectivity used to derive it. However, here we illustrate that we would have made similar conclusions had we used an alternative biological reference point: $S_{R_{\mathrm{MAX}}}$. $S_{R_{\mathrm{MAX}}}$ represents the total escapement (regardless of sex or age composition) necessary to maximize recruitment. The yield-per-recruit approach we employed is general enough as to allow maximizing another objective value -- for deriving $S_{\mathrm{MSC}}$ in the main text analysis we set the algorithm to maximize total catch but by replacing this with total recruitment, we can find $S_{R_{\mathrm{MAX}}}$ instead. Figure 6.1 below shows the same figure as presented in the main text Figure 7, but for $S_{R_{\mathrm{MAX}}}$ and $H_{R_{\mathrm{MAX}}}$ (harvest at maximum recruitment). Note the overall similarity between this figure and that for $S_{\mathrm{MSC}}$ as shown in Figure 7 of the main text.
+Our findings in the main-text equilibrium analysis illustrate that $S_{\mathrm{MSC}}$ is sensitive to the specific demographic trends, time periods, and size-selectivity used to derive it. However, here we illustrate that we would have made similar conclusions had we used an alternative biological reference point: $S_{R_{\mathrm{MAX}}}$. $S_{R_{\mathrm{MAX}}}$ represents the total escapement (regardless of sex or age composition) necessary to maximize recruitment. The yield-per-recruit approach we employed is general enough as to allow maximizing another objective value -- for deriving $S_{\mathrm{MSC}}$ in the main-text analysis we set the algorithm to maximize total catch but by replacing this with total recruitment, we can find $S_{R_{\mathrm{MAX}}}$ instead. Figure 6.1 below shows the same figure as presented in the main-text Figure 7, but for $S_{R_{\mathrm{MAX}}}$ and $H_{R_{\mathrm{MAX}}}$ (harvest at maximum recruitment). Note the overall similarity between this figure and that for $S_{\mathrm{MSC}}$ as shown in Figure 7 of the main-text.
 
 **Figure 6.1** Estimated equilibrium values of $S_{R_{\mathrm{MAX}}}$ (panels a, c, and e) and $H_{R_{\mathrm{MAX}}}$ (panels b, d, and f) using 8-inch (panels a and b), non-selective (panels c and d), and 6-inch (panels e and f) mesh gillnet hear for a subset of models. The time period (symbol type) represents which years were used to calculate the average demographic qualities used in the equilibrium calculations. The percent change from the posterior median for model N-0 is displayed on the secondary $y$-axis for reference. Points are posterior medians, thick lines are the posterior central 50% limits, and thin lines are the posterior central 80% limits.
 
