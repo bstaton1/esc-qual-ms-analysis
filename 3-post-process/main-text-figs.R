@@ -576,7 +576,7 @@ msy_plot = function(keep_val = "S", keep_vuln = "mesh8", keep_mods, xticklabs = 
                        ifelse(keep_vuln == "flat", paste0("(", letter, ") No selectivity"), paste0("(", letter, ") 6 in. mesh"))), pos = 4, cex = 0.7, font = 2)
   
   # add a main title over top panel
-  mtext(side = 3, ifelse(keep_vuln == "mesh8", latex2exp::TeX(paste0(keep_val, "_{MSC}")), ""), line = 0, font = 2)
+  mtext(side = 3, ifelse(keep_vuln == "mesh8", TeX(paste0(keep_val, "_{MSC}")), ""), line = 0, font = 2)
   
   # draw a border
   box()
