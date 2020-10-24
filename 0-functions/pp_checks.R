@@ -15,7 +15,7 @@ mult_pp_check = function(q_samps, x_obs, progress = F) {
   
   # loop through mcmc iters
   for (i in 1:saved) {
-    if (progress) StatonMisc::progress_updater(i, saved, rnd = 1, indent = 2)
+    if (progress) progress_updater(i, saved, rnd = 1, indent = 2)
     
     # multinomial probability vector for this mcmc sample
     q_fit = array_format(q_samps[i,])
@@ -60,7 +60,7 @@ lnorm_pp_check = function(x_samps, x_sig, x_obs, progress = F) {
   
   # loop through mcmc iters
   for (i in 1:saved) {
-    if (progress) StatonMisc::progress_updater(i, saved, rnd = 1, indent = 2)
+    if (progress) progress_updater(i, saved, rnd = 1, indent = 2)
     
     # simulated data: log number
     log_x_new = rnorm(ncol(x_samps), log_x_samps[i,], x_sig)

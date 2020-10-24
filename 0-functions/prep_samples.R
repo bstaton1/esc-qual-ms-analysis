@@ -26,7 +26,7 @@ prep_samples = function(post, keep_t = NULL, keep_y = NULL, silent = F) {
   v = post_subset(post, "^v", T)
   
   mean_v = t(sapply(1:n_samp, function(i) {
-    if (!silent) StatonMisc::progress_updater(i, n_samp, grp = "Mean Vulnerability", indent = 5)
+    if (!silent) progress_updater(i, n_samp, grp = "Mean Vulnerability", indent = 5)
     
     v_out = NULL
     for (mesh in c(mesh8, mesh6)) {
@@ -49,7 +49,7 @@ prep_samples = function(post, keep_t = NULL, keep_y = NULL, silent = F) {
   psi = post_subset(post, "psi", T)
   
   mean_pi = t(sapply(1:n_samp, function(i) {
-    if (!silent) StatonMisc::progress_updater(i, n_samp, grp = "Mean Maturity", indent = 5)
+    if (!silent) progress_updater(i, n_samp, grp = "Mean Maturity", indent = 5)
     
     nR = 1e10
     

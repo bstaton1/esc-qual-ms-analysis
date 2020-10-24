@@ -44,11 +44,11 @@ states$S_tot_obs = states$N_tot_obs - states$H_com_tot_obs - states$H_sub_tot_ob
 
 # calculate CV of escapement: sum the log-normal variances of the components
 states$S_tot_obs_cv = 
-  StatonMisc::sig2cv(
+  sig2cv(
     sqrt(
-      StatonMisc::cv2sig(states$N_tot_obs_cv)^2 +
-       StatonMisc::cv2sig(states$H_com_tot_obs_cv)^2 + 
-       StatonMisc::cv2sig(states$H_sub_tot_obs_cv)^2
+      cv2sig(states$N_tot_obs_cv)^2 +
+       cv2sig(states$H_com_tot_obs_cv)^2 + 
+       cv2sig(states$H_sub_tot_obs_cv)^2
     )
   )
   
@@ -109,7 +109,7 @@ create_x_data = function(x_ages, n_eff_method = "scale_100") {
   )
   
   if (!(n_eff_method %in% valid_methods)) {
-    stop ("method '", n_eff_method, "' is invalid. Accepted options are: \n", StatonMisc::list_out(valid_methods, per_line = 1, indent = "  "))
+    stop ("method '", n_eff_method, "' is invalid. Accepted options are: \n", list_out(valid_methods, per_line = 1, indent = "  "))
   }
   
   if (n_eff_method == "scale_50") {
@@ -188,16 +188,16 @@ jags_dat = list(
   
   # escapement estimates
   S_obs = states$S_tot_obs,
-  S_obs_sig = StatonMisc::cv2sig(states$S_tot_obs_cv),
+  S_obs_sig = cv2sig(states$S_tot_obs_cv),
   
   # commerical harvest estimates
   Hcom_obs = states$H_com_tot_obs,
-  Hcom_obs_sig = StatonMisc::cv2sig(states$H_com_tot_obs_cv),
+  Hcom_obs_sig = cv2sig(states$H_com_tot_obs_cv),
   com_mesh = ifelse(mesh$com == "mesh8", 1, 2),
   
   # subsistence harvest estimates
   Hsub_obs = states$H_sub_tot_obs,
-  Hsub_obs_sig = StatonMisc::cv2sig(states$H_sub_tot_obs_cv),
+  Hsub_obs_sig = cv2sig(states$H_sub_tot_obs_cv),
   sub_mesh = ifelse(mesh$sub == "mesh8", 1, 2),
   
   # ratio of fish length to mesh perimeter

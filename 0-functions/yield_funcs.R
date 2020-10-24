@@ -111,7 +111,7 @@ eq_search = function(post.samp, q, silent = F) {
   # loop over scenarios and samples
   for (v in 1:length(v_scenarios)) {
     for (i in 1:n_samp) {
-      if (!silent) StatonMisc::progress_updater(i, n_samp, v_scenarios[v], indent = 5)
+      if (!silent) progress_updater(i, n_samp, v_scenarios[v], indent = 5)
       
       # obtain F that maximizes objective (R or H)
       fit_log_F_max = 
@@ -137,16 +137,16 @@ eq_search = function(post.samp, q, silent = F) {
   # summarize: extract posterior quantiles
   out = array(
     c(
-      apply(out[,,1], 2, StatonMisc::summ, p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975), na.rm = T)[3:9,],
-      apply(out[,,2], 2, StatonMisc::summ, p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975), na.rm = T)[3:9,],
-      apply(out[,,3], 2, StatonMisc::summ, p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975), na.rm = T)[3:9,]
+      apply(out[,,1], 2, summ, p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975), na.rm = T)[3:9,],
+      apply(out[,,2], 2, summ, p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975), na.rm = T)[3:9,],
+      apply(out[,,3], 2, summ, p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975), na.rm = T)[3:9,]
     ),
     dim = c(7, length(nms), 3)
   )
   
   # set the names of the output
   dimnames(out) = list(
-    names(StatonMisc::summ(rnorm(10), p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975)))[3:9],
+    names(summ(rnorm(10), p = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975)))[3:9],
     nms,
     v_scenarios
   )
