@@ -25,14 +25,7 @@ knitr::opts_knit$set(root.dir = "../../")
 ```
 
 ```{r packages, message = F, warning = F}
-library(postpack)
-library(StatonMisc)
-library(magrittr)
-library(knitr)
-library(kableExtra)
-library(stringr)
-library(scales)
-library(abind)
+source("load-packages.R")
 ```
 
 # Section #1: Imputation of Missing Length-at-Age data

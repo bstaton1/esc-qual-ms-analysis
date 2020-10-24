@@ -19,13 +19,7 @@ knitr::opts_chunk$set(echo = F, message = F, warning = F, fig.align = "center")
 knitr::opts_knit$set(root.dir = "../")
 
 # packages
-library(postpack)
-library(StatonMisc)
-library(magrittr)
-library(knitr)
-library(kableExtra)
-library(stringr)
-library(scales)
+source("load-packages.R")
 ```
 
 ```{r load-information}

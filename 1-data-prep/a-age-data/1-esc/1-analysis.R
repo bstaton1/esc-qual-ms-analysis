@@ -5,10 +5,8 @@ rm(list = ls(all = T))
 
 # WORKING DIRECTORY SHOULD BE SET TO PROJECT DIRECTORY
 
-# needed packages
-suppressMessages(library(dplyr))
-suppressMessages(library(reshape2))
-suppressMessages(library(StatonMisc))
+# needed packages/functions
+source("load-packages.R")
 source("1-data-prep/a-age-data/1-esc/0-functions.R")
 
 # do you want to write the output?

@@ -14,6 +14,9 @@ model = as.numeric(args[1])
 # location of data files
 data_dir = "inputs"
 
+# load in packages
+source("load-packages.R")
+
 # compile the data
 source("2-model-fit/1-compile-data.R")
 
