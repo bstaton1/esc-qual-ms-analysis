@@ -218,7 +218,7 @@ if (calc_eq) {
 
 ### calculate WAIC if requested ###
 if (do_waic) {
-  ppd_total = postpack::post_subset(post, "ppd_total", matrix = T)
+  ppd_total = post_subset(post, "ppd_total", matrix = T)
   WAIC = get_WAIC(ppd_total)
 }
 
