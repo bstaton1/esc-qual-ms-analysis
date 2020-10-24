@@ -609,7 +609,7 @@ mtext(side = 4, outer = T, "% Change from Model N-0", line = 0.75)
 dev.off()
 
 keep_val = "H"
-keep_vuln = "mesh8"
+keep_vuln = "mesh6"
 keep_mods = c("N-0", "E-0", "EM-0", "E-A", "E-S", "E-L", "E-AS", "E-AL", "E-SL", "E-ASL", "EM-ASL")
 
 x = msy["50%", keep_val, keep_vuln, "all", keep_mods]
@@ -617,7 +617,13 @@ round(x, -3)
 p = round((x - x[1])/(x[1]), 2)
 range(p[-1])
 
+early = msy["50%", "H", "mesh6", "early", keep_mods]
+late = msy["50%", "H", "mesh6", "late", keep_mods]
 
+msy["50%","p_female","mesh6", c("early","all", "late"),keep_mods]
+msy["50%","p_female","flat", c("early","all", "late"), keep_mods]
+
+round(((late - early)/early) * 100, 2)
 ##### CONVERGENCE SUMMARIES #####
 
 # diag_nodes = c("alpha", "beta_e10", "^R[", "delta_0",
@@ -637,7 +643,7 @@ range(p[-1])
 # }
 # 
 # out = lapply(post_list, f)
-# min_bound = 5000
+# min_bound = 700
 # max_bound = 20000
 # f = function(z) {
 #   z$base_name = postpack:::drop_index(z$param)
@@ -648,6 +654,8 @@ range(p[-1])
 # z = sapply(out, f)
 # z[z %in% c("-Inf", "Inf")] = NA
 # z
+# 
+# lapply(out, function(x) x[stringr::str_detect(x$param, "V"),"neff"])
 # 
 # out
 # above_min = z > 0
@@ -665,9 +673,9 @@ range(p[-1])
 # }
 # z = sapply(out, f)
 # z[z %in% c("-Inf", "Inf")] = NA
-# z > 1.1
+# z > 1.05
 # 
-# bad_alpha = z["alpha",] > 1.1
+# bad_alpha = z["alpha",] > 1.05
 # sort(colnames(z)[bad_alpha])
 # mean(z["alpha",bad_alpha])
 # 
@@ -678,9 +686,9 @@ range(p[-1])
 ##### POSTERIOR PREDICTIVE CHECKS #####
 
 # THIS TAKES A COUPLE MINUTES TO RUN
-# ESPECIALLY FOR THE COMPOSITION SECTION 
+# ESPECIALLY FOR THE COMPOSITION SECTION
 
-## ABUNDANCE 
+## ABUNDANCE
 
 # f = function(post) {
 #   pp = lnorm_pp_check(post_subset(post, "^S_t[", T), S_obs_sig, S_obs)
@@ -703,7 +711,7 @@ range(p[-1])
 # range(round(ESC_out, 2))
 # range(round(SUB_out, 2))
 # range(round(COM_out, 2))
-
+# 
 # COMPOSIITON
 # # discard half the samples before calculating predictive checks
 # thin = 0.5
@@ -736,13 +744,14 @@ range(p[-1])
 ##### NUMBERS FOR IN-TEXT #####
 
 # extract tau: RLM of fully selected fish
-tau_est = mean(sapply(post_list, function(post) post_summ(post, "^Vtau$", digits = 2)["mean",]))
+tau_est = sapply(post_list, function(post) post_summ(post, "^Vtau$", digits = 2)["50%",])
+
 
 mesh8_perim = 8 * 2 * 25.4  
 mesh6_perim = 6 * 2 * 25.4
 
-kusko_mesh8 = tau_est * mesh8_perim
-kusko_mesh6 = tau_est * mesh6_perim
+kusko_mesh8 = mean(tau_est) * mesh8_perim
+kusko_mesh6 = mean(tau_est) * mesh6_perim
 yukon_mesh8 = Ytau_est * mesh8_perim
 yukon_mesh6 = Ytau_est * mesh6_perim
 
@@ -814,3 +823,6 @@ med_msy_early = msy["50%", "H", "mesh6", "early",]
 med_msy_late = msy["50%", "H", "mesh6", "late",]
 
 round(((med_msy_late - med_msy_early)/med_msy_early) * 100)
+
+q = dimnames(msy)[[2]]
+msy["50%",stringr::str_detect(q, "^U"),"mesh6","all",]
