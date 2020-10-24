@@ -17,12 +17,12 @@ knitr::opts_chunk$set(echo = F, message = F, warning = F, fig.align = "center")
 
 # directory to knit from: the project root, which is one directory up from here
 knitr::opts_knit$set(root.dir = "../")
-
-# packages
-source("load-packages.R")
 ```
 
 ```{r load-information}
+# packages
+source("load-packages.R")
+
 # compile the data
 source("2-model-fit/1-compile-data.R")
 
