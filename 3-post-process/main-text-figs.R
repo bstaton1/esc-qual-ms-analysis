@@ -82,6 +82,11 @@ l_mods = str_detect(ids, "L")
 # max width (two column): 7.2inches
 # max height: 9.4 inches
 
+##### CREATE WAIC TABLE #####
+waic = t(sapply(meta, function(m) m$WAIC))
+waic_tab = data.frame(model = rownames(waic), pD = waic[,"pD"], WAIC = waic[,"WAIC"])
+write.csv(waic_tab, file.path(fig_dir, "waic.csv"), row.names = F)
+
 ##### SELECTIVITY PLOT: WITH TIME STRUCTURE #####
 
 early_t = 1:10
