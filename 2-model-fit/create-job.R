@@ -23,12 +23,12 @@ if (node == "055") {
   node_settings = "#PBS -l nodes=node055:ppn=4,walltime=60:00:00,flags=ADVRES:liuzhan_lab"
 } else {
   node_settings = "#PBS -q fastfat -l nodes=nodeNODE:ppn=4,walltime=60:00:00,flags=ADVRES:liuzhan_ff"
-  node_settings = stringr::str_replace(node_settings, "NODE", as.character(node))
+  node_settings = str_replace(node_settings, "NODE", as.character(node))
 }
-code = unlist(lapply(code, function(x) stringr::str_replace(x, "#NODE-SETTINGS-HERE", node_settings)))
+code = unlist(lapply(code, function(x) str_replace(x, "#NODE-SETTINGS-HERE", node_settings)))
 
 # replace which model to run: this is a number; models defined in model-key.csv
-code = unlist(lapply(code, function(x) stringr::str_replace(x, "MODEL", as.character(model))))
+code = unlist(lapply(code, function(x) str_replace(x, "MODEL", as.character(model))))
 code = c(code, "")   
 
 # write out the job file

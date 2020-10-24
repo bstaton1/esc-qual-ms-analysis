@@ -109,7 +109,7 @@ for (yr in all_years) {
     filter(!is.na(passage)) %>%
     mutate(p_passage = passage/sum(passage))
   
-  z = apply(dat_y[,stringr::str_detect(colnames(dat_y), "^m|^f")], 2, function(x) sum(x * dat_y$p_passage))
+  z = apply(dat_y[,str_detect(colnames(dat_y), "^m|^f")], 2, function(x) sum(x * dat_y$p_passage))
   
   n_weirs = nrow(dat_y)
   n_aged = sum(dat_y$n_aged)

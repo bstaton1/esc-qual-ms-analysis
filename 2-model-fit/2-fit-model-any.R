@@ -115,7 +115,7 @@ if (rand_age) diag_nodes = c(jags_params, "D_sum", "p")
 # BEFORE calling this script via Rscript
 # write_full_model()
 
-# stringr::str_magic!!
+# str_magic!!
 edit_full_model(
   model_lines = readLines(file.path("2-model-fit", "model-files", "full-model.txt")),
   outfile = model_file,

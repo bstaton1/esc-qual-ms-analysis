@@ -33,8 +33,8 @@ ny = length(fy:ly)
 
 # age sex combinations
 A = paste(rep(c("f", "m"), each = na), rep(a_min:a_max, 2), sep = "")
-f_ind = which(stringr::str_detect(A, "f"))
-m_ind = which(stringr::str_detect(A, "m"))
+f_ind = which(str_detect(A, "f"))
+m_ind = which(str_detect(A, "m"))
 
 ## abundance-related states
 states = read.csv(file.path(data_dir, "run-harv-ests-cv.csv"))

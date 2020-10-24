@@ -12,10 +12,10 @@ yield = function(log_F_max, i, post.samp, vuln) {
   sigma = unname(post.samp[i,"sigma_R_white"])
   
   # extract and name the relevant age/sex-structured quantities
-  pi_as = unname(post.samp[i,stringr::str_detect(cn, "pi")])
-  z_as = unname(post.samp[i,stringr::str_detect(cn, "z")])
+  pi_as = unname(post.samp[i,str_detect(cn, "pi")])
+  z_as = unname(post.samp[i,str_detect(cn, "z")])
   if (vuln %in% c("mesh8", "mesh6")) {
-    vuln_as = unname(post.samp[i,stringr::str_detect(cn, vuln)])
+    vuln_as = unname(post.samp[i,str_detect(cn, vuln)])
   } else {
     vuln_as = rep(1, 8)
   }

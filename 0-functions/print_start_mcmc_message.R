@@ -3,7 +3,7 @@ print_start_mcmc_message = function() {
   
   cat("    #-------------------------------#\n")
   cat("    Model Assumptions:\n")
-  cat("      -> Spawing units: ", StatonMisc::capitalize(stringr::str_replace(z_unit, "_", " ")), "\n", sep = "")
+  cat("      -> Spawing units: ", StatonMisc::capitalize(str_replace(z_unit, "_", " ")), "\n", sep = "")
   cat("      -> Length trend: ", ifelse(len_trend, "Yes", "No"), "\n", sep = "")
   cat("      -> Sex trend: ", ifelse(sex_trend, "Yes", "No"), "\n", sep = "")
   cat("      -> Age trend: ", ifelse(age_trend, "Yes", "No"), "\n", sep = "")

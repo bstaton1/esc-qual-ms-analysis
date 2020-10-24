@@ -651,7 +651,7 @@ round(((late - early)/early) * 100, 2)
 # z[z %in% c("-Inf", "Inf")] = NA
 # z
 # 
-# lapply(out, function(x) x[stringr::str_detect(x$param, "V"),"neff"])
+# lapply(out, function(x) x[str_detect(x$param, "V"),"neff"])
 # 
 # out
 # above_min = z > 0
@@ -821,4 +821,4 @@ med_msy_late = msy["50%", "H", "mesh6", "late",]
 round(((med_msy_late - med_msy_early)/med_msy_early) * 100)
 
 q = dimnames(msy)[[2]]
-msy["50%",stringr::str_detect(q, "^U"),"mesh6","all",]
+msy["50%",str_detect(q, "^U"),"mesh6","all",]
