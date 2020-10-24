@@ -771,8 +771,8 @@ v_prior_plot = function(p) {
   # sample from these distributions: previous versions of code embedded this in the JAGS model
   # need to use truncated normal for sigma and theta parameters
   if (p %in% c("sig", "tha")) {
-    source_samps = truncnorm::rtruncnorm(n = nrow(post_samps), a = 0, b = "Inf", mean = source_p[1], sd = source_p[2])
-    prior_samps = truncnorm::rtruncnorm(n = nrow(post_samps), a = 0, b = "Inf", mean = prior_p[1], sd = prior_p[2])
+    source_samps = rtruncnorm(n = nrow(post_samps), a = 0, b = "Inf", mean = source_p[1], sd = source_p[2])
+    prior_samps = rtruncnorm(n = nrow(post_samps), a = 0, b = "Inf", mean = prior_p[1], sd = prior_p[2])
   } else {
     source_samps = rnorm(nrow(post_samps), source_p[1], source_p[2])
     prior_samps = rnorm(nrow(post_samps), prior_p[1], prior_p[2])
