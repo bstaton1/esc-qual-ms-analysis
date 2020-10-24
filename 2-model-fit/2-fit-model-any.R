@@ -137,7 +137,7 @@ print_start_mcmc_message()
 
 cat("\n    Started MCMC at:", format(starttime_mcmc), "\n")
 
-post_info = jagsUI::jags(
+post_info = jags(
   data = jags_dat,
   inits = jags_inits,
   parameters.to.save = jags_params,
