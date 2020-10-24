@@ -92,7 +92,7 @@ if (z_unit == "fish_count") {
 }
 
 # create the output z object as an array: females are [,,1], males [,,2]
-z = abind::abind(
+z = abind(
   z_mat[,f_ind],
   z_mat[,m_ind],
   along = 3)
