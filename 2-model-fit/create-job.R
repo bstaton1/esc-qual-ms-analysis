@@ -4,6 +4,9 @@
   # $1: model
   # $2: node (055, 144, or 145)
 
+# load packages
+source("../load-packages.R")
+
 # read in the command line arguments
 args = commandArgs(trailingOnly = T)
 model = args[1]
