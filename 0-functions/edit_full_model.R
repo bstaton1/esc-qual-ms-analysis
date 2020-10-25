@@ -6,16 +6,16 @@ edit_full_model = function(model_lines, outfile, z_unit, sex_trend, age_trend, r
   
   # 2.) remove whitespace if requested
   if (!keep_whitespace) {
-    model_lines = model_lines[-which(stringr::str_detect(model_lines, "^  +$"))]
+    model_lines = model_lines[-which(str_detect(model_lines, "^  +$"))]
   } 
   
   # 3.) remove comments if requested
   if (!keep_comments) {
-    model_lines = model_lines[-which(stringr::str_detect(model_lines, "^  +#"))]
+    model_lines = model_lines[-which(str_detect(model_lines, "^  +#"))]
   } 
   
   # 4.) remove "%_%" instances, but keep the T() or I() part
-  model_lines = stringr::str_remove(model_lines, " %_%")
+  model_lines = str_remove(model_lines, " %_%")
   
   ### ALTERATIONS TO CODE BASED ON MODEL VERSION ###
   
@@ -23,8 +23,8 @@ edit_full_model = function(model_lines, outfile, z_unit, sex_trend, age_trend, r
     # z_unit == "fish_count":  alpha ~ U(0, 20)
     # z_unit != "fish_count":  alpha ~ U(0, 0.1)
   if (z_unit != "fish_count") {
-    match = model_lines[stringr::str_detect(model_lines, "alpha ~ ")]
-    replacement = stringr::str_replace(match, pattern = "dunif\\(0, 20\\)", replacement = "dunif\\(0, 0.1\\)")
+    match = model_lines[str_detect(model_lines, "alpha ~ ")]
+    replacement = str_replace(match, pattern = "dunif\\(0, 20\\)", replacement = "dunif\\(0, 0.1\\)")
     model_lines[which(model_lines == match)] = replacement
   }
   
@@ -32,8 +32,8 @@ edit_full_model = function(model_lines, outfile, z_unit, sex_trend, age_trend, r
   # sex_trend == T: logistic sex composition regardless of age, time trend for brood year
   # sex_trend == F: time invariant sex composition (slope not estimated but fixed at zero)
   if (!sex_trend) {
-    match = model_lines[stringr::str_detect(model_lines, "delta_1 ~ ")]
-    white_space =  unlist(stringr::str_extract_all(match, "  +"))
+    match = model_lines[str_detect(model_lines, "delta_1 ~ ")]
+    white_space =  unlist(str_extract_all(match, "  +"))
     replace = "delta_1 <- 0"
     model_lines[which(model_lines == match)] = paste(white_space, replace, sep = "")
   }
@@ -42,8 +42,8 @@ edit_full_model = function(model_lines, outfile, z_unit, sex_trend, age_trend, r
   # age_trend == T: baseline category logit maturation for each sex, time trend for brood year
   # age_trend == F: time invariant maturation (slopes not estimated but fixed at zero)
   if (!age_trend) {
-    match = model_lines[stringr::str_detect(model_lines, "gamma_1\\[s,a\\] ~ ")]
-    white_space = unlist(stringr::str_extract_all(match, "  +"))
+    match = model_lines[str_detect(model_lines, "gamma_1\\[s,a\\] ~ ")]
+    white_space = unlist(str_extract_all(match, "  +"))
     replace = "gamma_1[s,a] <- 0"
     model_lines[which(model_lines == match)] = paste(white_space, replace, sep = "")
   }
@@ -53,22 +53,22 @@ edit_full_model = function(model_lines, outfile, z_unit, sex_trend, age_trend, r
   # if rand_age == T: p[y,,] are dirichlet distributed around pi
   # if rand_age == F: p[y,,] are are set to pi[y,]
   if (!rand_age) {
-    match = model_lines[stringr::str_detect(model_lines, "p\\[y,a,s\\] <- ")]
-    white_space = unlist(stringr::str_extract_all(match, "  +"))
+    match = model_lines[str_detect(model_lines, "p\\[y,a,s\\] <- ")]
+    white_space = unlist(str_extract_all(match, "  +"))
     replace = "p[y,a,s] <- pi[y,a,s]"
     model_lines[which(model_lines == match)] = paste(white_space, replace, sep = "")
     
     # remove D_scale, D_sum, gamma, and g
-    D_scale_line = stringr::str_which(model_lines, "D_scale ~ ")
-    D_sum_line = stringr::str_which(model_lines, "D_sum <- ")
-    gamma_line = stringr::str_which(model_lines, "gamma\\[y,a,s\\] <- ")
-    g_line = stringr::str_which(model_lines, "g\\[y,a,s\\] ~ ")
+    D_scale_line = str_which(model_lines, "D_scale ~ ")
+    D_sum_line = str_which(model_lines, "D_sum <- ")
+    gamma_line = str_which(model_lines, "gamma\\[y,a,s\\] <- ")
+    g_line = str_which(model_lines, "g\\[y,a,s\\] ~ ")
     model_lines = model_lines[-c(D_scale_line, D_sum_line, gamma_line, g_line)]
   }
   
   ### ALTERATIONS TO CODE BASED ON WHETHER CALCULATING PPD (FOR WAIC) ###
   if (!ppd) {
-    ppd_lines = stringr::str_which(model_lines, "ppd")
+    ppd_lines = str_which(model_lines, "ppd")
     model_lines = model_lines[-c(min(ppd_lines):max(ppd_lines))]
   }
   

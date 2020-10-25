@@ -19,14 +19,14 @@ prep_samples = function(post, keep_t = NULL, keep_y = NULL, silent = F) {
   male = 2
   
   # extract necessary SRA parameters
-  sr_params = postpack::post_subset(post, c("alpha", "^beta$", "sigma_R_white", "phi"), T)
-  n_samp = as.list(postpack::post_dim(post))$saved
+  sr_params = post_subset(post, c("alpha", "^beta$", "sigma_R_white", "phi"), T)
+  n_samp = as.list(post_dim(post))$saved
   # extract the vulnerability schedules
   # averaging yearly values by age, sex, and gear over some time period
-  v = postpack::post_subset(post, "^v", T)
+  v = post_subset(post, "^v", T)
   
   mean_v = t(sapply(1:n_samp, function(i) {
-    if (!silent) StatonMisc::progress_updater(i, n_samp, grp = "Mean Vulnerability", indent = 5)
+    if (!silent) progress_updater(i, n_samp, grp = "Mean Vulnerability", indent = 5)
     
     v_out = NULL
     for (mesh in c(mesh8, mesh6)) {
@@ -45,11 +45,11 @@ prep_samples = function(post, keep_t = NULL, keep_y = NULL, silent = F) {
   colnames(mean_v) = c(paste(as, "v_mesh8", sep = "_"), paste(as, "v_mesh6", sep = "_"))
   
   # extract the probability of maturation at age and sex
-  pi = postpack::post_subset(post, "pi", T)
-  psi = postpack::post_subset(post, "psi", T)
+  pi = post_subset(post, "pi", T)
+  psi = post_subset(post, "psi", T)
   
   mean_pi = t(sapply(1:n_samp, function(i) {
-    if (!silent) StatonMisc::progress_updater(i, n_samp, grp = "Mean Maturity", indent = 5)
+    if (!silent) progress_updater(i, n_samp, grp = "Mean Maturity", indent = 5)
     
     nR = 1e10
     

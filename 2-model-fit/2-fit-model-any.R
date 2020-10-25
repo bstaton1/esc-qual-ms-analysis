@@ -14,6 +14,9 @@ model = as.numeric(args[1])
 # location of data files
 data_dir = "inputs"
 
+# load in packages
+source("load-packages.R")
+
 # compile the data
 source("2-model-fit/1-compile-data.R")
 
@@ -112,7 +115,7 @@ if (rand_age) diag_nodes = c(jags_params, "D_sum", "p")
 # BEFORE calling this script via Rscript
 # write_full_model()
 
-# stringr::str_magic!!
+# str_magic!!
 edit_full_model(
   model_lines = readLines(file.path("2-model-fit", "model-files", "full-model.txt")),
   outfile = model_file,
@@ -134,7 +137,7 @@ print_start_mcmc_message()
 
 cat("\n    Started MCMC at:", format(starttime_mcmc), "\n")
 
-post_info = jagsUI::jags(
+post_info = jags(
   data = jags_dat,
   inits = jags_inits,
   parameters.to.save = jags_params,
@@ -195,7 +198,7 @@ if (calc_eq) {
   msy_early = eq_search(samps_early, q = "H", silent = silent)
   msy_late = eq_search(samps_late, q = "H", silent = silent)
   msy_all = eq_search(samps_all, q = "H", silent = silent)
-  msy = abind::abind(msy_early, msy_all, msy_late, along = 4)
+  msy = abind(msy_early, msy_all, msy_late, along = 4)
   dimnames(msy)[[4]] = c("early", "all", "late")
   stoptime = Sys.time()
   cat("    Elapsed time:", format(round(stoptime - starttime, 1)), "\n")
@@ -206,7 +209,7 @@ if (calc_eq) {
   Rmax_early = eq_search(samps_early, q = "R", silent = silent)
   Rmax_late = eq_search(samps_late, q = "R", silent = silent)
   Rmax_all = eq_search(samps_all, q = "R", silent = silent)
-  Rmax = abind::abind(Rmax_early, Rmax_all, Rmax_late, along = 4)
+  Rmax = abind(Rmax_early, Rmax_all, Rmax_late, along = 4)
   dimnames(Rmax)[[4]] = c("early", "all", "late")
   stoptime = Sys.time()
   cat("    Elapsed time:", format(round(stoptime - starttime, 1)), "\n")
@@ -215,7 +218,7 @@ if (calc_eq) {
 
 ### calculate WAIC if requested ###
 if (do_waic) {
-  ppd_total = postpack::post_subset(post, "ppd_total", matrix = T)
+  ppd_total = post_subset(post, "ppd_total", matrix = T)
   WAIC = get_WAIC(ppd_total)
 }
 

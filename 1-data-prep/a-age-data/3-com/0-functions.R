@@ -15,7 +15,7 @@ asl_data_prep = function(dat) {
     filter(species == "Chinook" & year %in% all_years) %>%
     # create a day of the year variable
     group_by(year) %>%
-    mutate(doy = StatonMisc::date2doy(date)) %>%
+    mutate(doy = date2doy(date)) %>%
     ungroup %>%
     # remove fish that weren't aged or sexed successfully
     filter(!is.na(fwa) & !is.na(swa) & sex %in% c("male", "female")) %>%

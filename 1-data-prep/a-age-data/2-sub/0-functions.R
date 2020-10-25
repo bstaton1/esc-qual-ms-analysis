@@ -33,7 +33,7 @@ asl_data_prep = function(dat) {
     filter(species == "Chinook" & year %in% all_years) %>%
     # create a day of the year variable
     group_by(year) %>%
-    mutate(doy = StatonMisc::date2doy(date)) %>%
+    mutate(doy = date2doy(date)) %>%
     ungroup %>%
     # remove fish that weren't aged or sexed successfully
     filter(!is.na(fwa) & !is.na(swa) & sex %in% c("male", "female")) %>%
@@ -96,7 +96,7 @@ cal_prep = function(cal, yr, v) {
     cal = cal[!is.na(cal$chinook),]
     
     # add a doy variable
-    cal$doy = StatonMisc::date2doy(cal$date)
+    cal$doy = date2doy(cal$date)
     
     # merge in the stratum_key
     cal = merge(x = cal, y = strata_key, by = "doy", all.y = T)

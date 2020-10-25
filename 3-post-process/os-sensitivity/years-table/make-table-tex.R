@@ -37,7 +37,7 @@ preamble = c(
 tab = read.csv("years.csv", stringsAsFactors = F, allowEscapes = T)
 
 # replace "\\n" with "\n": for kableExtra::linebreak
-tab = apply(tab, 2, function(x) stringr::str_replace(x, "\\\\n", "\\\n"))
+tab = apply(tab, 2, function(x) str_replace(x, "\\\\n", "\\\n"))
 
 # add line breaks to necessary cells
 tab = apply(tab, 2, function(x) linebreak(x, align = "c"))

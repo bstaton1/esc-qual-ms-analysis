@@ -1,6 +1,9 @@
 # clear the workspace
 rm(list = ls(all = T))
 
+# load packages
+source("load-packages.R")
+
 # set the working directory to this location
 setwd("3-post-process")
 
@@ -18,7 +21,7 @@ for (m in 1:n_models) {
   html_dir = "os-detailed"
   
   out_file = paste0("Supp-", LETTERS[m+1], "_", model_ids[model], ".html", sep = "")
-  rmarkdown::render(
+  render(
     input = "Detailed_Output_template.Rmd",
     output_file = file.path(html_dir, out_file)
   )

@@ -17,18 +17,12 @@ knitr::opts_chunk$set(echo = F, message = F, warning = F, fig.align = "center")
 
 # directory to knit from: the project root, which is one directory up from here
 knitr::opts_knit$set(root.dir = "../")
-
-# packages
-library(postpack)
-library(StatonMisc)
-library(magrittr)
-library(knitr)
-library(kableExtra)
-library(stringr)
-library(scales)
 ```
 
 ```{r load-information}
+# packages
+source("load-packages.R")
+
 # compile the data
 source("2-model-fit/1-compile-data.R")
 
@@ -215,7 +209,7 @@ n_burn = unname(meta$mcmc.info["n.burnin"])
 n_chain = unname(meta$mcmc.info["n.chains"])
 n_post = unname(meta$mcmc.info["n.iter"]) - n_burn
 n_thin = unname(meta$mcmc.info["n.thin"])
-n_adapt = mean(unname(meta$mcmc.info[stringr::str_detect(names(meta$mcmc.info), "adapt")]))
+n_adapt = mean(unname(meta$mcmc.info[str_detect(names(meta$mcmc.info), "adapt")]))
 n_save = n_post/n_thin * n_chain
 n_total = (n_adapt + n_burn + n_post) * n_chain
 tab = data.frame(
@@ -693,7 +687,7 @@ par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
 plot(1,1, type = "n", xlim = range(rlm_seq), ylim = c(min(V_out),1),
      ylab = "Selectivity", xlab = "MEFL:Mesh Perimeter (RLM)", las = 1)
 junk = sapply(sample(1:nrow(V_post), min(nrow(V_post), 100)), function(i) {
-  lines(V_out[,i] ~ rlm_seq, col = scales::alpha("grey20", 0.2))
+  lines(V_out[,i] ~ rlm_seq, col = alpha("grey20", 0.2))
 })
 lines(V_med ~ rlm_seq, col = "blue", lwd = 4)
        
@@ -777,8 +771,8 @@ v_prior_plot = function(p) {
   # sample from these distributions: previous versions of code embedded this in the JAGS model
   # need to use truncated normal for sigma and theta parameters
   if (p %in% c("sig", "tha")) {
-    source_samps = truncnorm::rtruncnorm(n = nrow(post_samps), a = 0, b = "Inf", mean = source_p[1], sd = source_p[2])
-    prior_samps = truncnorm::rtruncnorm(n = nrow(post_samps), a = 0, b = "Inf", mean = prior_p[1], sd = prior_p[2])
+    source_samps = rtruncnorm(n = nrow(post_samps), a = 0, b = "Inf", mean = source_p[1], sd = source_p[2])
+    prior_samps = rtruncnorm(n = nrow(post_samps), a = 0, b = "Inf", mean = prior_p[1], sd = prior_p[2])
   } else {
     source_samps = rnorm(nrow(post_samps), source_p[1], source_p[2])
     prior_samps = rnorm(nrow(post_samps), prior_p[1], prior_p[2])
@@ -797,20 +791,20 @@ v_prior_plot = function(p) {
        xlim = range(dens[[1]]$x, dens[[2]]$x, dens[[3]]$x))
   
   # KDE: the prior
-  with(dens[[2]], polygon(x = c(x, rev(x)), y = c(y, rep(0, length(y))), col = scales::alpha("orange", 0.5), border = NA))
+  with(dens[[2]], polygon(x = c(x, rev(x)), y = c(y, rep(0, length(y))), col = alpha("orange", 0.5), border = NA))
   lines(dens[[2]]$y ~ dens[[2]]$x, col = "black")
   
   # KDE: the posterior
-  with(dens[[1]], polygon(x = c(x, rev(x)), y = c(y, rep(0, length(y))), col = scales::alpha("skyblue4", 0.3), border = NA))
+  with(dens[[1]], polygon(x = c(x, rev(x)), y = c(y, rep(0, length(y))), col = alpha("skyblue4", 0.3), border = NA))
   lines(dens[[1]]$y ~ dens[[1]]$x, col = "blue")
   
   # KDE: the source 
-  with(dens[[3]], polygon(x = c(x, rev(x)), y = c(y, rep(0, length(y))), col = scales::alpha("salmon4", 0.3), border = NA))
+  with(dens[[3]], polygon(x = c(x, rev(x)), y = c(y, rep(0, length(y))), col = alpha("salmon4", 0.3), border = NA))
   lines(dens[[3]]$y ~ dens[[3]]$x, col = "red")
   
   box()
   legend("top", legend = c("Prior", "Posterior", capitalize(meta$Vprior)), pch = 22,
-         pt.bg = scales::alpha(c("orange", "skyblue4", "salmon4"), c(0.5, 0.3, 0.3)),
+         pt.bg = alpha(c("orange", "skyblue4", "salmon4"), c(0.5, 0.3, 0.3)),
          col = c("black", "blue", "red"), horiz = T, bty = "n", pt.cex = 3)
 
 }
@@ -963,7 +957,7 @@ lines(U_fit ~ years, lwd = 2, col = "blue")
 Htot_obs = Hsub_obs + Hcom_obs
 x = Htot_obs/(S_obs + Htot_obs)
 
-points(x ~ years, col = "red", bg = scales::alpha("salmon", 0.5), pch = 21)
+points(x ~ years, col = "red", bg = alpha("salmon", 0.5), pch = 21)
 
 ```
 

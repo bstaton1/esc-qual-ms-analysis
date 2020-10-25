@@ -4,15 +4,11 @@
 
 rm(list = ls(all = T))
 
-library(StatonMisc)
-library(postpack)
-library(abind)
-library(stringr)
-
 ##### SESSION SETUP #####
 
 # load data/functions
 model = 1  # just needed to build the data
+source("load-packages.R")
 source("2-model-fit/1-compile-data.R")
 source("load-functions.R")
 rm(model) # clear out the model object 
@@ -580,7 +576,7 @@ msy_plot = function(keep_val = "S", keep_vuln = "mesh8", keep_mods, xticklabs = 
                        ifelse(keep_vuln == "flat", paste0("(", letter, ") No selectivity"), paste0("(", letter, ") 6 in. mesh"))), pos = 4, cex = 0.7, font = 2)
   
   # add a main title over top panel
-  mtext(side = 3, ifelse(keep_vuln == "mesh8", latex2exp::TeX(paste0(keep_val, "_{MSC}")), ""), line = 0, font = 2)
+  mtext(side = 3, ifelse(keep_vuln == "mesh8", TeX(paste0(keep_val, "_{MSC}")), ""), line = 0, font = 2)
   
   # draw a border
   box()
@@ -655,7 +651,7 @@ round(((late - early)/early) * 100, 2)
 # z[z %in% c("-Inf", "Inf")] = NA
 # z
 # 
-# lapply(out, function(x) x[stringr::str_detect(x$param, "V"),"neff"])
+# lapply(out, function(x) x[str_detect(x$param, "V"),"neff"])
 # 
 # out
 # above_min = z > 0
@@ -825,4 +821,4 @@ med_msy_late = msy["50%", "H", "mesh6", "late",]
 round(((med_msy_late - med_msy_early)/med_msy_early) * 100)
 
 q = dimnames(msy)[[2]]
-msy["50%",stringr::str_detect(q, "^U"),"mesh6","all",]
+msy["50%",str_detect(q, "^U"),"mesh6","all",]
