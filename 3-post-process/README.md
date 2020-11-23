@@ -4,7 +4,7 @@ This subdirectory contains all code for creating the figures found in the main t
 
 ### `main-text-figs.R`
 
-This script creates all figures found in the main text and creates some of the numerical output presented in-text. You must have fitted the models first before attempting to run this code.
+This script creates all figures found in the main text and creates some of the numerical output presented in-text. You must have posterior samples form models 1 - 12 before attempting to run this code.
 
 ### `Detailed_Output_template.Rmd`
 
