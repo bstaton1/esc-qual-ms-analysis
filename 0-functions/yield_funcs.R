@@ -9,7 +9,7 @@ yield = function(log_F_max, i, post.samp, vuln) {
   alpha = unname(post.samp[i,"alpha"])
   beta = unname(post.samp[i,"beta"])
   phi = unname(post.samp[i,"phi"])
-  sigma = unname(post.samp[i,"sigma_R_white"])
+  sigma = unname(post.samp[i,"sigma_R"])
   
   # extract and name the relevant age/sex-structured quantities
   pi_as = unname(post.samp[i,str_detect(cn, "pi")])

@@ -2,7 +2,7 @@
 # WORKING DIRECTORY SHOULD BE SET TO PROJECT LOCATION
 # IF ON LOCAL COMPUTER, JUST HAVE PROJECT OPEN IN RSTUDIO SESSION
 # IF ON HPC OR COMMAND LINE WITH CURRENT DIRECTORY SET TO THIS LOCATION, UNCOMMENT THIS LINE
-setwd("../")
+# setwd("../")
 
 # clear the workspace
 rm(list = ls(all = T))
@@ -80,7 +80,7 @@ jags_dat = append(jags_dat, list(
 # set nodes to monitor
 jags_params = c(
   # SRA params
-  "alpha", "beta", "beta_e10", "phi", "sigma_R_white", "sigma_R0",
+  "alpha", "beta", "beta_e10", "phi", "sigma_R", "sigma_R0",
   
   # states
   "N_t", "S_t", "Z_t", "R", "log_mean_R0", "Hcom", "Hsub",
@@ -102,7 +102,7 @@ if (do_waic) jags_params = c(jags_params, "ppd_total")
 # set nodes to monitor diagnostics for
 diag_nodes = c("alpha", "beta", "beta_e10", "R", 
                "delta_0", "delta_1", "gamma_0", "gamma_1",
-               "phi", "sigma_R_white", "sigma_R0", 
+               "phi", "sigma_R", "sigma_R0", 
                "Fcom", "Fsub", "Vtau", "Vsig", "Vtha", "Vlam", "log_mean_R0"
 )
 if (rand_age) diag_nodes = c(jags_params, "D_sum", "p")

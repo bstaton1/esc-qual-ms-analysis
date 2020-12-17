@@ -19,7 +19,7 @@ prep_samples = function(post, keep_t = NULL, keep_y = NULL, silent = F) {
   male = 2
   
   # extract necessary SRA parameters
-  sr_params = post_subset(post, c("alpha", "^beta$", "sigma_R_white", "phi"), T)
+  sr_params = post_subset(post, c("alpha", "^beta$", "sigma_R", "phi"), T)
   n_samp = as.list(post_dim(post))$saved
   # extract the vulnerability schedules
   # averaging yearly values by age, sex, and gear over some time period

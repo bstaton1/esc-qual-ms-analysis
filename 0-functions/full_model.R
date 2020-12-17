@@ -6,11 +6,9 @@ jags_model_code = function() {
   beta ~ dunif(0, 0.5)
   beta_e10 <- beta * 1e10
   phi ~ dunif(-1, 0.99)
-  tau_R_white ~ dgamma(0.01, 0.01)
-  tau_R_red <- tau_R_white * (1 - phi * phi)
-  sigma_R_white <- 1 / sqrt(tau_R_white)
-  sigma_R_red <- 1 / sqrt(tau_R_red)
-  log_resid_0 ~ dnorm(0, tau_R_red)
+  tau_R ~ dgamma(0.01, 0.01)
+  sigma_R <- 1 / sqrt(tau_R)
+  log_resid_0 ~ dnorm(0, tau_R * (1 - phi * phi))
   
   ### PART 1: BIOLOGICAL PROCESS SUBMODEL: BROOD YEAR RECRUITMENT PROCESS #####
   
@@ -26,7 +24,7 @@ jags_model_code = function() {
   
   #1b) Stock-Recruitment with Autocorrelated lag-1 residuals: for years with spawner/recruit link
   for (y in (na+a_min):ny) {
-    log_R[y] ~ dnorm(log_Rmean2[y],tau_R_white)
+    log_R[y] ~ dnorm(log_Rmean2[y],tau_R)
     R[y] <- exp(log_R[y])
     log_Rmean1[y] <- log_alpha + log(Z_t[y-a_max]) - beta * Z_t[y-a_max]
     log_resid[y] <- log_R[y] - log_Rmean1[y]
