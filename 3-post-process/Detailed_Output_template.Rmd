@@ -812,7 +812,7 @@ v_prior_plot = function(p) {
 
 ```{r, eval = selectivity}
 if (meta$Vprior == "kusko") {
-  sel_message = 'The prior on each selectivity parameter ($\\tau$, $\\sigma$, $\\theta$, and $\\lambda$) was normal (or truncated normal to ensure $\\sigma>0$ and $\\theta>0$) with mean equal to the estimates from the Kuskokwim lower river sonar site provided by the Alaska Department of Fish and Game (ADF&G; see Birchfield and Smith [2017](http://www.adfg.alaska.gov/FedAidPDFs/FDS19-27.pdf){target="_blank"} for methods), and standard deviation equal to the standard error provided times 10 (purposefully uninformative). The "Kusko" estimates are those provided by ADF&G with unaltered standard error.'
+  sel_message = 'The prior on each selectivity parameter ($\\tau$, $\\sigma$, $\\theta$, and $\\lambda$) was normal (or truncated normal to ensure $\\sigma>0$ and $\\theta>0$) with mean equal to the estimates from the Kuskokwim lower river sonar site provided by the Alaska Department of Fish and Game (ADF&G; see Birchfield and Smith [2019](http://www.adfg.alaska.gov/FedAidPDFs/FDS19-27.pdf){target="_blank"} for methods), and standard deviation equal to the standard error provided times 10 (purposefully uninformative). The "Kusko" estimates are those provided by ADF&G with unaltered standard error.'
 }
 
 if (meta$Vprior == "yukon") {
