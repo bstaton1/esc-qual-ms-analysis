@@ -934,11 +934,11 @@ lines(psi[3,] ~ by, col = "blue", lwd = 2)
 
 `r cntr = up_cntr("Section", cntr, u_rates); create_label("Section", cntr, T, level = 1, sub = "", subb = "", text = "Exploitation Rates", tabset = T, u_rates)`
 
-`r if (u_rates) "_These are total exploitation rates, with fishing mortality resulting from both subsistence and commercial fisheries._"`
+`r if (u_rates) "_These are total exploitation rates, with fishing mortality resulting from both subsistence and commercial fisheries. Vertical dashed lines represent the years the fisheries switched from mostly 8-inch mesh to mostly 6-inch mesh (1984 for commerical and 2014 for subsistence)._"`
 
 `r cntr = up_cntr("Figure", cntr, u_rates); create_label("Figure", cntr, T, level = 2, sub = "a", subb = "", text = "By Year", tabset = F, u_rates)`
 
-Red points represent the aggregate exploitation rate based on observed data: total catch (subsistence + commercial) divided by total catch + total escapement.
+Red points represent the aggregate exploitation rate based on observed data: total catch (subsistence + commercial) divided by total catch + total escapement. 
 
 ```{r u-tot, eval = u_rates}
 U_fit = post_summ(post, "Utot_t[")[3,]
@@ -958,6 +958,7 @@ Htot_obs = Hsub_obs + Hcom_obs
 x = Htot_obs/(S_obs + Htot_obs)
 
 points(x ~ years, col = "red", bg = alpha("salmon", 0.5), pch = 21)
+abline(v = c(years[min(which(com_mesh == 2))], years[min(which(sub_mesh == 2))]) - 0.5, lty = 2)
 
 ```
 
@@ -979,6 +980,7 @@ for (a in 1:na) {
   lines(U_lwr[,a] ~ years, col = "skyblue3")
   lines(U_upr[,a] ~ years, col = "skyblue3")
   lines(U_fit[,a] ~ years, lwd = 2, col = "blue")
+  abline(v = c(years[min(which(com_mesh == 2))], years[min(which(sub_mesh == 2))]) - 0.5, lty = 2)
 }
 
 mtext(side = 2, outer = T, "Exploitation Rate", line = 1, cex = 1.2)
@@ -1003,6 +1005,7 @@ for (s in 1:2) {
   lines(U_lwr[,a,s] ~ years, col = "skyblue3")
   lines(U_upr[,a,s] ~ years, col = "skyblue3")
   lines(U_fit[,a,s] ~ years, lwd = 2, col = "blue")
+  abline(v = c(years[min(which(com_mesh == 2))], years[min(which(sub_mesh == 2))]) - 0.5, lty = 2)
   }
 }
 
