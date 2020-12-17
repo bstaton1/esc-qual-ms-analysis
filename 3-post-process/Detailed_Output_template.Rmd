@@ -399,18 +399,21 @@ q_lwr = array_format(post_summ(post, "q_esc")[4,])
 q_upr = array_format(post_summ(post, "q_esc")[5,])
 q_obs = t(apply(x_esc, 1, function(x) x/sum(x)))
 
-par(mfcol = c(4,2), mar = c(2,2,2,2), oma = c(0,2,0,0), cex.main = 1.4, cex.axis = 1.4)
+par(mfcol = c(4,2), mar = c(1,2,2,1.5), oma = c(3,4,0,0), cex.main = 1.4, cex.axis = 1.4, mgp = c(2,0.4,0), tcl = -0.2)
 sex = rep(c("Females", "Males"), each = na)
 age_v = rep(a_min:a_max, 2)
 for (as in 1:8) {
   plot(q_fit[,as] ~ years, type = "n", ylim = range(c(q_lwr[,as], q_upr[,as], q_obs[,as]), na.rm = T),
-       main = paste("Age", age_v[as], sex[as]), las = 1)
+       main = paste("Age", age_v[as], sex[as]), las = 1,
+       xlab = "", ylab = "")
   polygon(x = c(years, rev(years)), y = c(q_lwr[,as], rev(q_upr[,as])), col = "skyblue", border = NA)
   lines(q_fit[,as] ~ years, lwd = 2, col = "blue")
   lines(q_lwr[,as] ~ years, col = "skyblue3")
   lines(q_upr[,as] ~ years, col = "skyblue3")
   points(q_obs[,as] ~ years, pch = 21, bg = alpha("salmon", 0.5), col = "red", cex = 1.4)
 }
+mtext(side = 1, outer = T, line = 1.5, "Calendar Year", cex = 1.2)
+mtext(side = 2, outer = T, line = 1.5, "Proportional Age/Sex Composition", cex = 1.2)
 
 ```
 
@@ -424,12 +427,12 @@ q_lwr = array_format(post_summ(post, "q_com")[4,])
 q_upr = array_format(post_summ(post, "q_com")[5,])
 q_obs = t(apply(x_com, 1, function(x) x/sum(x)))
 
-par(mfcol = c(4,2), mar = c(2,2,2,2), oma = c(0,2,0,0), cex.main = 1.4, cex.axis = 1.4)
+par(mfcol = c(4,2), mar = c(1,2,2,1.5), oma = c(3,4,0,0), cex.main = 1.4, cex.axis = 1.4, mpg = c(2,0.4,0), tcl = -0.2)
 sex = rep(c("Females", "Males"), each = na)
 age_v = rep(a_min:a_max, 2)
 for (as in 1:8) {
   plot(q_fit[,as] ~ years, type = "n", ylim = range(c(q_lwr[,as], q_upr[,as], q_obs[,as]), na.rm = T),
-       main = paste("Age", age_v[as], sex[as]), las = 1)
+       main = paste("Age", age_v[as], sex[as]), las = 1, xlab = "", ylab = "")
   polygon(x = c(years, rev(years)), y = c(q_lwr[,as], rev(q_upr[,as])), col = "skyblue", border = NA)
   lines(q_fit[,as] ~ years, lwd = 2, col = "blue")
   lines(q_lwr[,as] ~ years, col = "skyblue3")
@@ -437,6 +440,8 @@ for (as in 1:8) {
   points(q_obs[,as] ~ years, pch = 21, cex = 1.4, col = "red", bg = alpha("salmon", 0.5))
   abline(v = years[min(which(com_mesh == 2))] - 0.5, lty = 2)
 }
+mtext(side = 1, outer = T, line = 1.5, "Calendar Year", cex = 1.2)
+mtext(side = 2, outer = T, line = 1.5, "Proportional Age/Sex Composition", cex = 1.2)
 ```
 
 `r create_label("Figure", cntr, F, level = 4, sub = "a", subb = "3", text = "Subsistence", tabset = F, fit)`
@@ -449,12 +454,12 @@ q_lwr = array_format(post_summ(post, "q_sub")[4,])
 q_upr = array_format(post_summ(post, "q_sub")[5,])
 q_obs = t(apply(x_sub, 1, function(x) x/sum(x)))
 
-par(mfcol = c(4,2), mar = c(2,2,2,2), oma = c(0,2,0,0), cex.main = 1.4, cex.axis = 1.4)
+par(mfcol = c(4,2), mar = c(1,2,2,1.5), oma = c(3,4,0,0), cex.main = 1.4, cex.axis = 1.4, mgp = c(2,0.4,0), tcl = -0.2)
 sex = rep(c("Females", "Males"), each = na)
 age_v = rep(a_min:a_max, 2)
 for (as in 1:8) {
   plot(q_fit[,as] ~ years, type = "n", ylim = range(c(q_lwr[,as], q_upr[,as], q_obs[,as]), na.rm = T),
-       main = paste("Age", age_v[as], sex[as]), las = 1)
+       main = paste("Age", age_v[as], sex[as]), las = 1, xlab = "", ylab = "")
   polygon(x = c(years, rev(years)), y = c(q_lwr[,as], rev(q_upr[,as])), col = "skyblue", border = NA)
   lines(q_fit[,as] ~ years, lwd = 2, col = "blue")
   lines(q_lwr[,as] ~ years, col = "skyblue3")
@@ -462,6 +467,9 @@ for (as in 1:8) {
   points(q_obs[,as] ~ years, pch = 21, cex = 1.4, col = "red", bg = alpha("salmon", 0.5))
   abline(v = years[min(which(sub_mesh == 2))] - 0.5, lty = 2)
 }
+mtext(side = 1, outer = T, line = 1.5, "Calendar Year", cex = 1.2)
+mtext(side = 2, outer = T, line = 1.5, "Proportional Age/Sex Composition", cex = 1.2)
+
 ```
 
 `r create_label("Figure", cntr, F, level = 3, sub = "b", subb = "", text = "By Sex", tabset = T, fit)`
@@ -475,7 +483,7 @@ pf_fit_esc = rowSums(array_format(post_summ(post, "q_esc")[3,])[,1:4])
 pf_lwr_esc = rowSums(array_format(post_summ(post, "q_esc")[4,])[,1:4])
 pf_upr_esc = rowSums(array_format(post_summ(post, "q_esc")[5,])[,1:4])
 pf_esc = rowSums(x_esc[,1:4])/rowSums(x_esc)
-par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
+par(mar = c(3,3,1,1), mgp = c(2,0.4,0), tcl = -0.20)
 plot(pf_fit_esc ~ years, type = "l", ylim = c(0,1), las = 1, ylab = "Proportion Females", xlab = "Calendar Year")
 polygon(x = c(years, rev(years)), y = c(pf_lwr_esc, rev(pf_upr_esc)), col = "skyblue", border = NA)
 lines(pf_fit_esc ~ years, lwd = 2, col = "blue")
@@ -493,7 +501,7 @@ pf_fit_com = rowSums(array_format(post_summ(post, "q_com")[3,])[,1:4])
 pf_lwr_com = rowSums(array_format(post_summ(post, "q_com")[4,])[,1:4])
 pf_upr_com = rowSums(array_format(post_summ(post, "q_com")[5,])[,1:4])
 pf_com = rowSums(x_com[,1:4])/rowSums(x_com)
-par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
+par(mar = c(3,3,1,1), mgp = c(2,0.4,0), tcl = -0.20)
 plot(pf_fit_com ~ years, type = "l", ylim = c(0,1), las = 1, main = "", ylab = "Proportion Females", xlab = "Calendar Year")
 polygon(x = c(years, rev(years)), y = c(pf_lwr_com, rev(pf_upr_com)), col = "skyblue", border = NA)
 lines(pf_fit_com ~ years, lwd = 2, col = "blue")
@@ -512,7 +520,7 @@ pf_fit_sub = rowSums(array_format(post_summ(post, "q_sub")[3,])[,1:4])
 pf_lwr_sub = rowSums(array_format(post_summ(post, "q_sub")[4,])[,1:4])
 pf_upr_sub = rowSums(array_format(post_summ(post, "q_sub")[5,])[,1:4])
 pf_sub = rowSums(x_sub[,1:4])/rowSums(x_sub)
-par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
+par(mar = c(3,3,1,1), mgp = c(2,0.4,0), tcl = -0.20)
 plot(pf_fit_sub ~ years, type = "l", ylim = c(0,1), las = 1, main = "", ylab = "Proportion Females", xlab = "Calendar Year")
 polygon(x = c(years, rev(years)), y = c(pf_lwr_sub, rev(pf_upr_sub)), col = "skyblue", border = NA)
 lines(pf_fit_sub ~ years, lwd = 2, col = "blue")
@@ -529,30 +537,30 @@ abline(v = years[min(which(sub_mesh == 2))] - 0.5, lty = 2)
 `r create_label("Figure", cntr, F, level = 4, sub = "c", subb = "1", text = "Escapement", tabset = F, fit)`
 
 ```{r esc-ess, eval = fit}
-par(xaxs = "i", yaxs = "i", mar = c(3,3,1,1), mgp = c(2,0.75,0), cex.axis = 1.2)
+par(xaxs = "i", yaxs = "i", mar = c(3,3,1,1), mgp = c(2,0.4,0), tcl = -0.2, cex.axis = 1.2)
 mp = barplot(c(NA, n_esc, NA), las = 2, ylim = c(0, 100), col = "skyblue", border = "skyblue3", space = 0)
 axis(side = 1, at = mp[c(NA, years, NA) %in% seq(1980, 2015, 5)], labels = seq(1980, 2015, 5), line = 0, las = 2)
-axis(side = 1, at = mp[2:(nt+1)], labels = rep("", nt), line = 0, las = 2, tcl = -0.2)
+axis(side = 1, at = mp[2:(nt+1)], labels = rep("", nt), line = 0, las = 2)
 box()
 ```
 
 `r create_label("Figure", cntr, F, level = 4, sub = "c", subb = "2", text = "Commercial", tabset = F, fit)`
 
 ```{r com-ess, eval = fit}
-par(xaxs = "i", yaxs = "i", mar = c(3,3,1,1), mgp = c(2,0.75,0), cex.axis = 1.2)
+par(xaxs = "i", yaxs = "i", mar = c(3,3,1,1), mgp = c(2,0.4,0), tcl = -0.2, cex.axis = 1.2)
 mp = barplot(c(NA, n_com, NA), las = 2, ylim = c(0, 100), col = "skyblue", border = "skyblue3", space = 0)
 axis(side = 1, at = mp[c(NA, years, NA) %in% seq(1980, 2015, 5)], labels = seq(1980, 2015, 5), line = 0, las = 2)
-axis(side = 1, at = mp[2:(nt+1)], labels = rep("", nt), line = 0, las = 2, tcl = -0.2)
+axis(side = 1, at = mp[2:(nt+1)], labels = rep("", nt), line = 0, las = 2)
 box()
 ```
 
 `r create_label("Figure", cntr, F, level = 4, sub = "c", subb = "3", text = "Subsistence", tabset = F, fit)`
 
 ```{r sub-ess, eval = fit}
-par(xaxs = "i", yaxs = "i", mar = c(3,3,1,1), mgp = c(2,0.75,0), cex.axis = 1.2)
+par(xaxs = "i", yaxs = "i", mar = c(3,3,1,1), mgp = c(2,0.4,0), tcl = -0.2, cex.axis = 1.2)
 mp = barplot(c(NA, n_sub, NA), las = 2, ylim = c(0, 100), col = "skyblue", border = "skyblue3", space = 0)
 axis(side = 1, at = mp[c(NA, years, NA) %in% seq(1980, 2015, 5)], labels = seq(1980, 2015, 5), line = 0, las = 2)
-axis(side = 1, at = mp[2:(nt+1)], labels = rep("", nt), line = 0, las = 2, tcl = -0.2)
+axis(side = 1, at = mp[2:(nt+1)], labels = rep("", nt), line = 0, las = 2)
 box()
 ```
 
@@ -563,7 +571,7 @@ box()
 ```{r Sesc-fit, eval = fit}
 S_fit = post_summ(post, "^S_t[")/1000
 mean_S_cv = paste0(round(mean(sig2cv(S_obs_sig)), 2) * 100, "%")
-par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
+par(mar = c(3,3,1,1), mgp = c(2,0.4,0), tcl = -0.2)
 plot(S_fit[3,] ~ years, type = "n", ylim = range(0,S_fit[4:5,]), las = 1,
      main = paste0("Mean Observation CV: ", mean_S_cv), ylab = "Total Fish (1000s)", xlab = "Calendar Year")
 polygon(x = c(years, rev(years)), y = c(S_fit[4,], rev(S_fit[5,])), col = "skyblue", border = NA)
@@ -578,7 +586,7 @@ points(I(S_obs/1000) ~ years, pch = 21, cex = 1.2, col = "red", bg = alpha("salm
 ```{r Hcom-fit, eval = fit}
 Hcom_fit = post_summ(post, "Hcom")/1000
 mean_com_cv = paste0(round(mean(sig2cv(Hcom_obs_sig)), 2) * 100, "%")
-par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
+par(mar = c(3,3,1,1), mgp = c(2,0.4,0), tcl = -0.2)
 plot(Hcom_fit[3,] ~ years, type = "n", ylim = range(0,Hcom_fit[4:5,]), las = 1, 
      main = paste0("Mean Observation CV: ", mean_com_cv), ylab = "Total Fish (1000s)", xlab = "Calendar Year")
 polygon(x = c(years, rev(years)), y = c(Hcom_fit[4,], rev(Hcom_fit[5,])), col = "skyblue", border = NA)
@@ -593,7 +601,7 @@ points(I(Hcom_obs/1000) ~ years, pch = 21, cex = 1.2, col = "red", bg = alpha("s
 ```{r Hsub-fit, eval = fit}
 Hsub_fit = post_summ(post, "Hsub")/1000
 mean_sub_cv = paste0(round(mean(sig2cv(Hsub_obs_sig)), 2) * 100, "%")
-par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
+par(mar = c(3,3,1,1), mgp = c(2,0.4,0), tcl = -0.2)
 plot(Hsub_fit[3,] ~ years, type = "n", ylim = range(0,Hsub_fit[4:5,]), las = 1,
      main = paste0("Mean Observation CV: ", mean_sub_cv), ylab = "Total Fish (1000s)", xlab = "Calendar Year")
 polygon(x = c(years, rev(years)), y = c(Hsub_fit[4,], rev(Hsub_fit[5,])), col = "skyblue", border = NA)
@@ -683,7 +691,7 @@ rlm_seq = seq(min(rlm), max(rlm), length = 100)
 V_out = sapply(1:nrow(V_post), my_pearson, rlm = rlm_seq)
 V_med = apply(V_out, 1, median)
 
-par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
+par(mar = c(3,3,1,1), mgp = c(2,0.4,0), tcl = -0.2)
 plot(1,1, type = "n", xlim = range(rlm_seq), ylim = c(min(V_out),1),
      ylab = "Selectivity", xlab = "MEFL:Mesh Perimeter (RLM)", las = 1)
 junk = sapply(sample(1:nrow(V_post), min(nrow(V_post), 100)), function(i) {
@@ -711,7 +719,7 @@ v = array_format(post_summ(post, "v[")[3,])
 xf = a_min:a_max - 0.05
 xm = a_min:a_max + 0.05
 
-par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
+par(mar = c(3,3,1,1), mgp = c(2,0.4,0), tcl = -0.2)
 plot(mesh8_fit[,1] ~ xf, ylim = c(0,1), xlim = range(xf, xm),
      type = "n", xaxt = "n", las = 2,
      xlab = "Age", ylab = "Selectivity", cex = 1.2)
@@ -739,7 +747,7 @@ xf = a_min:a_max - 0.05
 xm = a_min:a_max + 0.05
 
 
-par(mar = c(3,3,1,1), mgp = c(2,0.5,0), tcl = -0.25)
+par(mar = c(3,3,1,1), mgp = c(2,0.4,0), tcl = -0.2)
 plot(mesh6_fit[,1] ~ xf, ylim = c(0,1), xlim = range(xf, xm),
      type = "n", xaxt = "n", las = 2,
      xlab = "Age", ylab = "Selectivity", cex = 1.2)
@@ -785,7 +793,7 @@ v_prior_plot = function(p) {
   dens = apply(samps, 2, density)
   
   # draw a blank plot
-  par(mar = c(3,3,1,1), xaxs = "i", yaxs = "i", mgp = c(2,0.5,0), tcl = -0.25)
+  par(mar = c(3,3,1,1), xaxs = "i", yaxs = "i", mgp = c(2,0.4,0), tcl = -0.2)
   plot(1,1, type = "n", xlab = "Parameter Value", ylab = "Density",
        ylim = c(0, max(dens[[1]]$y, dens[[2]]$y, dens[[3]]$y)) * 1.2,
        xlim = range(dens[[1]]$x, dens[[2]]$x, dens[[3]]$x))
@@ -857,8 +865,8 @@ v_prior_plot("lam")
 pi = array_format(post_summ(post, "pi")[1,])
 
 layout(matrix(1:3, 1, 3), widths = c(1,1,0.2))
-par(mar = c(2,2,2,2), oma = c(2,3,0,0), xaxs = "i", yaxs = "i",
-    cex.axis = 1.4, cex.main = 1.4)
+par(mar = c(2,2,2,1), oma = c(2,3,0,0), xaxs = "i", yaxs = "i",
+    cex.axis = 1.4, cex.main = 1.4, tcl = -0.2, mgp = c(2,0.4,0))
 # fill_col = c("grey50", "grey65", "grey80", "grey95")
 fill_col = rev(brewer_pal(palette = "Blues")(4))
 by = (min(years) - a_max):(max(years) - a_min)
@@ -891,8 +899,8 @@ pi = array_format(post_summ(post, "^p[")[1,])
 
 
 layout(matrix(1:3, 1, 3), widths = c(1,1,0.2))
-par(mar = c(2,2,2,2), oma = c(2,3,0,0), xaxs = "i", yaxs = "i",
-    cex.axis = 1.4, cex.main = 1.4)
+par(mar = c(2,2,2,1), oma = c(2,3,0,0), xaxs = "i", yaxs = "i",
+    cex.axis = 1.4, cex.main = 1.4, tcl = -0.2, mgp = c(2,0.4,0))
 # fill_col = c("grey50", "grey65", "grey80", "grey95")
 fill_col = rev(brewer_pal(palette = "Blues")(4))
 by = (min(years) - a_max):(max(years) - a_min)
@@ -924,7 +932,7 @@ legend("center", title = "Age", legend = rev(c(4:7)), pch = 22, pt.bg = rev(fill
 psi = post_summ(post, "psi")
 # p_f = summ_post(post, "p_f")
 by = (min(years) - a_max):(max(years) - a_min)
-par(mar = c(3.5,3.5,1,1), mgp = c(2.3, 0.4, 0), tcl = -0.25)
+par(mar = c(3.5,3.5,1,1), mgp = c(2.3, 0.4, 0), tcl = -0.2)
 plot(psi[3,] ~ by, type = "l", xlab = "Brood Year", ylab = "Probability of Return-as-Female", las = 1, ylim = c(0.2, 0.5))
 polygon(x = c(by, rev(by)), y = c(psi[4,], rev(psi[5,])), col = "skyblue", border = NA)
 lines(psi[4,] ~ by, col = "skyblue3")
@@ -945,7 +953,7 @@ U_fit = post_summ(post, "Utot_t[")[3,]
 U_lwr = post_summ(post, "Utot_t[")[4,]
 U_upr = post_summ(post, "Utot_t[")[5,]
 
-par(mar = c(2,5,2,2), cex.main = 1.4, cex.axis = 1.4, cex.lab = 1.4)
+par(mar = c(2,3,2,2), cex.main = 1.4, mgp = c(2,0.4,0), tcl = -0.2)
 plot(U_fit ~ years, type = "n", ylim = c(0,1),las = 1,
      ylab = "Exploitation Rate")
 polygon(x = c(years, rev(years)), y = c(U_lwr, rev(U_upr)),
@@ -969,11 +977,12 @@ U_fit = array_format(post_summ(post, "Utot_ta[")[3,])
 U_lwr = array_format(post_summ(post, "Utot_ta[")[4,])
 U_upr = array_format(post_summ(post, "Utot_ta[")[5,])
 
-par(mfcol = c(4,1), mar = c(2,2,2,2), oma = c(0,3,0,0), cex.main = 1.4, cex.axis = 1.4)
+par(mfcol = c(4,1), mar = c(2,2,2,2), oma = c(0,3,0,0), cex.main = 1.4, cex.axis = 1.4, mgp = c(2,0.4,0), tcl = -0.2)
+
 ages = a_min:a_max
 for (a in 1:na) {
   plot(U_fit[,a] ~ years, type = "n",
-       ylim = c(0,1),
+       ylim = c(0,1), xlab = "", ylab = "",
        main = paste("Age", ages[a]), las = 1)
   polygon(x = c(years, rev(years)), y = c(U_lwr[,a], rev(U_upr[,a])),
           col = "skyblue", border = NA)
@@ -993,13 +1002,13 @@ U_fit = array_format(post_summ(post, "Utot_tas")[3,])
 U_lwr = array_format(post_summ(post, "Utot_tas")[4,])
 U_upr = array_format(post_summ(post, "Utot_tas")[5,])
 
-par(mfcol = c(4,2), mar = c(2,2,2,2), oma = c(0,3,0,0), cex.main = 1.4, cex.axis = 1.4)
+par(mfcol = c(4,2), mar = c(2,2,2,2), oma = c(0,3,0,0), cex.main = 1.4, tcl = -0.2, mgp = c(2,0.4,0))
 sexes = c("Females", "Males")
 ages = a_min:a_max
 for (s in 1:2) {
   for (a in 1:na) {
     plot(U_fit[,a,s] ~ years, type = "n",
-         ylim = c(0,1),
+         ylim = c(0,1), xlab = "", ylab = "",
          main = paste("Age", ages[a], sexes[s]), las = 1)
   polygon(x = c(years, rev(years)), y = c(U_lwr[,a,s], rev(U_upr[,a,s])), col = "skyblue", border = NA)
   lines(U_lwr[,a,s] ~ years, col = "skyblue3")
@@ -1045,7 +1054,7 @@ R = R/R_div
 Z_pred = Z_pred/Z_div
 R_pred = R_pred/R_div
 
-par(xaxs = "i", yaxs = "i", mar = c(5,5,1,1), cex.axis = 1.4, cex.lab = 1.4)
+par(xaxs = "i", yaxs = "i", mar = c(3,3,1,1), mgp = c(2,0.4,0), tcl = -0.2)
 plot(R[3,R_ind] ~ Z[3,Z_ind], type = "n", las = 1,
      xlim = c(0, max(Z[5,Z_ind])) * 1.05,
      ylim = c(0, max(R[5,R_ind])) * 1.05,
@@ -1095,7 +1104,7 @@ R = R/R_div
 Z_pred = Z_pred/Z_div
 R_pred = R_pred/R_div
 
-par(xaxs = "i", yaxs = "i", mar = c(5,5,1,1), cex.axis = 1.4, cex.lab = 1.4)
+par(xaxs = "i", yaxs = "i", mar = c(3,3,1,1), mgp = c(2,0.4,0), tcl = -0.2)
 plot(R[3,R_ind] ~ Z[3,Z_ind], type = "n", las = 1,
      xlim = c(0, max(Z[5,Z_ind])) * 1.05,
      ylim = c(0, max(R[5,R_ind])) * 1.05,
@@ -1153,7 +1162,7 @@ S = S[3,]/max(S[3,])
 R = R/R_div
 R_pred = R_pred/R_div
 
-par(xaxs = "i", yaxs = "i", mar = c(5,5,1,1), cex.axis = 1.4, cex.lab = 1.4)
+par(xaxs = "i", yaxs = "i", mar = c(3,3,1,1), mgp = c(2,0.4,0), tcl = -0.2)
 plot(R[3,R_ind] ~ Z[Z_ind], type = "n", las = 1,
      xlim = c(0, max(Z_pred)) * 1.05,
      ylim = c(0, max(R[5,R_ind])) * 1.05,
@@ -1177,7 +1186,7 @@ legend("topright", legend = c("Z/max(Z)", "S/max(S)"),
 
 ```{r z-per-s, eval = per_cap}
 Z_per_S = post_summ(post, "Z_per_S_t")
-par(mar = c(3,3,1,3), mgp = c(2,0.5,0), tcl = -0.25, lend = "square")
+par(mar = c(3,3,1,3), mgp = c(2,0.4,0), tcl = -0.2, lend = "square")
 plot(Z_per_S[3,] ~ years, type = "n", ylim = range(Z_per_S[4:5,]),
      main = "", ylab = paste0(pretty_z_unit, "/Spawning Salmon"), xlab = "Calendar Year")
 polygon(x = c(years, rev(years)), y = c(Z_per_S[4,], rev(Z_per_S[5,])), col = "skyblue", border = NA)
@@ -1202,7 +1211,7 @@ abline(h = all_mean, lty = 2, lwd = 3)
 
 ```{r z-per-fs, eval = per_cap & meta$z_unit != "fish_count"}
 Z_per_fS = post_summ(post, "Z_per_female_t")
-par(mar = c(3,3,1,3), mgp = c(2,0.5,0), tcl = -0.25, lend = "square")
+par(mar = c(3,3,1,3), mgp = c(2,0.4,0), tcl = -0.2, lend = "square")
 plot(Z_per_fS[3,] ~ years, type = "n", ylim = range(Z_per_fS[4:5,]),
      main = "", ylab = paste0(pretty_z_unit, "/Female Spawning Salmon"), xlab = "Calendar Year")
 polygon(x = c(years, rev(years)), y = c(Z_per_fS[4,], rev(Z_per_fS[5,])), col = "skyblue", border = NA)
