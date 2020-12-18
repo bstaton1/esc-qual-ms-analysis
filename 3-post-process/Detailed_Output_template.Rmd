@@ -427,7 +427,7 @@ q_lwr = array_format(post_summ(post, "q_com")[4,])
 q_upr = array_format(post_summ(post, "q_com")[5,])
 q_obs = t(apply(x_com, 1, function(x) x/sum(x)))
 
-par(mfcol = c(4,2), mar = c(1,2,2,1.5), oma = c(3,4,0,0), cex.main = 1.4, cex.axis = 1.4, mpg = c(2,0.4,0), tcl = -0.2)
+par(mfcol = c(4,2), mar = c(1,2,2,1.5), oma = c(3,4,0,0), cex.main = 1.4, cex.axis = 1.4, mgp = c(2,0.4,0), tcl = -0.2)
 sex = rep(c("Females", "Males"), each = na)
 age_v = rep(a_min:a_max, 2)
 for (as in 1:8) {
@@ -953,9 +953,9 @@ U_fit = post_summ(post, "Utot_t[")[3,]
 U_lwr = post_summ(post, "Utot_t[")[4,]
 U_upr = post_summ(post, "Utot_t[")[5,]
 
-par(mar = c(2,3,2,2), cex.main = 1.4, mgp = c(2,0.4,0), tcl = -0.2)
+par(mar = c(3,3,1,1), cex.main = 1.4, mgp = c(2,0.4,0), tcl = -0.2)
 plot(U_fit ~ years, type = "n", ylim = c(0,1),las = 1,
-     ylab = "Exploitation Rate")
+     ylab = "Exploitation Rate", xlab = "Calendar Year")
 polygon(x = c(years, rev(years)), y = c(U_lwr, rev(U_upr)),
         col = "skyblue", border = NA)
 lines(U_lwr ~ years, col = "skyblue3")
@@ -977,7 +977,7 @@ U_fit = array_format(post_summ(post, "Utot_ta[")[3,])
 U_lwr = array_format(post_summ(post, "Utot_ta[")[4,])
 U_upr = array_format(post_summ(post, "Utot_ta[")[5,])
 
-par(mfcol = c(4,1), mar = c(2,2,2,2), oma = c(0,3,0,0), cex.main = 1.4, cex.axis = 1.4, mgp = c(2,0.4,0), tcl = -0.2)
+par(mfcol = c(4,1), mar = c(2,2,2,2), oma = c(1,3,0,0), cex.main = 1.4, cex.axis = 1.4, mgp = c(2,0.4,0), tcl = -0.2)
 
 ages = a_min:a_max
 for (a in 1:na) {
@@ -992,6 +992,7 @@ for (a in 1:na) {
   abline(v = c(years[min(which(com_mesh == 2))], years[min(which(sub_mesh == 2))]) - 0.5, lty = 2)
 }
 
+mtext(side = 1, outer = T, "Calendar Year", line = 0, cex = 1.2)
 mtext(side = 2, outer = T, "Exploitation Rate", line = 1, cex = 1.2)
 ```
 
@@ -1002,7 +1003,7 @@ U_fit = array_format(post_summ(post, "Utot_tas")[3,])
 U_lwr = array_format(post_summ(post, "Utot_tas")[4,])
 U_upr = array_format(post_summ(post, "Utot_tas")[5,])
 
-par(mfcol = c(4,2), mar = c(2,2,2,2), oma = c(0,3,0,0), cex.main = 1.4, tcl = -0.2, mgp = c(2,0.4,0))
+par(mfcol = c(4,2), mar = c(2,2,2,2), oma = c(2,3,0,0), cex.main = 1.4, cex.axis = 1.4, tcl = -0.2, mgp = c(2,0.4,0))
 sexes = c("Females", "Males")
 ages = a_min:a_max
 for (s in 1:2) {
@@ -1017,7 +1018,7 @@ for (s in 1:2) {
   abline(v = c(years[min(which(com_mesh == 2))], years[min(which(sub_mesh == 2))]) - 0.5, lty = 2)
   }
 }
-
+mtext(side = 1, outer = T, "Calendar Year", line = 0, cex = 1.2)
 mtext(side = 2, outer = T, "Exploitation Rate", line = 1, cex = 1.2)
 ```
 
