@@ -624,7 +624,7 @@ round(((late - early)/early) * 100, 2)
 
 # diag_nodes = c("alpha", "beta_e10", "^R[", "delta_0",
 #                "delta_1", "gamma_0", "gamma_1",
-#                "phi", "sigma_R_white", "sigma_R0",
+#                "phi", "sigma_R", "sigma_R0",
 #                "Fcom", "Fsub", "^Vtau$", "^Vsig$", "^Vtha$", "^Vlam$", "log_mean_R0"
 # )
 # 

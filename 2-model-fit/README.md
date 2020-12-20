@@ -96,3 +96,39 @@ You will be prompted to enter several model numbers separated by spaces. Do not 
 
 Once you have completed this for all models you wish to run, the `*.tar.gz` files can be copied back to your computer using `scp`.
 
+## Defining JAGS Model Structure
+
+One aspect of the coding framework used here is perhaps worthy of note to interested readers. The analysis fits a total of 31 models, 12 for the main-text analysis and the remainder as part of sensitivity analyses. Some of the alternative models require different JAGS code to fit, others are altered by simply changing the data passed to them.
+
+In the cases where the model code needs to be changed, it would be cumbersome to have many different model files to maintain. If a small change needed to be made, then it would need to be made to many files simultaneously. This can inhibit model development and is error prone (e.g., the change is made in some model files, but not others).
+
+As a solution, this code relies on a main model definition (found in a function body in `0-functions/full_model.R`), which is used to create a `full-model.txt` file. This houses the code for the most complex model, and a function is used (`edit_full_model.R`) to change certain lines to simplify the full model for a particular simpler model.
+
+For example, consider the case concerning models that do not incorporate time-trending return by sex dynamics. In the full model, the part of the JAGS code controlling the temporal aspects of return by sex looks like this:
+
+```R
+### PART 2: MATURITY PROCESS SUBMODEL ###
+  # 2a) brood-year specific sex ratio
+  delta_0 ~ dnorm(0,1e-6)
+  delta_1 ~ dnorm(0,1e-6)
+  for (y in 1:ny) {
+    logit(psi[y]) <- delta_0 + delta_1 * y
+    R_sex[y,1] <- R[y] * psi[y]
+    R_sex[y,2] <- R[y] * (1 - psi[y])
+  }
+```
+
+This model will allow the probability that a recruit returns as a female to trend over time. If we wanted to fit a model without this (i.e., with `delta_1` fixed at zero), we could simply save this full model as a new file with a new name, and edit the line(s) in question.
+
+This is the job of `edit_full_model()`. It accepts a `sex_trend` argument which, if `TRUE`, will execute the following R code to make the switch to set `delta_1 <- 0` rather than having it take on a non-zero value (i.e., a prior):
+
+```R
+match = model_lines[str_detect(model_lines, "delta_1 ~ ")]
+white_space =  unlist(str_extract_all(match, "  +"))
+replace = "delta_1 <- 0"
+model_lines[which(model_lines == match)] = paste(white_space, replace, sep = "")
+```
+
+The first line finds the line that needs to be changed. The second line extracts all of the white space in front of the text that needs changing (to make sure the indenting remains the same after the edit is made - this is not strictly necessary). The third line specifies what the revised line should look like. The fourth line performs the replacement.
+
+This is mentioned here only because this framework proved to be very useful in model development, and Staton hasn't seen it done before. It is likely that other practitioners may find this sort of trick useful. 
