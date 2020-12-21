@@ -2,7 +2,7 @@
 
 **INSERT ZENODO DOI GRAPHIC HERE WHEN MINTED**
 
-This repository stores the code and data used to perform the analysis presented in _Incorporating demographic information into Pacific salmon spawner-recruit analyses alters management reference points for a western Alaska population_ by authors B. Staton, M. Catalano, S. Fleischman, and J. Ohlberger (DOI: **Insert DOI if accepted**)
+This repository stores the code and data used to perform the analysis presented in _Incorporating demographic information into spawner-recruit analyses alters biological reference points for a western Alaska salmon population_ by authors B. Staton, M. Catalano, S. Fleischman, and J. Ohlberger (DOI: **Insert DOI if accepted**)
 
 ## Analysis Structure and Motivation
 
