@@ -275,28 +275,29 @@ dev.off()
 
 ##### RETURN AT AGE PLOT #####
 pi = array_format(post_summ(post_list[["E-ASL"]], "pi")[3,])
+pi_lwr = array_format(post_summ(post_list[["E-ASL"]], "pi")[4,])
+pi_upr = array_format(post_summ(post_list[["E-ASL"]], "pi")[5,])
 
-ppi = 600
-file_device(file.path(fig_dir, paste0("pi-trends.", file_type)), h = 4, w = 7.2)
-par(mfrow = c(1,2), mar = c(1, 0.25, 0.25, 0.25), oma = c(1.5,3,1.5,2), xaxs = "i", yaxs = "i",
+
+lab_x = floor(seq(1970, 2014, length = 4))
+
+file_device(file.path(fig_dir, paste0("pi-trends.", file_type)), h = 3.5, w = 7.2)
+par(mfrow = c(1,2), mar = c(1, 0.25, 0.25, 0.25), oma = c(1.5,3,1.5,2), yaxs = "i",
     cex.axis = 1, cex.main = 1, tcl = -0.25, mgp = c(2,0.4,0), lend = "square")
-fill_col = c("grey35", "grey55", "grey80", "white")
+cols = c("black", "grey40", "grey60", "grey75")
 by = 1969:2015
 sex = c("Female", "Male")
 for (s in 1:2) {
-  plot(1,1, type = "n", xlim = range(by), ylim = c(0,1), las = 1, yaxt = "n", xaxt = "n")
-  for (a in (na-1):1) {
-    if (a == 1) {
-      lines(pi[,a,s] ~ by)
-      polygon(x = c(by, rev(by)), y = c(rep(0, ny), rev(pi[,a,s])), col = fill_col[a])
-    } else {
-      lines(rowSums(pi[,1:a,s]) ~ by)
-      polygon(x = c(by, rev(by)), y = c(rep(0, ny), rev(rowSums(pi[,1:a,s]))), col = fill_col[a])
-    }
+  plot(1,1, type = "n", xlim = range(by), ylim = c(-0.025,1), las = 1, yaxt = "n", xaxt = "n")
+  for (a in 1:na) {
+    polygon(c(by, rev(by)), c(pi_lwr[,a,s], rev(pi_upr[,a,s])), col = scales::alpha("grey30", 0.15), border = NA)
+  }
+  for (a in 1:na) {
+    lines(pi[,a,s] ~ by, col = cols[a], lwd = 2)
+    text(x = lab_x[a], y = pi[which(by == lab_x[a]),a,s] + 0.035, labels = ages[a], xpd = T, col = cols[a])
   }
   
   if (s == 2) {
-    legend("bottomright", title = "Age", legend = rev(c(4:7)), pch = 22, pt.bg = rev(fill_col), box.col = "white", bg = "white", cex = 0.95, pt.cex = 3)
     axis(side = 4, at = seq(0, 1, 0.2), labels = seq(0, 1, 0.2), las = 2)
     mtext(line = 0.25, side = 3, "Male")
     
