@@ -1,6 +1,8 @@
 ---
 title: "`r paste0('Online Supplement ', LETTERS[m + 1], ' to Staton et al.')`"
 subtitle: "`r paste0('_Detailed Output for Model: ', model_ids[model], '_')`"
+author: "Incorporating demographic information into spawner-recruit analyses alters biological reference points for a western Alaska salmon population"
+date: "DOI: [10.1139/cjfas-2020-0478](https://doi.org/10.1139/cjfas-2020-0478)"
 output:
   html_document:
     theme: cerulean
