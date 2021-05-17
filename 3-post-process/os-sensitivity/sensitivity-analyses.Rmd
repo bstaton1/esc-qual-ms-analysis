@@ -1,6 +1,8 @@
 ---
 title: "Additional Information/Sensitivity Analyses"
 subtitle: "_Online Supplement A to Staton et al._"
+author: "Incorporating demographic information into spawner-recruit analyses alters biological reference points for a western Alaska salmon population"
+date: "DOI: [10.1139/cjfas-2020-0478](https://doi.org/10.1139/cjfas-2020-0478)"
 output:
   bookdown::html_document2:
     theme: cerulean
