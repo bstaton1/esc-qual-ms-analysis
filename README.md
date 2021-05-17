@@ -1,8 +1,7 @@
-# Repo: esc-qual-ms-analysis
+> This repository stores the code and data used to perform the analysis presented in _Incorporating demographic information into spawner-recruit analyses alters biological reference points for a western Alaska salmon population_ by authors B. Staton, M. Catalano, S. Fleischman, and J. Ohlberger (published in the *Canadian Journal of Fisheries and Aquatic Sciences*)
 
-**INSERT ZENODO DOI GRAPHIC HERE WHEN MINTED**
-
-This repository stores the code and data used to perform the analysis presented in _Incorporating demographic information into spawner-recruit analyses alters biological reference points for a western Alaska salmon population_ by authors B. Staton, M. Catalano, S. Fleischman, and J. Ohlberger (DOI: **Insert DOI if accepted**)
+[![ArticleDOI](https://img.shields.io/badge/Article%20DOI-10.1139%2Fcjfas--2020--0478-blue)](https://doi.org/10.1139/cjfas-2020-0478)
+[![GitHub Repo Archive DOI](https://img.shields.io/badge/GitHub%20Repo%20Archive%20DOI-10.5281%2Fzenodo.4382757-blue)](https://doi.org/10.5281/zenodo.4382757)
 
 ## Analysis Structure and Motivation
 
@@ -31,7 +30,7 @@ The complete set of models for publication were fitted using the [Hopper High Pe
 
 Program [JAGS](<http://mcmc-jags.sourceforge.net/>) is required to run the models and the R package '[jagsUI](https://CRAN.R-project.org/package=jagsUI)' is used to call JAGS from R. Other miscellaneous packages are used for data formatting and preparations (e.g., 'reshape2', 'dplyr', etc.). See the file `load-packages.R` for a complete list of required packages.
 
-Posterior summarization relies heavily on the 'postpack', written by B. Staton.  See the [package website](https://bstaton1.github.io/postpack/) for more details on how to use it.
+Posterior summarization relies heavily on the R package '[postpack](https://bstaton1.github.io/postpack/)', written by B. Staton, to make inference from many models simultaneously.
 
 One other package written by B. Staton is used ('StatonMisc'). At the time of writing, it is [found only on GitHub](https://github.com/bstaton1/StatonMisc). The exact version used in this project can be installed via:
 
@@ -42,7 +41,7 @@ remotes::install_github("bstaton1/StatonMisc", ref = "0803a5a")
 
 ## Session Info
 
-For reproducibility purposes, all analyses were conducted using this configuration:
+For reproducibility purposes, all post-MCMC analyses were conducted using this configuration:
 
 ```
 - Session info --------------------------------------------------------------------------
