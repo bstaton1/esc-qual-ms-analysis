@@ -1,6 +1,7 @@
 > This repository stores the code and data used to perform the analysis presented in _Incorporating demographic information into spawner-recruit analyses alters biological reference points for a western Alaska salmon population_ by authors B. Staton, M. Catalano, S. Fleischman, and J. Ohlberger (published in the *Canadian Journal of Fisheries and Aquatic Sciences*)
 
 [![ArticleDOI](https://img.shields.io/badge/Article%20DOI-10.1139%2Fcjfas--2020--0478-blue)](https://doi.org/10.1139/cjfas-2020-0478)
+
 [![GitHub Repo Archive DOI](https://img.shields.io/badge/GitHub%20Repo%20Archive%20DOI-10.5281%2Fzenodo.4382757-blue)](https://doi.org/10.5281/zenodo.4382757)
 
 ## Analysis Structure and Motivation
