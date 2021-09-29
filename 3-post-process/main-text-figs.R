@@ -109,7 +109,7 @@ xm = a_min:a_max + 0.01
 file_device(file.path(fig_dir, paste0("v-age.", file_type)), h = 5, w = 3.45)
 par(mfrow = c(2,1), mar = c(1,1.25,0.5,0.5),  oma = c(1,1,0,0), tcl = -0.15, mgp = c(2,0.2,0), cex.axis = 0.75)
 plot(1,1, ylim = c(0,1), xlim = range(min(xf) - max(x_t), max(xm) + max(x_t)),
-     col = "red", pch = 16, type = "o",xaxt = "n", las = 2)
+     col = "red", pch = 16, type = "o",xaxt = "n", las = 2, xlab = "", ylab = "")
 col = c("black", "grey", "white")
 
 for (t in (1:3)) {
@@ -126,7 +126,7 @@ text(x = usr[1] - xdiff * 0.015, usr[3] + ydiff * 0.05, labels = "(a)", pos = 4,
 text(x = usr[1] + xdiff * 0.06, usr[3] + ydiff * 0.04, labels = "8 in. Mesh", pos = 4, font = 1, cex = 0.8)
 
 plot(1,1, ylim = c(0,1), xlim = range(min(xf) - max(x_t), max(xm) + max(x_t)),
-     col = "red", pch = 16, type = "o",xaxt = "n", las = 2)
+     col = "red", pch = 16, type = "o",xaxt = "n", las = 2, xlab = "", ylab = "")
 
 for (t in (1:3)) {
   lines(xf - x_t[t], v_f_mesh6[,"mean",t], type = "o", pch = 21, bg = col[t], cex = 1.4)
@@ -266,7 +266,7 @@ for (as in 1:8) {
 }
 
 mtext(side = 1, outer = T, line = 1.5, "Year")
-mtext(side = 2, outer = T, line = 3.4, "Proportional Contribution")
+mtext(side = 2, outer = T, line = 3.4, "Percent Contribution")
 dev.off()
 
 ##### RETURN AT AGE PLOT #####
@@ -274,17 +274,18 @@ pi = array_format(post_summ(post_list[["E-ASL"]], "pi")[3,])
 pi_lwr = array_format(post_summ(post_list[["E-ASL"]], "pi")[4,])
 pi_upr = array_format(post_summ(post_list[["E-ASL"]], "pi")[5,])
 
-
 lab_x = floor(seq(1970, 2014, length = 4))
 
-file_device(file.path(fig_dir, paste0("pi-trends.", file_type)), h = 3.5, w = 7.2)
-par(mfrow = c(1,2), mar = c(1, 0.25, 0.25, 0.25), oma = c(1.5,3,1.5,2), yaxs = "i",
-    cex.axis = 1, cex.main = 1, tcl = -0.25, mgp = c(2,0.4,0), lend = "square")
+file_device(file.path(fig_dir, paste0("pi-trends.", file_type)), h = 5, w = 3.45)
+par(mfrow = c(2,1), mar = c(1,1.25,0.5,0.5),  oma = c(1.1,1,0,0), tcl = -0.15, mgp = c(2,0.2,0), cex.axis = 0.75, lend = "square")
+
 cols = c("black", "grey40", "grey60", "grey75")
 by = 1969:2015
 sex = c("Female", "Male")
+letter = c("(a)", "(b)")
+
 for (s in 1:2) {
-  plot(1,1, type = "n", xlim = range(by), ylim = c(-0.025,1), las = 1, yaxt = "n", xaxt = "n")
+  plot(1,1, type = "n", xlim = range(by), ylim = c(-0.025,1), las = 1, yaxt = "n", xaxt = "n", xlab = "", ylab = "")
   for (a in 1:na) {
     polygon(c(by, rev(by)), c(pi_lwr[,a,s], rev(pi_upr[,a,s])), col = scales::alpha("grey30", 0.15), border = NA)
   }
@@ -293,21 +294,19 @@ for (s in 1:2) {
     text(x = lab_x[a], y = pi[which(by == lab_x[a]),a,s] + 0.035, labels = ages[a], xpd = T, col = cols[a])
   }
   
-  if (s == 2) {
-    axis(side = 4, at = seq(0, 1, 0.2), labels = seq(0, 1, 0.2), las = 2)
-    mtext(line = 0.25, side = 3, "Male")
-    
-  } else {
-    axis(side = 2, at = seq(0, 1, 0.2), labels = seq(0, 1, 0.2), las = 2)
-    mtext(line = 2, side = 2, "Probability of Return-at-Age")
-    mtext(line = 0.25, side = 3, "Female")
-  }
-  axis(side = 1, at = seq(1970, 2010, 10), labels = substr(seq(1970, 2010, 10), 3, 4), tcl = -0.4)
+  usr = par("usr"); xdiff = diff(usr[1:2]); ydiff = diff(usr[3:4])
+  text(x = usr[1] - xdiff * 0.015, usr[4] - ydiff * 0.05, labels = letter[s], pos = 4, font = 2, cex = 0.9)
+  text(x = usr[1] + xdiff * 0.06, usr[4] - ydiff * 0.055, labels = sex[s], pos = 4, font = 1, cex = 0.8)
+  
+  axis(side = 2, at = seq(0, 1, 0.2), labels = format(seq(0, 1, 0.2), nsmall = 1), las = 2)
+  axis(side = 1, at = seq(1970, 2010, 10), labels = substr(seq(1970, 2010, 10), 3, 4), tcl = -0.35)
   axis(side = 1, at = seq(1970, 2014, 2), labels = F, tcl = -0.2)
   
   box()
 }
-mtext(side = 1, outer = T, line = 0.5, "Brood Year")
+mtext(side = 2, line = 0.2, outer = TRUE, "Probability of Return-at-Age", cex = 0.9)
+
+mtext(side = 1, outer = T, line = 0.25, "Brood Year", cex = 0.9)
 dev.off()
 
 ##### EGG NUMBER AND MASS RELATIONSHIPS AND CHANGES #####
