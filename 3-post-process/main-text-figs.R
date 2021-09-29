@@ -160,23 +160,21 @@ pearson = function(rlm, lambda, theta, sigma, tau) {
   v/max(v)
 }
 
-
 ssm_ests = post_subset(post_list[["E-ASL"]], "^V...$", T)
 
 ssm_pearson = function(rlm, i) {
   pearson(
-    rlm, 
+    rlm,
     tau = ssm_ests[i,1], sigma = ssm_ests[i,2], theta = ssm_ests[i,3], lambda = ssm_ests[i,4]
   )
 }
-
 
 out = t(sapply(1:post_dim(post_list[["E-ASL"]], "saved"), function(i) ssm_pearson(rlm_seq, i)))
 v_ssm = apply(out, 2, summ)
 v_kusko = pearson(rlm_seq, Vlam_kusko[1], Vtha_kusko[1], Vsig_kusko[1], Vtau_kusko[1])
 v_yukon = pearson(rlm_seq, Vlam_yukon[1], Vtha_yukon[1], Vsig_yukon[1], Vtau_yukon[1])
 
-file_device(file.path(fig_dir, paste0("v-length.", file_type)), h = 3.5, w = 3.5)
+file_device(file.path(fig_dir, paste0("v-length.", file_type)), h = 3.45, w = 3.45)
 par(mar = c(2,2.25,2,0.5), mgp = c(1.25,0.2,0), tcl = -0.15, cex.axis = 0.75, lend = "square", cex.lab = 0.8)
 plot(1,1, xlim = range(rlm_seq), ylim = c(min(v_ssm[4,]), 1), type = "n", ylab = "Selectivity", las = 2, xaxt = "n", xlab = "", lwd = 2, lty = 1)
 polygon(x = c(rlm_seq, rev(rlm_seq)), y = c(v_ssm[4,], rev(v_ssm[5,])),
@@ -211,13 +209,11 @@ axis_i = seq(1, length(rlm_seq), 150)
 
 axis(side = 1, at = rlm_seq[axis_i], labels = round(rlm_seq[axis_i] * mesh8_perim, -1))
 axis(side = 3, at = rlm_seq[axis_i], labels = round(rlm_seq[axis_i] * mesh6_perim, -1), col.axis = "grey60", col.ticks = "grey60")
-mtext(side = 3, "METF (mm) w/6 in. Mesh", line = 1, col = "grey60", font = 2, cex = 0.8)
+mtext(side = 3, "METF (mm) w/6 in. Mesh", line = 1, col = "grey60", font = 1, cex = 0.8)
 segments(par("usr")[1], par("usr")[4], par("usr")[2], par("usr")[4],col = "grey60", xpd = T)
-mtext(side = 1, "METF (mm) w/8 in. Mesh", line = 1, font = 2, cex = 0.8)
+mtext(side = 1, "METF (mm) w/8 in. Mesh", line = 1, font = 1, cex = 0.8)
 legend("topright", legend = c("SSM", "Yukon R. Sonar", "Kuskokwim R. Sonar"), lty = c(1,2,3), lwd = c(4,1,1.4), bty = "n", cex = 0.75)
 dev.off()
-
-
 
 ##### AGE/SEX COMPOSITION COMPARISONS #####
 q_esc = array_format(post_summ(post_list[["E-ASL"]], "q_esc")["50%",])
