@@ -220,8 +220,8 @@ q_esc = array_format(post_summ(post_list[["E-ASL"]], "q_esc")["50%",])
 q_com = array_format(post_summ(post_list[["E-ASL"]], "q_com")["50%",])
 q_sub = array_format(post_summ(post_list[["E-ASL"]], "q_sub")["50%",])
 
-file_device(file.path(fig_dir, paste0("age-comp.", file_type)), h = 5.75, w = 3.5)
-par(mfcol = c(4,2), mar = c(0.25,0.25,0.25,0.25), oma = c(3,4.5,1.5,2),
+file_device(file.path(fig_dir, paste0("age-comp.", file_type)), h = 5, w = 3.45)
+par(mfcol = c(4,2), mar = c(0.25,0.25,0.25,0.25), oma = c(2.5,4.6,1.5,2),
     tcl = -0.20, mgp = c(2,0.25,0), lend = "square", ljoin = "mitre")
 yaxis_side = rep(c(2,4), each = 4)
 xaxis_draw = rep(c(F,F,F,T), 2)
@@ -242,7 +242,7 @@ for (as in 1:8) {
   lines(q_esc[,as] ~ years, lty = 1, col = "black")
   lines(q_com[,as] ~ years, lty = 3, col = "black", lwd = 2)
   lines(q_sub[,as] ~ years, lty = 2, col = "black")
-
+  
   at_y = axisTicks(par("usr")[3:4], log = F, nint = 3)
   axis(side = yaxis_side[as], at = at_y, labels = paste0(at_y * 100, "%"), las = 2)
   
@@ -256,17 +256,17 @@ for (as in 1:8) {
     legend("top", horiz = T, x.intersp = c(0.5, 0.2, 0.2), seg.len = c(1.5,2.5,2) ,legend = c("Esc", "Com", "Sub"), title = "Source", 
            lty = c(1,3,2), lwd = c(1,2,1), cex = 0.7, box.col = "black", bg = "white")
   }
-  box(lwd = 1.25)
+  box(lwd = 1)
   if (upper_text_draw[as]) {
     mtext(side = 3, line = 0, text = ifelse(as == 1, "Female", "Male"), xpd = T, cex = 0.8)
   }
   if (right_text_draw[as]) {
-    mtext(side = 2, line = 2, text = right_text[as], xpd = T, cex = 0.8)
+    mtext(side = 2, line = 2.4, text = right_text[as], xpd = T, cex = 0.8)
   }
 }
 
 mtext(side = 1, outer = T, line = 1.5, "Year")
-mtext(side = 2, outer = T, line = 3, "Proportional Contribution")
+mtext(side = 2, outer = T, line = 3.4, "Proportional Contribution")
 dev.off()
 
 ##### RETURN AT AGE PLOT #####
