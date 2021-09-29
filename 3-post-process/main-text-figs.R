@@ -106,8 +106,8 @@ x_t = seq(0.15,0.05, -0.05)
 xf = a_min:a_max - 0.01
 xm = a_min:a_max + 0.01
 
-file_device(file.path(fig_dir, paste0("v-age.", file_type)), h = 6, w = 3.5)
-par(mfrow = c(2,1), mar = c(1,2,0.5,0.5),  oma = c(1.5,1,0,0), tcl = -0.25, mgp = c(2,0.4,0))
+file_device(file.path(fig_dir, paste0("v-age.", file_type)), h = 5, w = 3.45)
+par(mfrow = c(2,1), mar = c(1,1.25,0.5,0.5),  oma = c(1,1,0,0), tcl = -0.15, mgp = c(2,0.2,0), cex.axis = 0.75)
 plot(1,1, ylim = c(0,1), xlim = range(min(xf) - max(x_t), max(xm) + max(x_t)),
      col = "red", pch = 16, type = "o",xaxt = "n", las = 2)
 col = c("black", "grey", "white")
@@ -117,13 +117,13 @@ for (t in (1:3)) {
   lines(xm + rev(x_t)[t], v_m_mesh8[,"mean",t], type = "o", pch = 23, bg = col[t], lty = 2, cex = 1.4)
 }
 
-legend("bottomright", c("Female", "Male", "First 10 Yrs", "All Yrs", "Last 10 Yrs"), bty = "n", x.intersp = 0.5, seg.len = 3,
-       lty = c(1, 2, NA, NA, NA), pch = c(21, 23, 22, 22, 22), pt.bg = c("white", "white", col), pt.cex = 1.4, cex = 0.7)
+legend("bottomright", c("Female", "Male", "First 10 Yrs", "All Yrs", "Last 10 Yrs"), bty = "n", x.intersp = 0.5, seg.len = 2.9,
+       lty = c(1, 2, NA, NA, NA), pch = c(21, 23, 22, 22, 22), pt.bg = c("white", "white", col), pt.cex = 1.4, cex = 0.75)
 box()
 axis(side = 1, at = 4:7, labels = 4:7)
 usr = par("usr"); xdiff = diff(usr[1:2]); ydiff = diff(usr[3:4])
-text(x = usr[1] - xdiff * 0.015, usr[3] + ydiff * 0.05, labels = "(a)", pos = 4, font = 2, cex = 1)
-text(x = usr[1] + xdiff * 0.075, usr[3] + ydiff * 0.04, labels = "8 in. Mesh", pos = 4, font = 1, cex = 0.8)
+text(x = usr[1] - xdiff * 0.015, usr[3] + ydiff * 0.05, labels = "(a)", pos = 4, font = 2, cex = 0.9)
+text(x = usr[1] + xdiff * 0.06, usr[3] + ydiff * 0.04, labels = "8 in. Mesh", pos = 4, font = 1, cex = 0.8)
 
 plot(1,1, ylim = c(0,1), xlim = range(min(xf) - max(x_t), max(xm) + max(x_t)),
      col = "red", pch = 16, type = "o",xaxt = "n", las = 2)
@@ -134,12 +134,12 @@ for (t in (1:3)) {
 }
 
 axis(side = 1, at = 4:7, labels = 4:7)
-text(x = usr[1] - xdiff * 0.015, usr[3] + ydiff * 0.05, labels = "(b)", pos = 4, font = 2, cex = 1)
-text(x = usr[1] + xdiff * 0.075, usr[3] + ydiff * 0.04, labels = "6 in. Mesh", pos = 4, font = 1, cex = 0.8)
+text(x = usr[1] - xdiff * 0.015, usr[3] + ydiff * 0.05, labels = "(b)", pos = 4, font = 2, cex = 0.9)
+text(x = usr[1] + xdiff * 0.06, usr[3] + ydiff * 0.04, labels = "6 in. Mesh", pos = 4, font = 1, cex = 0.8)
 usr = par("usr"); xdiff = diff(usr[1:2]); ydiff = diff(usr[3:4])
 
-mtext(side = 1, line = 0.5, outer = T, "Age")
-mtext(side = 2, line = 0.0, outer = T, "Selectivity")
+mtext(side = 1, line = 0.0, outer = T, "Age", cex = 0.8)
+mtext(side = 2, line = 0.25, outer = T, "Selectivity", cex = 0.8)
 dev.off()
 
 ##### SELECTIVITY PLOT: FULL SHAPE #####
