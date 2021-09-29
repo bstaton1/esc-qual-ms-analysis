@@ -343,9 +343,10 @@ med = rbind(
   (mass_fun(colMeans(ldat[l10,])) - mass_fun(colMeans(ldat[f10,])))/mass_fun(colMeans(ldat[f10,]))
 )
 
-file_device(file.path(fig_dir, paste0("z-figure.", file_type)), h = 6, w = 3.5)
 
-par(mfrow = c(2,1), mar = c(2.5,3.75,0.5,0.5), mgp = c(1.5,0.35,0), tcl = -0.25, lend = "square")
+file_device(file.path(fig_dir, paste0("z-figure.", file_type)), h = 5, w = 3.45)
+
+par(mfrow = c(2,1), mar = c(2,3,0.25,0.5),  oma = c(0,0,0,0), tcl = -0.15, mgp = c(2,0.2,0), cex.axis = 0.75, lend = "square")
 
 pred_x = seq(500, mean(ldat[f10,4]), length = 100)
 pred_egg = egg_fun(pred_x)/egg_fun(mean(ldat[f10,4]))
@@ -365,14 +366,15 @@ lm = mass_fun(colMeans(ldat[l10,]))
 
 
 plot(pred_egg ~ pred_x, type = "l", ylim = range(0, pred_egg, pred_mass),
-     xlab = "METF (mm)", ylab = "", yaxt = "n", lwd = 2)
+     xlab = "", ylab = "", yaxt = "n", lwd = 2)
 lines(pred_mass ~ pred_x, type = "l", lty = 2, lwd = 2)
 axis(side = 2, at = seq(0, 1.2, 0.2), labels = paste0(seq(0, 1.2, 0.2) * 100, "%"), las = 2)
-mtext(side = 2, "Relative Reproductive Output", line = 2.5)
+mtext(side = 2, "Relative Reproductive Output", line = 2)
+mtext(side = 1, "METF (mm)", line = 1)
 points(rep(0, 4) ~ colMeans(ldat[f10,]), pch = c("4", "5", "6", "7"), col = "grey60")
 points(rep(0, 4) ~ colMeans(ldat[l10,]), pch = c("4", "5", "6", "7"))
 usr = par("usr"); xdiff = diff(usr[1:2]); ydiff = diff(usr[3:4])
-text(usr[1] - 0.025 * xdiff, usr[4] - ydiff * 0.05, pos = 4, labels = "(a)", font = 2)
+text(usr[1] - 0.025 * xdiff, usr[4] - ydiff * 0.05, pos = 4, labels = "(a)", font = 2, cex = 0.9)
 
 segments(colMeans(ldat[f10,]), rep(0.035, 4), colMeans(ldat[f10,]), egg_fun(colMeans(ldat[f10,]))/egg_fun(mean(ldat[f10,4])), col = "grey60")
 segments(colMeans(ldat[l10,]), rep(0.035, 4), colMeans(ldat[l10,]), egg_fun(colMeans(ldat[l10,]))/egg_fun(mean(ldat[f10,4])))
@@ -383,11 +385,11 @@ points(colMeans(ldat[f10,]), mass_fun(colMeans(ldat[f10,]))/mass_fun(mean(ldat[f
 points(colMeans(ldat[l10,]), mass_fun(colMeans(ldat[l10,]))/mass_fun(mean(ldat[f10,4])), col = "black", pch = 24, bg = "black")
 
 legend(x = usr[1], y = usr[4] - ydiff * 0.075, seg.len = c(2.5), legend = c("Egg #", "Egg Mass", "First 10 Yrs", "Last 10 Yrs"), 
-       lty = c(1,2,NA,NA), pch = c(22, 24, NA, NA), pt.cex = 1.1, pt.bg = c("white", "white", NA, NA), text.col = c("black", "black", "grey60", "black"), bty = "n", cex = 0.8)
+       lty = c(1,2,NA,NA), pch = c(22, 24, NA, NA), pt.cex = 1.1, pt.bg = c("white", "white", NA, NA), text.col = c("black", "black", "grey60", "black"), bty = "n", cex = 0.75)
 
 
 mp = barplot(med, beside = T, ylim = c(-0.5,0.8), col = "white",
-             border = "white", yaxt = "n", xlab = "Age")
+             border = "white", yaxt = "n", xlab = "")
 abline(h = 0, lty = 1)
 segments(mp, lwr, mp, upr)
 points(med[1,] ~ mp[1,], bg = "grey60", pch = 21)
@@ -396,15 +398,18 @@ points(med[3,] ~ mp[3,], bg = "grey60", pch = 24)
 axis(side = 1, at = mp[2,], labels = 4:7)
 axis(side = 2, at = seq(-0.4, 1, by = 0.2),
      paste0(labels = seq(-0.4, 1, 0.2) * 100, "%"), las = 2)
-mtext(side = 2, "% Change", line = 2.5)
+mtext(side = 2, "% Change", line = 2)
+mtext(side = 1, "Age", line = 1)
+
 legend("topright", legend = c("METF", "Egg #", "Egg Mass"), pt.cex = 1.1,
-       pch = c(21,22,24), pt.bg = "grey60", bty = "n", cex = 0.8)
+       pch = c(21,22,24), pt.bg = "grey60", bty = "n", cex = 0.75)
 usr = par("usr"); xdiff = diff(usr[1:2]); ydiff = diff(usr[3:4])
-text(usr[1] - 0.025 * xdiff, usr[4] - ydiff * 0.05, pos = 4, labels = "(b)", font = 2)
+text(usr[1] - 0.025 * xdiff, usr[4] - ydiff * 0.05, pos = 4, labels = "(b)", font = 2, cex = 0.9)
 
 box()
 
 dev.off()
+
 
 round(egg_fun(colMeans(ldat[f10,]))/egg_fun(mean(ldat[f10,4])), 2)
 round(mass_fun(colMeans(ldat[f10,]))/mass_fun(mean(ldat[f10,4])), 2)
