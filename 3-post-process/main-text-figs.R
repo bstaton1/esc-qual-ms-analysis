@@ -17,8 +17,8 @@ out_dir = "model-output/permanent"
 out_files = dir(out_dir, full.names = T)
 
 # HOW DO YOU WANT TO SAVE THE OUTPUT
-# file_type = "pdf"
-file_type = "png"
+file_type = "pdf"
+# file_type = "png"
 fig_dir = "3-post-process/ms-figs"
 
 # create directory to store output figures if it doesn't exist
