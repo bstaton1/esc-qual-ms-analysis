@@ -451,9 +451,8 @@ uprs2 = sapply(out, function(x) x["75%",])
 
 round((meds[3,] - meds[1,])/meds[1,], 2)
 
-
-file_device(file.path(fig_dir, paste0("z-percapita.", file_type)), h = 3.75, w = 3.5)
-par(xaxs = "i", yaxs = "i", mar = c(4,3,0.5,0.5), tcl = -0.25, mgp = c(2,0.35,0))
+file_device(file.path(fig_dir, paste0("z-percapita.", file_type)), h = 3.5, w = 3.45)
+par(xaxs = "i", yaxs = "i", mar = c(3.1,3,0.5,0.5), tcl = -0.15, mgp = c(2,0.35,0), lend = "square", cex.lab = 1, cex.axis = 0.8)
 mp = barplot(meds, las = 2,
              # ylim = 1 + (max(abs(rbind(lwrs1, uprs1))) - 1) * c(-1,1),
              ylim = 1 + (max(abs(range(meds) - 1)) * c(-1.5,1.5)),
@@ -466,11 +465,9 @@ at_v = (mp[1,1:(length(keep_mods) - 1)] + mp[3,2:length(keep_mods)])/2
 zero_break = 2; one_break = 5; two_break = 8
 abline(v = at_v, col = "grey60")
 
-# rect(xleft = usr[1], ybottom = usr[4] - ydiff * 0.1, xright = usr[2], ytop = usr[4], border = "white", col = "white")
-rect(xleft = usr[1], ybottom = usr[3], xright = at_v[zero_break], ytop = usr[4], lwd = 2, xpd = T)
-rect(xleft = at_v[zero_break], ybottom = usr[3], xright = at_v[one_break], ytop = usr[4], lwd = 2, xpd = T)
-rect(xleft = at_v[one_break], ybottom = usr[3], xright = at_v[two_break], ytop = usr[4], lwd = 2, xpd = T)
-rect(xleft = at_v[two_break], ybottom = usr[3], xright = usr[2], ytop = usr[4], lwd = 2, xpd = T)
+abline(v = at_v[zero_break], lwd = 2)
+abline(v = at_v[one_break], lwd = 2)
+abline(v = at_v[two_break], lwd = 2)
 axis(side = 1, at = mp[2,], labels = F)
 segments(mp[1,], lwrs1[1,], mp[1,], uprs1[1,])
 segments(mp[2,], lwrs1[2,], mp[2,], uprs1[2,])
@@ -478,15 +475,12 @@ segments(mp[3,], lwrs1[3,], mp[3,], uprs1[3,])
 points(meds[1,] ~ mp[1,], pch = 21, bg = "grey60", cex = 0.8)
 points(meds[2,] ~ mp[2,], pch = 22, bg = "grey60", cex = 0.8)
 points(meds[3,] ~ mp[3,], pch = 24, bg = "grey60", cex = 0.8)
-# segments(mp[1,], lwrs2[1,], mp[1,], uprs2[1,], lwd = 4)
-# segments(mp[2,], lwrs2[2,], mp[2,], uprs2[2,], lwd = 4)
-# segments(mp[3,], lwrs2[3,], mp[3,], uprs2[3,], lwd = 4)
 lab1 = paste(paste0("'", substr(range(years[block == 1]), 3, 4)), collapse = "-")
 lab2 = paste(paste0("'", substr(range(years[block == 2]), 3, 4)), collapse = "-")
 lab3 = paste(paste0("'", substr(range(years[block == 3]), 3, 4)), collapse = "-")
 legend("top", x.intersp = 0.5, horiz = T, legend = c(lab1, lab2, lab3), pch = c(21, 22, 24), pt.bg = "grey60", pt.cex = 1, cex = 0.75, bg = "white", box.col = "black")
-box(lwd = 2)
-
+# box(col = "white", lwd = 3)
+box(lwd = 1)
 dev.off()
 
 ## % declines in per capita output (for main-text results):
