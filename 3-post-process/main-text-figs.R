@@ -492,6 +492,15 @@ round((meds[3,"E-A"] - meds[1,"E-A"])/meds[1,"E-A"], 2)
 
 ##### MSC FIGURE #####
 
+# which models to keep for plot
+keep_mods = c(
+  "N-0",
+  "E-0", "EM-0",
+  # "E-L", "E-A", "E-S",
+  # "E-AL", "E-AS", "E-SL",
+  "E-ASL", "EM-ASL")
+
+
 # function to create the plot comparing time periods and models for a given eq. quantity and vuln type
 msy_plot = function(keep_val = "S", keep_vuln = "mesh8", keep_mods, xticklabs = F, legend = F, letter) {
   # extract the equilibrium info requested
@@ -577,21 +586,13 @@ msy_plot = function(keep_val = "S", keep_vuln = "mesh8", keep_mods, xticklabs = 
   box()
 }
 
-# which models to keep for plot
-keep_mods = c(
-  "N-0",
-  "E-0", "EM-0",
-  # "E-L", "E-A", "E-S",
-  # "E-AL", "E-AS", "E-SL",
-  "E-ASL", "EM-ASL")
-
 # make the plot itself
-file_device(file.path(fig_dir, paste0("msc.", file_type)), h = 5.5, w = 7.2)
-par(mfcol = c(3,2), xaxs = "i", yaxs = "i", cex = 1, lend = "square", mar = c(0,1.75,0.75,2.25),
-    oma = c(3.5,0.75,0.5,2), tcl = -0.25, mgp = c(2,0.35,0), cex.axis = 0.9)
+file_device(file.path(fig_dir, paste0("msc.", file_type)), h = 5.5, w = 7)
+par(mfcol = c(3,2), xaxs = "i", yaxs = "i", cex = 1, lend = "square", mar = c(0,1.75,0.75,2),
+    oma = c(3,0.75,0.5,2), tcl = -0.25, mgp = c(2,0.35,0), cex.axis = 0.75)
 msy_plot("S", "mesh8", keep_mods, legend = F, letter = "a")
 msy_plot("S", "flat", keep_mods, legend = F, letter = "c")
-msy_plot("S", "mesh6", keep_mods, legend = T, xticklabs = T, letter = "e"); par(mar = c(0,2.25,0.75,1.75))
+msy_plot("S", "mesh6", keep_mods, legend = T, xticklabs = T, letter = "e"); par(mar = c(0,2,0.75,1.75))
 msy_plot("H", "mesh8", keep_mods, legend = F, letter = "b")
 msy_plot("H", "flat", keep_mods, legend = F, letter = "d")
 msy_plot("H", "mesh6", keep_mods, xticklabs = T, letter = "f")
